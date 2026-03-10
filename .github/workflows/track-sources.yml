@@ -1,0 +1,106 @@
+name: Track Sources
+
+on:
+  schedule:
+    # Daily at 06:00 UTC (before build workflow)
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  track-elements:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install just
+      uses: extractions/setup-just@v2
+
+    - name: Restore BuildStream cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/buildstream
+        key: bst-cache-${{ runner.arch }}
+        restore-keys: |
+          bst-cache-${{ runner.arch }}
+
+    - name: Track all COSMIC element sources
+      run: BST_FLAGS="--no-interactive" just track-all
+
+    - name: Check for changes
+      id: check
+      run: |
+        if git diff --quiet; then
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Create PR with updated refs
+      if: steps.check.outputs.changed == 'true'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        BRANCH="auto/track-sources-$(date +%Y%m%d)"
+        git checkout -b "$BRANCH"
+        git add elements/
+        git commit -m "chore: track upstream COSMIC sources"
+        git push -u origin "$BRANCH"
+        gh pr create \
+          --title "chore: track upstream COSMIC sources $(date +%Y-%m-%d)" \
+          --body "Automated source tracking update." \
+          --base main
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  track-junctions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install just
+      uses: extractions/setup-just@v2
+
+    - name: Restore BuildStream cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/buildstream
+        key: bst-cache-${{ runner.arch }}
+        restore-keys: |
+          bst-cache-${{ runner.arch }}
+
+    - name: Track junction sources
+      run: BST_FLAGS="--no-interactive" just track-junctions
+
+    - name: Check for changes
+      id: check
+      run: |
+        if git diff --quiet; then
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Create PR with updated junction refs
+      if: steps.check.outputs.changed == 'true'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        BRANCH="auto/track-junctions-$(date +%Y%m%d)"
+        git checkout -b "$BRANCH"
+        git add elements/
+        git commit -m "chore: track freedesktop-sdk junction"
+        git push -u origin "$BRANCH"
+        gh pr create \
+          --title "chore: track freedesktop-sdk junction $(date +%Y-%m-%d)" \
+          --body "Automated junction tracking update. Review before merging -- junction updates may require rebuild verification." \
+          --base main
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,16 @@
+# Aliases for downloading sources
+# Changing an alias does not trigger a rebuild
+
+aliases:
+
+  # File download aliases
+  crates: https://static.crates.io/crates/
+  pypi: https://files.pythonhosted.org/packages/
+  github-releases: https://github.com/
+
+  # Git repository aliases
+  github: https://github.com/
+  gitlab: https://gitlab.com/
+  gnome: https://gitlab.gnome.org/
+  freedesktop: https://gitlab.freedesktop.org/
+  srht: https://git.sr.ht/

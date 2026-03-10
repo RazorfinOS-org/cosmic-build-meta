@@ -1,0 +1,39 @@
+name: Build COSMIC
+
+on:
+  schedule:
+    # Daily build at 08:00 UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install just
+      uses: extractions/setup-just@v2
+
+    - name: Restore BuildStream cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/buildstream
+        key: bst-cache-${{ runner.arch }}
+        restore-keys: |
+          bst-cache-${{ runner.arch }}
+
+    - name: Build full COSMIC stack
+      run: BST_FLAGS="--no-interactive --on-error=continue" just build-all
+
+    - name: Upload build logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs
+        path: ~/.cache/buildstream/logs/
+        retention-days: 7

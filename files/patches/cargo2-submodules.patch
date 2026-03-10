@@ -1,0 +1,254 @@
+--- a/src/buildstream_plugins_community/sources/cargo2.py	2026-03-09 18:21:07.413348910 -0400
++++ b/src/buildstream_plugins_community/sources/cargo2.py	2026-03-09 18:24:53.690028564 -0400
+@@ -107,6 +107,7 @@
+ obtained from the git repository through the ``crate-name`` key of the *extra_data*.
+ """
+ 
++import configparser
+ import contextlib
+ import glob
+ import json
+@@ -140,6 +141,7 @@
+     pass
+ 
+ from dulwich.repo import Repo
++from dulwich.objects import sha_to_hex
+ import tomlkit
+ 
+ from ._git_utils import (
+@@ -478,6 +480,9 @@
+             except CONNECTION_ERRORS as e:
+                 raise SourceError(f"failed to fetch: {e}") from e
+ 
++        # Also fetch any git submodule commits referenced by this commit
++        self._fetch_submodules(alias_override)
++
+     # get_source_info()
+     #
+     # Gets the SourceInfo object for this crate
+@@ -546,6 +551,14 @@
+             with Repo(tmp_dir, object_store=mirror.object_store) as dest:
+                 dest.reset_index()
+ 
++        # Initialize git submodules if present
++        gitmodules_path = os.path.join(tmp_dir, ".gitmodules")
++        if os.path.exists(gitmodules_path):
++            for sub_path, sub_url, sub_commit in self._get_submodule_info():
++                sub_dir = os.path.join(tmp_dir, sub_path)
++                sub_mirror_dir = self._get_submodule_mirror_dir(sub_url)
++                self._checkout_submodule(sub_dir, sub_mirror_dir, sub_commit)
++
+         # Workspace handling
+         #
+         # When new workspace features are added it is worth checking if
+@@ -592,12 +605,40 @@
+ 
+             crate = crates.get(self.name)
+             if crate is None:
++                # Crate not in workspace members; search all Cargo.toml files
++                # recursively. This handles crates in git submodules or workspace-
++                # excluded path dependencies.
++                for crate_toml_path in glob.glob(
++                    os.path.join(tmp_dir, "**", "Cargo.toml"), recursive=True
++                ):
++                    crate_path = os.path.normpath(
++                        os.path.dirname(crate_toml_path)
++                    )
++                    if crate_path in [c["path"] for c in crates.values()]:
++                        continue
++                    try:
++                        with open(crate_toml_path, "rb") as f:
++                            crate_toml = tomllib.load(f)
++                            pkg_name = crate_toml.get("package", {}).get("name")
++                            if pkg_name == self.name:
++                                crate = {
++                                    "config": crate_toml,
++                                    "path": crate_path,
++                                }
++                                break
++                    except Exception:
++                        continue
++
++            if crate is None:
+                 raise SourceError(
+                     f"Crate '{self.name}' neither found in root nor workspace manifests. Root manifest:\n{root_toml}\nMember manifests:{crates}"
+                 )
+ 
+             # Apply information inherited from workspace Cargo.toml
+-            config_inherit_workspace(crate["config"], root_toml["workspace"])
++            try:
++                config_inherit_workspace(crate["config"], root_toml["workspace"])
++            except Exception:
++                pass  # Non-workspace crates may not need inheritance
+ 
+             with open(
+                 os.path.join(crate["path"], "Cargo.toml"),
+@@ -633,8 +674,21 @@
+     #   (bool): Whether we are cached or not
+     #
+     def is_cached(self):
+-        with Repo(self._get_mirror_dir(), bare=True) as repo:
+-            return self.commit.encode() in repo
++        try:
++            with Repo(self._get_mirror_dir(), bare=True) as repo:
++                if self.commit.encode() not in repo:
++                    return False
++            # Also check submodule caches
++            for _path, url, commit in self._get_submodule_info():
++                mirror_dir = self._get_submodule_mirror_dir(url)
++                if not os.path.exists(mirror_dir):
++                    return False
++                with Repo(mirror_dir, bare=True) as sub_repo:
++                    if commit.encode() not in sub_repo:
++                        return False
++            return True
++        except Exception:
++            return False
+ 
+     # is_resolved()
+     #
+@@ -703,6 +757,144 @@
+         add_alias(manifest, self.repo_mirrored)
+         return manifest
+ 
++    # _get_submodule_info()
++    #
++    # Parse .gitmodules from the fetched commit to find submodule info.
++    #
++    # Returns:
++    #    list: List of (path, url, hex_commit_str) tuples
++    #
++    def _get_submodule_info(self):
++        try:
++            with Repo(self._get_mirror_dir(), bare=True) as repo:
++                commit_obj = repo[self.commit.encode()]
++                tree = repo[commit_obj.tree]
++
++                gitmodules_sha = None
++                submodule_commits = {}
++
++                for entry in tree.items():
++                    name = entry.path
++                    if isinstance(name, bytes):
++                        name = name.decode()
++                    hex_sha = sha_to_hex(entry.sha)
++                    if isinstance(hex_sha, bytes):
++                        hex_sha = hex_sha.decode()
++                    if name == ".gitmodules":
++                        gitmodules_sha = hex_sha
++                    if entry.mode == 0o160000:  # gitlink (submodule)
++                        submodule_commits[name] = hex_sha
++
++                if not gitmodules_sha or not submodule_commits:
++                    return []
++
++                gitmodules_blob = repo[gitmodules_sha.encode()]
++                content = gitmodules_blob.data.decode()
++
++                config = configparser.ConfigParser()
++                config.read_string(content)
++
++                result = []
++                for section in config.sections():
++                    if section.startswith('submodule '):
++                        path = config.get(section, 'path')
++                        url = config.get(section, 'url')
++                        # Resolve relative URLs against the repo URL
++                        if url.startswith('../') or url.startswith('./'):
++                            base_url = self._get_url()
++                            if base_url.endswith('.git'):
++                                base_url = base_url[:-4]
++                            url = urllib.parse.urljoin(base_url + '/', url)
++                        commit = submodule_commits.get(path)
++                        if commit:
++                            result.append((path, url, commit))
++
++                return result
++        except Exception:
++            return []
++
++    # _get_submodule_mirror_dir()
++    #
++    # Gets the local mirror directory for a submodule URL.
++    #
++    # Args:
++    #    url (str): Submodule URL
++    #
++    def _get_submodule_mirror_dir(self, url):
++        if url.endswith(".git"):
++            norm_url = url[:-4]
++        else:
++            norm_url = url
++        return os.path.join(
++            self.cargo.get_mirror_directory(),
++            utils.url_directory_name(norm_url) + "_sub.git",
++        )
++
++    # _fetch_submodules()
++    #
++    # Fetch git submodule commits referenced by this commit.
++    #
++    # Args:
++    #    alias_override (str|None): Alias override for URL translation
++    #
++    def _fetch_submodules(self, alias_override=None):
++        for path, url, commit in self._get_submodule_info():
++            mirror_dir = self._get_submodule_mirror_dir(url)
++            lock = REPO_LOCKS.setdefault(mirror_dir, threading.Lock())
++
++            with lock:
++                try:
++                    sub_repo_ctx = Repo.init_bare(mirror_dir, mkdir=True)
++                except FileExistsError:
++                    sub_repo_ctx = Repo(mirror_dir, bare=True)
++
++                with sub_repo_ctx as sub_repo:
++                    if commit.encode() in sub_repo:
++                        continue
++
++                    try:
++                        client, client_path = get_authenticated_transport_and_path(url)
++                        with self.cargo.timed_activity(
++                            f"Fetching submodule {path} from {url}"
++                        ):
++                            client.fetch(
++                                client_path,
++                                sub_repo,
++                                determine_wants=lambda refs, depth=None, c=commit: [
++                                    c.encode()
++                                ],
++                                depth=1,
++                            )
++                    except CONNECTION_ERRORS as e:
++                        raise SourceError(
++                            f"failed to fetch submodule {path}: {e}"
++                        ) from e
++
++    # _checkout_submodule()
++    #
++    # Checkout a submodule into the given directory.
++    #
++    # Args:
++    #    sub_dir (str): Target directory for the submodule
++    #    mirror_dir (str): Path to the submodule's bare mirror repo
++    #    commit (str): Hex SHA of the commit to checkout
++    #
++    def _checkout_submodule(self, sub_dir, mirror_dir, commit):
++        if not os.path.exists(mirror_dir):
++            return
++
++        if os.path.exists(sub_dir):
++            shutil.rmtree(sub_dir)
++
++        with Repo(mirror_dir, bare=True) as sub_mirror:
++            with Repo.init(sub_dir) as sub_dest:
++                sub_dest.object_store.add_object(sub_mirror[commit.encode()])
++                sub_dest.refs[b"HEAD"] = commit.encode()
++                sub_dest.update_shallow([commit.encode()], [])
++
++            with Repo(sub_dir, object_store=sub_mirror.object_store) as sub_dest:
++                sub_dest.reset_index()
++
+ 
+ # config_inherit_workspace()
+ #

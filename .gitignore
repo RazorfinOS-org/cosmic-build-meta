@@ -1,0 +1,16 @@
+# BuildStream
+.bst/
+builddir/
+workspaces/
+*.log
+
+# Build artifacts
+target/
+
+# Python
+__pycache__/
+*.pyc
+
+# Editor backups
+*~
+*.swp
