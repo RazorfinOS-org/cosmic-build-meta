@@ -25,7 +25,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-greeter.git
   track: master
-  ref: epoch-1.0.8-5-g239fb4f22f9b92e6d5b5185a10ef6088b8d77bd1
+  ref: epoch-1.0.8-6-g63cd93bddd01bf714e98553966d4da12eac0ee5b
 - kind: cargo2
   url: "crates:"
   ref:
@@ -2889,6 +2889,10 @@ sources:
     version: 22.0.0
     sha: bc9d91f0e2c4b51434dfa6db77846f2793149d8e73f800fa2e41f52b8eac3c5d
   - kind: registry
+    name: whitespace-conf
+    version: 1.0.0
+    sha: 88bce969a15062afb2d34155402d78cd50d1ddeca000a42353ef0c71ddd68995
+  - kind: registry
     name: widestring
     version: 1.2.0
     sha: dd7cf3379ca1aac9eea11fba24fd7e315d621f8dfe35c8d7d2be8b793726e07d
@@ -3326,7 +3330,6 @@ sources:
     name: zvariant_utils
     version: 3.2.1
     sha: c6949d142f89f6916deca2232cf26a8afacf2b9fdc35ce766105e104478be599
-
 environment:
   # Workaround: build.rs uses vergen crate which requires git metadata.
   # In the sandbox there's no .git directory, so we set idempotent mode
