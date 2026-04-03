@@ -1,0 +1,30 @@
+name: Validate Elements
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE*'
+
+jobs:
+  validate_elements:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install just
+      uses: extractions/setup-just@v2
+
+    - name: Restore BuildStream cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/buildstream
+        key: bst-cache-${{ runner.arch }}
+        restore-keys: |
+          bst-cache-${{ runner.arch }}
+
+    - name: Validate all element definitions
+      run: BST_FLAGS="--no-interactive" just check

@@ -2,8 +2,8 @@ name: Track Sources
 
 on:
   schedule:
-    # Daily at 06:00 UTC (before build workflow)
-    - cron: '0 6 * * *'
+    # Monday and Thursday at 06:00 UTC (before build workflow)
+    - cron: '0 6 * * 1,4'
   workflow_dispatch:
 
 permissions:
