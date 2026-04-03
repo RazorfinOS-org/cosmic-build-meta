@@ -23,7 +23,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings-daemon.git
   track: master
-  ref: epoch-1.0.8-2-g8d83e2a4179bbe193d195cd42efe9ce50bcc9926
+  ref: epoch-1.0.8-3-g7bd2f5d3c731fb56a572aa8bff7f87ca8e9603e6
 - kind: cargo2
   url: "crates:"
   ref:
@@ -366,24 +366,17 @@ sources:
     version: 0.1.1
     sha: 77745e017f5edba1a9c1d854f6f3a52dac8a12dd5af5d2f54aecf61e43d80d30
   - kind: git
-    commit: 160b086abe03cd34a8a375d7fbe47b24308d1f38
-    repo: github:pop-os/cosmic-protocols
-    query:
-      rev: 160b086
-    name: cosmic-client-toolkit
-    version: 0.2.0
-  - kind: git
     commit: 40c7eb26cd5e625678d618a755845a741a910287
     repo: github:pop-os/cosmic-comp
     name: cosmic-comp-config
     version: 1.0.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: cosmic-config
     version: 1.0.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: cosmic-config-derive
     version: 1.0.0
@@ -397,13 +390,6 @@ sources:
     repo: github:pop-os/freedesktop-icons
     name: cosmic-freedesktop-icons
     version: 0.4.0
-  - kind: git
-    commit: 160b086abe03cd34a8a375d7fbe47b24308d1f38
-    repo: github:pop-os/cosmic-protocols
-    query:
-      rev: 160b086
-    name: cosmic-protocols
-    version: 0.2.0
   - kind: git
     commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
     repo: github:pop-os/dbus-settings-bindings
@@ -420,7 +406,7 @@ sources:
     name: cosmic-text
     version: 0.18.2
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: cosmic-theme
     version: 1.0.0
@@ -935,57 +921,57 @@ sources:
     version: 0.1.2
     sha: f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_core
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_debug
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_futures
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_graphics
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_program
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_renderer
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_runtime
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_tiny_skia
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_wgpu
     version: 0.14.0
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: iced_widget
     version: 0.14.2
@@ -1166,7 +1152,7 @@ sources:
     version: 0.2.183
     sha: b5b646652bf6661599e1da8901b3b9522896f01e736bad5f723fe7a3a27f899d
   - kind: git
-    commit: 3da55e807440a99f6ed62edc2e7a84ca4be9b844
+    commit: f06d15ae35204cb3bcef5a3188b5ec59a1cc9bfd
     repo: github:pop-os/libcosmic
     name: libcosmic
     version: 1.0.0
@@ -2290,10 +2276,6 @@ sources:
     version: 0.31.9
     sha: c86287151a309799b821ca709b7345a048a2956af05957c89cb824ab919fa4e3
   - kind: registry
-    name: wayland-server
-    version: 0.31.12
-    sha: 63736a4a73e781cf6a736aa32c5d6773c3eb5389197562742a8c611b49b5e359
-  - kind: registry
     name: wayland-sys
     version: 0.31.10
     sha: 374f6b70e8e0d6bf9461a32988fd553b59ff630964924dad6e4a4eb6bd538d17
@@ -2600,10 +2582,6 @@ sources:
     name: xkb-data
     version: 0.2.2
     sha: 08bde286fb1aad6e18459bdf90da78b611bb8a1993605de5d1ddacca4995c10a
-  - kind: registry
-    name: xkbcommon
-    version: 0.8.0
-    sha: 8d66ca9352cbd4eecbbc40871d8a11b4ac8107cfc528a6e14d7c19c69d0e1ac9
   - kind: registry
     name: xkbcommon
     version: 0.9.0
