@@ -25,7 +25,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-greeter.git
   track: master
-  ref: epoch-1.0.8-17-gff62e25e1081bd3ba655ac5727cb70cb8265a9b5
+  ref: epoch-1.0.8-18-gc3e2182c3836cff8edeb34a46125e775e279e2dd
 - kind: cargo2
   url: "crates:"
   ref:

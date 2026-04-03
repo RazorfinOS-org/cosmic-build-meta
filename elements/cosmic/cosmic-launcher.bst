@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-launcher.git
   track: master
-  ref: epoch-1.0.8-9-g582c49934fab1546a94271ac9ec5ecfdea07cb36
+  ref: epoch-1.0.8-10-gcf41ed5572747e1169f86169675126323616c445
 - kind: cargo2
   url: "crates:"
   ref:
