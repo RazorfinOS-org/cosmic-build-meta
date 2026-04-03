@@ -32,7 +32,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/xdg-desktop-portal-cosmic.git
   track: master
-  ref: epoch-1.0.8-11-g9fb7d2fe56d40529a8e48b3f8895145030fcc022
+  ref: epoch-1.0.8-14-gdd4ad1acd7de3c8cbb1161f9e9d4af0415e0b169
 - kind: cargo2
   url: "crates:"
   ref:
@@ -3099,12 +3099,12 @@ sources:
     sha: 1c598d6b99ea013e35844697fc4670d08339d5cda15588f193c6beedd12f644b
   - kind: registry
     name: wayland-backend
-    version: 0.3.14
-    sha: aa75f400b7f719bcd68b3f47cd939ba654cedeef690f486db71331eec4c6a406
+    version: 0.3.15
+    sha: 2857dd20b54e916ec7253b3d6b4d5c4d7d4ca2c33c2e11c6c76a99bd8744755d
   - kind: registry
     name: wayland-client
-    version: 0.31.13
-    sha: ab51d9f7c071abeee76007e2b742499e535148035bb835f97aaed1338cf516c3
+    version: 0.31.14
+    sha: 645c7c96bb74690c3189b5c9cb4ca1627062bb23693a4fad9d8c3de958260144
   - kind: registry
     name: wayland-csd-frame
     version: 0.3.0
@@ -3135,16 +3135,16 @@ sources:
     sha: 78248e4cc0eff8163370ba5c158630dcae1f3497a586b826eca2ef5f348d6235
   - kind: registry
     name: wayland-scanner
-    version: 0.31.9
-    sha: c86287151a309799b821ca709b7345a048a2956af05957c89cb824ab919fa4e3
+    version: 0.31.10
+    sha: 9c324a910fd86ebdc364a3e61ec1f11737d3b1d6c273c0239ee8ff4bc0d24b4a
   - kind: registry
     name: wayland-server
     version: 0.31.12
     sha: 63736a4a73e781cf6a736aa32c5d6773c3eb5389197562742a8c611b49b5e359
   - kind: registry
     name: wayland-sys
-    version: 0.31.10
-    sha: 374f6b70e8e0d6bf9461a32988fd553b59ff630964924dad6e4a4eb6bd538d17
+    version: 0.31.11
+    sha: d8eab23fefc9e41f8e841df4a9c707e8a8c4ed26e944ef69297184de2785e3be
   - kind: registry
     name: web-sys
     version: 0.3.91
