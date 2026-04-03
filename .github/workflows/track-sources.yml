@@ -41,20 +41,26 @@ jobs:
           echo "changed=true" >> "$GITHUB_OUTPUT"
         fi
 
-    - name: Create PR with updated refs
+    - name: Create or update PR with updated refs
       if: steps.check.outputs.changed == 'true'
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        BRANCH="auto/track-sources-$(date +%Y%m%d)"
+        BRANCH="auto/track-sources"
         git checkout -b "$BRANCH"
         git add elements/
         git commit -m "chore: track upstream COSMIC sources"
-        git push -u origin "$BRANCH"
-        gh pr create \
-          --title "chore: track upstream COSMIC sources $(date +%Y-%m-%d)" \
-          --body "Automated source tracking update." \
-          --base main
+        git push --force-with-lease -u origin "$BRANCH"
+        EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+        if [ -n "$EXISTING_PR" ]; then
+          gh pr edit "$EXISTING_PR" \
+            --title "chore: track upstream COSMIC sources $(date +%Y-%m-%d)"
+        else
+          gh pr create \
+            --title "chore: track upstream COSMIC sources $(date +%Y-%m-%d)" \
+            --body "Automated source tracking update." \
+            --base main
+        fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -88,19 +94,25 @@ jobs:
           echo "changed=true" >> "$GITHUB_OUTPUT"
         fi
 
-    - name: Create PR with updated junction refs
+    - name: Create or update PR with updated junction refs
       if: steps.check.outputs.changed == 'true'
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        BRANCH="auto/track-junctions-$(date +%Y%m%d)"
+        BRANCH="auto/track-junctions"
         git checkout -b "$BRANCH"
         git add elements/
         git commit -m "chore: track freedesktop-sdk junction"
-        git push -u origin "$BRANCH"
-        gh pr create \
-          --title "chore: track freedesktop-sdk junction $(date +%Y-%m-%d)" \
-          --body "Automated junction tracking update. Review before merging -- junction updates may require rebuild verification." \
-          --base main
+        git push --force-with-lease -u origin "$BRANCH"
+        EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+        if [ -n "$EXISTING_PR" ]; then
+          gh pr edit "$EXISTING_PR" \
+            --title "chore: track freedesktop-sdk junction $(date +%Y-%m-%d)"
+        else
+          gh pr create \
+            --title "chore: track freedesktop-sdk junction $(date +%Y-%m-%d)" \
+            --body "Automated junction tracking update. Review before merging -- junction updates may require rebuild verification." \
+            --base main
+        fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
