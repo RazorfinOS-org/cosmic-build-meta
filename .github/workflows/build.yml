@@ -2,8 +2,8 @@ name: Build COSMIC
 
 on:
   schedule:
-    # Daily build at 08:00 UTC
-    - cron: '0 8 * * *'
+    # Weekly build on Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
   workflow_dispatch:
   push:
     branches: [main]

@@ -96,6 +96,11 @@ track-all:
 
 # ── Inspection ───────────────────────────────────────────────────────
 
+# Validate all element definitions (YAML parsing, deps, variables)
+[group('info')]
+check:
+    just bst show --deps all cosmic/deps.bst
+
 # Show element info
 [group('info')]
 show element:
