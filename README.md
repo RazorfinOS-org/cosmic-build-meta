@@ -66,7 +66,7 @@ kind: junction
 
 sources:
 - kind: git_repo
-  url: github:user/cosmic-build-meta.git
+  url: github:RazorfinOS-org/cosmic-build-meta.git
   track: main
   ref: <commit-ref>
 ```
