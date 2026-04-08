@@ -25,7 +25,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings.git
   track: master
-  ref: epoch-1.0.8-54-g59ccde22fae21cfb323ff45fa945d362a20992a0
+  ref: epoch-1.0.9-0-g04da80bb904f500ea07ec6ee4ea45d3b50adb9bb
 - kind: cargo2
   url: "crates:"
   ref:
@@ -189,8 +189,8 @@ sources:
     sha: c3d036a3c4ab069c7b410a2ce876bd74808d2d0888a82667669f8e783a898bf1
   - kind: registry
     name: arc-swap
-    version: 1.9.0
-    sha: a07d1f37ff60921c83bdfc7407723bdefe89b44b98a9b772f225c8f9d67141a6
+    version: 1.9.1
+    sha: 6a3a1fd6f75306b68087b831f025c712524bcb19aad54e557b1129cfa0a2b207
   - kind: registry
     name: arg_enum_proc_macro
     version: 0.3.4
@@ -253,8 +253,8 @@ sources:
     sha: 3b43422f69d8ff38f95f1b2bb76517c91589a924d1559a0e935d7c8ce0274c11
   - kind: registry
     name: async-signal
-    version: 0.2.13
-    sha: 43c070bbf59cd3570b6b2dd54cd772527c7c3620fce8be898406dd3ed6adc64c
+    version: 0.2.14
+    sha: 52b5aaafa020cf5053a01f2a60e8ff5dccf550f0f77ec54a4e47285ac2bab485
   - kind: registry
     name: async-task
     version: 4.7.1
@@ -450,8 +450,8 @@ sources:
     sha: 26b52a9543ae338f279b96b0b9fed9c8093744685043739079ce85cd58f289a6
   - kind: registry
     name: cc
-    version: 1.2.58
-    sha: e1e928d4b69e3077709075a938a05ffbedfa53a84c8f766efbf8220bb1ff60e1
+    version: 1.2.59
+    sha: b7a4d3ec6524d28a329fc53654bbadc9bdd7b0431f5d65f1a56ffb28a1ee5283
   - kind: registry
     name: cexpr
     version: 0.6.0
@@ -534,6 +534,14 @@ sources:
     name: clipboard_x11
     version: 0.4.2
   - kind: registry
+    name: cocoa
+    version: 0.25.0
+    sha: f6140449f97a6e97f9511815c5632d84c8aacf8ac271ad77c559218161a1373c
+  - kind: registry
+    name: cocoa-foundation
+    version: 0.1.2
+    sha: 8c6234cbb2e4c785b456c0644748b1ac416dd045799740356f8363dfe00c93f7
+  - kind: registry
     name: codespan-reporting
     version: 0.12.0
     sha: fe6d2e5af09e8c8ad56c969f2157a3d4238cebc7c55f0a517728c38f7b200f81
@@ -578,9 +586,21 @@ sources:
     version: 0.10.1
     sha: b2a6cd9ae233e7f62ba4e9353e81a88df7fc8a5987b8d445b4d90c879bd156f6
   - kind: registry
+    name: core-foundation
+    version: 0.9.4
+    sha: 91e195e091a93c46f7102ec7818a2aa394e1e1771c3ab4825963fa03e45afb8f
+  - kind: registry
     name: core-foundation-sys
     version: 0.8.7
     sha: 773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b
+  - kind: registry
+    name: core-graphics
+    version: 0.23.2
+    sha: c07782be35f9e1140080c6b96f0d44b739e2278479f64e02fdab4e32dfd8b081
+  - kind: registry
+    name: core-graphics-types
+    version: 0.1.3
+    sha: 45390e6114f68f718cc7a830514a96f903cccd70d02a8f6d9f643ac4ba45afaf
   - kind: registry
     name: core-graphics-types
     version: 0.2.0
@@ -611,12 +631,12 @@ sources:
     name: cosmic-comp-config
     version: 1.0.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: cosmic-config
     version: 1.0.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: cosmic-config-derive
     version: 1.0.0
@@ -683,12 +703,12 @@ sources:
     name: cosmic-settings-daemon-config
     version: 0.1.0
   - kind: git
-    commit: 9a5579f5231bc52b3688a2de3643091f1ce32cbd
+    commit: 9a2ab09f06905e91f41d64ac6eee887726e7fd76
     repo: github:pop-os/cosmic-text.git
     name: cosmic-text
     version: 0.18.2
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: cosmic-theme
     version: 1.0.0
@@ -866,6 +886,22 @@ sources:
     name: dpi
     version: 0.1.2
   - kind: registry
+    name: drm
+    version: 0.11.1
+    sha: a0f8a69e60d75ae7dab4ef26a59ca99f2a89d4c142089b537775ae0c198bdcde
+  - kind: registry
+    name: drm-ffi
+    version: 0.7.1
+    sha: 41334f8405792483e32ad05fbb9c5680ff4e84491883d2947a4757dc54cb2ac6
+  - kind: registry
+    name: drm-fourcc
+    version: 2.2.0
+    sha: 0aafbcdb8afc29c1a7ee5fbe53b5d62f4565b35a042a662ca9fecd0b54dae6f4
+  - kind: registry
+    name: drm-sys
+    version: 0.6.1
+    sha: 2d09ff881f92f118b11105ba5e34ff8f4adf27b30dae8f12e28c193af1c83176
+  - kind: registry
     name: dyn-clone
     version: 1.0.20
     sha: d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555
@@ -939,8 +975,8 @@ sources:
     sha: 12dd43e5011e8d8411a3215a0d57a2ec5c68282fb90eb5d7221fab0113442174
   - kind: registry
     name: fastrand
-    version: 2.3.0
-    sha: 37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be
+    version: 2.4.1
+    sha: 9f1f227452a390804cdb637b74a86990f2a7d7ba4b7d5693aac9b4dd6defd8d6
   - kind: registry
     name: fax
     version: 0.2.6
@@ -1011,8 +1047,8 @@ sources:
     sha: 77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb
   - kind: registry
     name: font-types
-    version: 0.11.1
-    sha: 73829a7b5c91198af28a99159b7ae4afbb252fb906159ff7f189f3a2ceaa3df2
+    version: 0.11.2
+    sha: 2d9237c6d82152100c691fb77ea18037b402bcc7257d2c876a4ffac81bc22a1c
   - kind: registry
     name: fontconfig-parser
     version: 0.5.8
@@ -1271,67 +1307,67 @@ sources:
     version: 0.1.2
     sha: f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_accessibility
     version: 0.1.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_core
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_debug
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_futures
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_graphics
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_program
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_renderer
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_runtime
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_tiny_skia
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_wgpu
     version: 0.14.0
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_widget
     version: 0.14.2
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: iced_winit
     version: 0.14.0
@@ -1341,8 +1377,8 @@ sources:
     sha: 00380f83691e089bcfa4aeb03a2d96a910b1c9ea406d6f822fc19dfb8b58d1ec
   - kind: registry
     name: icu_calendar
-    version: 2.2.0
-    sha: baf11bd83ebd0cd319e23a9a9c9a25b564a1fadc3bbc93069b8abc9d8df812bf
+    version: 2.2.1
+    sha: a2b2acc6263f494f1df50685b53ff8e57869e47d5c6fe39c23d518ae9a4f3e45
   - kind: registry
     name: icu_calendar_data
     version: 2.2.0
@@ -1501,8 +1537,8 @@ sources:
     sha: bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99
   - kind: registry
     name: indexmap
-    version: 2.13.0
-    sha: 7714e70437a7dc3ac8eb7e6f8df75fd8eb422675fc7678aff7364301092b1017
+    version: 2.13.1
+    sha: 45a8a2b9cb3e0b0c1803dbb0758ffac5de2f425b23c28f518faabd9d805342ff
   - kind: registry
     name: infer
     version: 0.19.0
@@ -1525,8 +1561,8 @@ sources:
     sha: fbdc09524a91f9cacd26f16734ff63d7dc650daffadd2b6f84d17a285bd875a9
   - kind: registry
     name: input-sys
-    version: 1.18.0
-    sha: bd4f5b4d1c00331c5245163aacfe5f20be75b564c7112d45893d4ae038119eb0
+    version: 1.19.0
+    sha: 36eee07d8e02bd95bf52b2e642cf13d33701b94c6e4b04fbf1d1fb07e9cb19e7
   - kind: registry
     name: interpolate_name
     version: 0.2.4
@@ -1720,7 +1756,7 @@ sources:
     version: 0.2.184
     sha: 48f5d2a454e16a5ea0f4ced81bd44e4cfc7bd3a507b61887c99fd3538b28e4af
   - kind: git
-    commit: 7a02c9a296c10469d9061391657f71aa33b3936b
+    commit: 724351727a191516ca1b2f2f90a00b7d211c7e1f
     repo: github:pop-os/libcosmic
     name: libcosmic
     version: 1.0.0
@@ -1776,6 +1812,10 @@ sources:
     name: linux-raw-sys
     version: 0.4.15
     sha: d26c52dbd32dccf2d10cac7725f8eae5296885fb5703b261f7d0a0739ec807ab
+  - kind: registry
+    name: linux-raw-sys
+    version: 0.6.5
+    sha: 2a385b1be4e5c3e362ad2ffa73c392e53f031eaa5b7d648e64cd87f27f6063d7
   - kind: registry
     name: litemap
     version: 0.8.2
@@ -2075,10 +2115,6 @@ sources:
     version: 0.3.2
     sha: 33fafba39597d6dc1fb709123dfa8289d39406734be322956a69f0931c73bb15
   - kind: registry
-    name: objc2-io-surface
-    version: 0.3.2
-    sha: 180788110936d59bab6bd83b6060ffdfffb3b922ba1396b312ae795e1de9d81d
-  - kind: registry
     name: objc2-metal
     version: 0.2.2
     sha: dd0cba1276f6023976a406a14ffa85e1fdd19df6b0f737b063b95f6c8c7aadd6
@@ -2086,10 +2122,6 @@ sources:
     name: objc2-quartz-core
     version: 0.2.2
     sha: e42bee7bff906b14b167da2bac5efe6b6a07e6f7c0a21a7308d40c960242dc7a
-  - kind: registry
-    name: objc2-quartz-core
-    version: 0.3.2
-    sha: 96c1358452b371bf9f104e21ec536d37a650eb10f7ee379fff67d2e08d537f1f
   - kind: registry
     name: objc2-ui-kit
     version: 0.3.2
@@ -2568,8 +2600,8 @@ sources:
     sha: b12e76d157a900eb52e81bc6e9f3069344290341720e9178cde2407113ac8d89
   - kind: registry
     name: semver
-    version: 1.0.27
-    sha: d767eb0aabc880b29956c35734170f26ed551a859dbd361d140cdbeca61ab1e2
+    version: 1.0.28
+    sha: 8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd
   - kind: registry
     name: serde
     version: 1.0.228
@@ -2689,10 +2721,13 @@ sources:
     name: socket2
     version: 0.6.3
     sha: 3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e
-  - kind: registry
+  - kind: git
+    commit: a3f77e251e7422803f693df6e3fc313c010c4dcb
+    repo: github:pop-os/softbuffer
+    query:
+      tag: cosmic-4.0
     name: softbuffer
-    version: 0.4.8
-    sha: aac18da81ebbf05109ab275b157c22a653bb3c12cf884450179942f81bcbf6c3
+    version: 0.4.1
   - kind: registry
     name: spirv
     version: 0.3.0+sdk-1.3.268.0
@@ -2763,8 +2798,8 @@ sources:
     sha: fe840c5b1afe259a5657392a4dbb74473a14c8db999c3ec2f4ae812e028a94da
   - kind: registry
     name: system-deps
-    version: 7.0.7
-    sha: 48c8f33736f986f16d69b6cb8b03f55ddcad5c41acc4ccc39dd88e84aa805e7f
+    version: 7.0.8
+    sha: 396a35feb67335377e0251fcbc1092fc85c484bd4e3a7a54319399da127796e7
   - kind: registry
     name: taffy
     version: 0.9.2
@@ -2852,12 +2887,12 @@ sources:
     sha: 1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20
   - kind: registry
     name: tokio
-    version: 1.50.0
-    sha: 27ad5e34374e03cfffefc301becb44e9dc3c17584f414349ebe29ed26661822d
+    version: 1.51.0
+    sha: 2bd1c4c0fc4a7ab90fc15ef6daaa3ec3b893f004f915f2392557ed23237820cd
   - kind: registry
     name: tokio-macros
-    version: 2.6.1
-    sha: 5c55a2eff8b69ce66c84f85e1da1c233edc36ceb85a2058d11b0d6a3c7e7569c
+    version: 2.7.0
+    sha: 385a6cb71ab9ab790c5fe8d67f1645e6c450a7ce006a33de03daa956cf70a496
   - kind: registry
     name: tokio-stream
     version: 0.1.18
@@ -2868,12 +2903,8 @@ sources:
     sha: f4f7f0dd8d50a853a531c426359045b1998f04219d88799810762cd4ad314234
   - kind: registry
     name: toml
-    version: 0.9.12+spec-1.1.0
-    sha: cf92845e79fc2e2def6a5d828f0801e29a2f8acc037becc5ab08595c7d5e9863
-  - kind: registry
-    name: toml_datetime
-    version: 0.7.5+spec-1.1.0
-    sha: 92e1cfed4a3038bc5a127e35a2d360f145e1f4b971b551a2ba5fd7aedf7e1347
+    version: 1.1.2+spec-1.1.0
+    sha: 81f3d15e84cbcd896376e6730314d59fb5a87f31e4b038454184435cd57defee
   - kind: registry
     name: toml_datetime
     version: 1.1.1+spec-1.1.0
@@ -3320,6 +3351,10 @@ sources:
     sha: 677d2418bec65e3338edb076e806bc1ec15693c5d0104683f2efe857f61056a9
   - kind: registry
     name: windows-sys
+    version: 0.52.0
+    sha: 282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d
+  - kind: registry
+    name: windows-sys
     version: 0.59.0
     sha: 1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b
   - kind: registry
@@ -3561,8 +3596,8 @@ sources:
     sha: d1890f4022759daae28ed4fe62859b1236caebfc61ede2f63ed4e695f3f6d936
   - kind: registry
     name: writeable
-    version: 0.6.2
-    sha: 9edde0db4769d2dc68579893f2306b26c6ecfbe0ef499b013d731b7b9247e0b9
+    version: 0.6.3
+    sha: 1ffae5123b2d3fc086436f8834ae3ab053a283cfac8fe0a0b8eaae044768a4c4
   - kind: registry
     name: x11-dl
     version: 2.21.0
