@@ -47,6 +47,7 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         BRANCH="auto/track-sources"
+        git fetch origin "$BRANCH" || true
         git checkout -b "$BRANCH"
         git add elements/
         git commit -m "chore: track upstream COSMIC sources"
@@ -100,6 +101,7 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         BRANCH="auto/track-junctions"
+        git fetch origin "$BRANCH" || true
         git checkout -b "$BRANCH"
         git add elements/
         git commit -m "chore: track freedesktop-sdk junction"
