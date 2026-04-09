@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-store.git
   track: master
-  ref: epoch-1.0.9-0-g76c1fb16f78a0c1c028df953d663a7c92dc78707
+  ref: epoch-1.0.9-12-gdfbf8554203d28cb6cc24739564d7ecfdf6d7e37
 - kind: cargo2
   url: "crates:"
   ref:
@@ -225,8 +225,8 @@ sources:
     sha: 3b43422f69d8ff38f95f1b2bb76517c91589a924d1559a0e935d7c8ce0274c11
   - kind: registry
     name: async-signal
-    version: 0.2.13
-    sha: 43c070bbf59cd3570b6b2dd54cd772527c7c3620fce8be898406dd3ed6adc64c
+    version: 0.2.14
+    sha: 52b5aaafa020cf5053a01f2a60e8ff5dccf550f0f77ec54a4e47285ac2bab485
   - kind: registry
     name: async-task
     version: 4.7.1
@@ -493,12 +493,12 @@ sources:
     name: cosmic-client-toolkit
     version: 0.2.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: cosmic-config
     version: 1.0.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: cosmic-config-derive
     version: 1.0.0
@@ -535,7 +535,7 @@ sources:
     name: cosmic-text
     version: 0.18.2
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: cosmic-theme
     version: 1.0.0
@@ -774,8 +774,8 @@ sources:
     sha: e51093e27b0797c359783294ca4f0a911c270184cb10f85783b118614a1501be
   - kind: registry
     name: fastrand
-    version: 2.4.0
-    sha: a043dc74da1e37d6afe657061213aa6f425f855399a11d3463c6ecccc4dfda1f
+    version: 2.4.1
+    sha: 9f1f227452a390804cdb637b74a86990f2a7d7ba4b7d5693aac9b4dd6defd8d6
   - kind: registry
     name: fdeflate
     version: 0.3.7
@@ -1133,67 +1133,67 @@ sources:
     version: 0.1.2
     sha: f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_accessibility
     version: 0.1.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_core
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_debug
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_futures
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_graphics
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_program
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_renderer
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_runtime
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_tiny_skia
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_wgpu
     version: 0.14.0
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_widget
     version: 0.14.2
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: iced_winit
     version: 0.14.0
@@ -1418,7 +1418,7 @@ sources:
     version: 0.2.184
     sha: 48f5d2a454e16a5ea0f4ced81bd44e4cfc7bd3a507b61887c99fd3538b28e4af
   - kind: git
-    commit: ab3eedd0f2e2ed7de9108ba6728261d8bae9e48d
+    commit: d9121d6f0dfff4116eea096459151d051befe1da
     repo: github:pop-os/libcosmic.git
     name: libcosmic
     version: 1.0.0
