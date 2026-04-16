@@ -25,7 +25,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings.git
   track: master
-  ref: epoch-1.0.9-1-g3639bafcfa3b27fd6a8a9bca7e77589b903975e8
+  ref: epoch-1.0.10-0-g09c4d04b49553017091b78884fa728506295b048
 - kind: cargo2
   url: "crates:"
   ref:
