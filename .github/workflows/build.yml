@@ -11,11 +11,20 @@ on:
       - '.github/workflows/**'
       - '*.md'
       - 'LICENSE*'
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
+    if: >-
+      github.event_name != 'pull_request' ||
+      startsWith(github.head_ref, 'auto/track-')
 
     steps:
     - uses: actions/checkout@v4
