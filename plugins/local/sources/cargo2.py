@@ -366,6 +366,31 @@ class CrateRegistry(SourceFetcher):
                     temporary=True,
                 )
 
+            # download_file() returns (None, None, None) when the server
+            # reports the content as unchanged (HTTP 304, or 200 with a
+            # matching ETag). fetch() only enters _download() when the
+            # mirror .crate file is absent, so reaching this branch means
+            # we have a stale .etag for a sha whose content is no longer
+            # on disk. Drop the stale etag and retry without
+            # If-None-Match so the server returns the actual bytes.
+            if local_file is None:
+                self._remove_etag(self.sha)
+                local_file, etag, error = download_file(
+                    url, None, td, auth_scheme
+                )
+                if error:
+                    raise SourceError(
+                        "{}: Error mirroring {}: {}".format(self, url, error),
+                        temporary=True,
+                    )
+                if local_file is None:
+                    raise SourceError(
+                        "{}: Server returned no content for {}".format(
+                            self, url
+                        ),
+                        temporary=True,
+                    )
+
             # Make sure url-specific mirror dir exists.
             os.makedirs(self._get_mirror_dir(), exist_ok=True)
 
@@ -445,6 +470,26 @@ class CrateRegistry(SourceFetcher):
         )
         with utils.save_file_atomic(etagfilename) as etagfile:
             etagfile.write(etag)
+
+    # _remove_etag()
+    #
+    # Removes the locally cached ETag for this crate, if present.
+    # Used to recover from a stale .etag whose corresponding .crate
+    # mirror file has been lost.
+    #
+    # Args:
+    #    sha (str): The sha256 checksum the etag was stored under
+    #
+    def _remove_etag(self, sha):
+        if not sha:
+            return
+        etagfilename = os.path.join(
+            self._get_mirror_dir(), "{}.etag".format(sha)
+        )
+        try:
+            os.remove(etagfilename)
+        except FileNotFoundError:
+            pass
 
     # _get_mirror_dir()
     #
