@@ -16,7 +16,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-files.git
   track: master
-  ref: epoch-1.0.10-1-gafca6aef73d9ba3ba6e144124df0ca0a0bb096b2
+  ref: epoch-1.0.10-8-gb3af8bf21178fb48a17710f4675259010ebabb5f
 - kind: cargo2
   url: "crates:"
   ref:
@@ -249,6 +249,10 @@ sources:
     name: atomic-waker
     version: 1.1.2
     sha: 1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0
+  - kind: registry
+    name: atomic_float
+    version: 1.1.0
+    sha: 628d228f918ac3b82fe590352cc719d30664a0c13ca3a60266fe02c7132d480a
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
     repo: https://github.com/jackpot51/rust-atomicwrites
@@ -312,12 +316,12 @@ sources:
     sha: bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a
   - kind: registry
     name: bitflags
-    version: 2.11.0
-    sha: 843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af
+    version: 2.11.1
+    sha: c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3
   - kind: registry
     name: bitstream-io
-    version: 4.9.0
-    sha: 60d4bd9d1db2c6bdf285e223a7fa369d5ce98ec767dec949c6ca62863ce61757
+    version: 4.10.0
+    sha: 7eff00be299a18769011411c9def0d827e8f2d7bf0c3dbf53633147a8867fd1f
   - kind: registry
     name: block
     version: 0.1.6
@@ -404,8 +408,8 @@ sources:
     sha: 138efcf0940a02ebf0cc8d1eff41a1682a46b431630f4c52450d6265876021fa
   - kind: registry
     name: cc
-    version: 1.2.59
-    sha: b7a4d3ec6524d28a329fc53654bbadc9bdd7b0431f5d65f1a56ffb28a1ee5283
+    version: 1.2.60
+    sha: 43c5703da9466b66a946814e1adf53ea2c90f10063b86290cc9eb67ce3478a20
   - kind: registry
     name: cfb
     version: 0.7.3
@@ -548,10 +552,6 @@ sources:
     version: 0.2.0
     sha: 3d44a101f213f6c4cdc1853d4b78aef6db6bdfa3468798cc1d9912f4735013eb
   - kind: registry
-    name: core2
-    version: 0.4.0
-    sha: b49ba7ef1ad6107f8824dbe97de947cbaac53c44e7f9756a1fba0d37c1eec505
-  - kind: registry
     name: core_affinity
     version: 0.8.3
     sha: a034b3a7b624016c6e13f5df875747cc25f884156aad2abd12b6c46797971342
@@ -567,17 +567,17 @@ sources:
     name: cosmic-client-toolkit
     version: 0.2.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: cosmic-config
     version: 1.0.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: cosmic-config-derive
     version: 1.0.0
   - kind: git
-    commit: 7a61a704f6d1ec41f71cbe766e3cc484858523fa
+    commit: 9c562fe3ecf03241a46a60c0078cd6ea10bd75ce
     repo: github:pop-os/freedesktop-icons
     name: cosmic-freedesktop-icons
     version: 0.4.0
@@ -609,7 +609,7 @@ sources:
     name: cosmic-text
     version: 0.18.2
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: cosmic-theme
     version: 1.0.0
@@ -768,7 +768,7 @@ sources:
     version: 1.2.1
     sha: 75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
@@ -948,8 +948,8 @@ sources:
     sha: 77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb
   - kind: registry
     name: font-types
-    version: 0.11.2
-    sha: 2d9237c6d82152100c691fb77ea18037b402bcc7257d2c876a4ffac81bc22a1c
+    version: 0.11.3
+    sha: 5b38ad915f6dadd993ced50848a8291a543bd41ca62bc10740d5e64e2ab4cfd7
   - kind: registry
     name: fontconfig-parser
     version: 0.5.8
@@ -1219,67 +1219,67 @@ sources:
     version: 0.1.2
     sha: f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_accessibility
     version: 0.1.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_core
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_debug
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_futures
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_graphics
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_program
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_renderer
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_runtime
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_tiny_skia
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_wgpu
     version: 0.14.0
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_widget
     version: 0.14.2
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: iced_winit
     version: 0.14.0
@@ -1432,6 +1432,10 @@ sources:
     version: 0.25.10
     sha: 85ab80394333c02fe689eaf900ab500fbd0c2213da414687ebf995a65d5a6104
   - kind: registry
+    name: image-extras
+    version: 0.1.0
+    sha: 86d29ba92ef6970a2685cc758b455d190842b8b9e96c865ffd31cdb9954b7548
+  - kind: registry
     name: image-webp
     version: 0.2.4
     sha: 525e9ff3e1a4be2fbea1fdf0e98686a6d98b4d8f937e1bf7402245af1909e8c3
@@ -1557,8 +1561,8 @@ sources:
     sha: 9afb3de4395d6b3e67a780b6de64b51c978ecf11cb9a462c66be7d4ca9039d33
   - kind: registry
     name: js-sys
-    version: 0.3.94
-    sha: 2e04e2ef80ce82e13552136fabeef8a5ed1f985a96805761cbb9a2c34e7664d9
+    version: 0.3.95
+    sha: 2964e92d1d9dc3364cae4d718d93f227e3abb088e747d92e0395bfdedf1c12ca
   - kind: registry
     name: jxl-bitstream
     version: 1.1.0
@@ -1661,14 +1665,14 @@ sources:
     sha: 7a79a3332a6609480d7d0c9eab957bca6b455b91bb84e66d19f5ff66294b85b8
   - kind: registry
     name: libbz2-rs-sys
-    version: 0.2.2
-    sha: 2c4a545a15244c7d945065b5d392b2d2d7f21526fba56ce51467b06ed445e8f7
+    version: 0.2.3
+    sha: b3a6a8c165077efc8f3a971534c50ea6a1a18b329ef4a66e897a7e3a1494565f
   - kind: registry
     name: libc
-    version: 0.2.184
-    sha: 48f5d2a454e16a5ea0f4ced81bd44e4cfc7bd3a507b61887c99fd3538b28e4af
+    version: 0.2.185
+    sha: 52ff2c0fe9bc6cb6b14a0592c2ff4fa9ceb83eea9db979b0487cd054946a2b8f
   - kind: git
-    commit: 6caccaba337ed9bab21c5fe3c2aa7392e322e89c
+    commit: c423ad1bfc25057922406c687f2ddc75ead5ab67
     repo: github:pop-os/libcosmic.git
     name: libcosmic
     version: 1.0.0
@@ -1738,8 +1742,8 @@ sources:
     sha: 0fae87c125b03c1d2c0150c90365d7d6bcc53fb73a9acaef207d2d065860f062
   - kind: registry
     name: lru
-    version: 0.16.3
-    sha: a1dc47f592c06f33f8e3aea9591776ec7c9f9e4124778ff8a3c3b87159f7e593
+    version: 0.16.4
+    sha: 7f66e8d5d03f609abc3a39e6f08e4164ebf1447a732906d39eb9b99b7919ef39
   - kind: registry
     name: lyon
     version: 1.0.19
@@ -1864,6 +1868,10 @@ sources:
     version: 0.29.0
     sha: 71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46
   - kind: registry
+    name: no_std_io2
+    version: 0.9.3
+    sha: b51ed7824b6e07d354605f4abb3d9d300350701299da96642ee084f5ce631550
+  - kind: registry
     name: nom
     version: 7.1.3
     sha: d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a
@@ -1885,8 +1893,8 @@ sources:
     sha: c02b49179cfebc9932238d04d6079912d26de0379328872846118a0fa0dbb302
   - kind: registry
     name: notify-rust
-    version: 4.14.0
-    sha: 1b2c9bc1689653cfbc04400b8719f2562638ff9c545bbd48cc58c657a14526df
+    version: 4.15.0
+    sha: 3c8146c105ae33d744e2d645f684d063b01176a99daf5986556266777b428816
   - kind: registry
     name: notify-types
     version: 2.1.0
@@ -2153,8 +2161,8 @@ sources:
     sha: c835479a4443ded371d6c535cbfd8d31ad92c5d23ae9770a61bc155e4992a3c1
   - kind: registry
     name: pkg-config
-    version: 0.3.32
-    sha: 7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c
+    version: 0.3.33
+    sha: 19f132c84eca552bf34cab8ec81f1c1dcc229b811638f9d283dceabe58c5569e
   - kind: registry
     name: plain
     version: 0.2.3
@@ -2181,8 +2189,8 @@ sources:
     sha: c33a9471896f1c69cecef8d20cbe2f7accd12527ce60845ff44c153bb2a21b49
   - kind: registry
     name: portable-atomic-util
-    version: 0.2.6
-    sha: 091397be61a01d4be58e7841595bd4bfedb15f1cd54977d79b8271e94ed799a3
+    version: 0.2.7
+    sha: c2a106d1259c23fac8e543272398ae0e3c0b8d33c88ed73d0cc71b0f1d902618
   - kind: registry
     name: potential_utf
     version: 0.1.5
@@ -2245,8 +2253,8 @@ sources:
     sha: 52717f9a02b6965224f95ca2a81e2e0c5c43baacd28ca057577988930b6c3d5b
   - kind: registry
     name: pxfm
-    version: 0.1.28
-    sha: b5a041e753da8b807c9255f28de81879c78c876392ff2469cde94799b2896b9d
+    version: 0.1.29
+    sha: e0c5ccf5294c6ccd63a74f1565028353830a9c2f5eb0c682c355c471726a6e3f
   - kind: registry
     name: qoi
     version: 0.4.1
@@ -2285,12 +2293,12 @@ sources:
     sha: f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf
   - kind: registry
     name: rand
-    version: 0.8.5
-    sha: 34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404
+    version: 0.8.6
+    sha: 5ca0ecfa931c29007047d1bc58e623ab12e5590e8c7cc53200d5202b69266d8a
   - kind: registry
     name: rand
-    version: 0.9.2
-    sha: 6db2770f06117d490610c7488547d543617b21bfa07796d7a12f6f1bd53850d1
+    version: 0.9.4
+    sha: 44c5af06bb1b7d3216d91932aed5265164bf384dc89cd6ba05cf59a35f5f76ea
   - kind: registry
     name: rand_chacha
     version: 0.3.1
@@ -2329,8 +2337,8 @@ sources:
     sha: 20675572f6f24e9e76ef639bc5552774ed45f1c30e2951e1e99c59888861c539
   - kind: registry
     name: rayon
-    version: 1.11.0
-    sha: 368f01d005bf8fd9b1206fb6fa653e6c4a81ceb1466406b81792d87c5677a58f
+    version: 1.12.0
+    sha: fb39b166781f92d482534ef4b4b1b2568f42613b53e5b6c160e24cfbfa30926d
   - kind: registry
     name: rayon-core
     version: 1.13.0
@@ -2767,8 +2775,8 @@ sources:
     sha: 1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20
   - kind: registry
     name: tokio
-    version: 1.51.1
-    sha: f66bf9585cda4b724d3e78ab34b73fb2bbaba9011b9bfdf69dc836382ea13b8c
+    version: 1.52.1
+    sha: b67dee974fe86fd92cc45b7a95fdd2f99a36a6d7b0d431a231178d3d670bbcc6
   - kind: registry
     name: tokio-macros
     version: 2.7.0
@@ -2938,8 +2946,8 @@ sources:
     sha: 06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821
   - kind: registry
     name: uuid
-    version: 1.23.0
-    sha: 5ac8b6f42ead25368cf5b098aeb3dc8a1a2c05a3eee8a9a1a68c640edbfc79d9
+    version: 1.23.1
+    sha: ddd74a9687298c6858e9b88ec8935ec45d22e8fd5e6394fa1bd4e99a87789c76
   - kind: registry
     name: uzers
     version: 0.12.2
@@ -2978,24 +2986,24 @@ sources:
     sha: 5428f8bf88ea5ddc08faddef2ac4a67e390b88186c703ce6dbd955e1c145aca5
   - kind: registry
     name: wasm-bindgen
-    version: 0.2.117
-    sha: 0551fc1bb415591e3372d0bc4780db7e587d84e2a7e79da121051c5c4b89d0b0
+    version: 0.2.118
+    sha: 0bf938a0bacb0469e83c1e148908bd7d5a6010354cf4fb73279b7447422e3a89
   - kind: registry
     name: wasm-bindgen-futures
-    version: 0.4.67
-    sha: 03623de6905b7206edd0a75f69f747f134b7f0a2323392d664448bf2d3c5d87e
+    version: 0.4.68
+    sha: f371d383f2fb139252e0bfac3b81b265689bf45b6874af544ffa4c975ac1ebf8
   - kind: registry
     name: wasm-bindgen-macro
-    version: 0.2.117
-    sha: 7fbdf9a35adf44786aecd5ff89b4563a90325f9da0923236f6104e603c7e86be
+    version: 0.2.118
+    sha: eeff24f84126c0ec2db7a449f0c2ec963c6a49efe0698c4242929da037ca28ed
   - kind: registry
     name: wasm-bindgen-macro-support
-    version: 0.2.117
-    sha: dca9693ef2bab6d4e6707234500350d8dad079eb508dca05530c85dc3a529ff2
+    version: 0.2.118
+    sha: 9d08065faf983b2b80a79fd87d8254c409281cf7de75fc4b773019824196c904
   - kind: registry
     name: wasm-bindgen-shared
-    version: 0.2.117
-    sha: 39129a682a6d2d841b6c429d0c51e5cb0ed1a03829d8b3d1e69a011e62cb3d3b
+    version: 0.2.118
+    sha: 5fd04d9e306f1907bd13c6361b5c6bfc7b3b3c095ed3f8a9246390f8dbdee129
   - kind: registry
     name: wasm-encoder
     version: 0.244.0
@@ -3062,8 +3070,8 @@ sources:
     sha: d8eab23fefc9e41f8e841df4a9c707e8a8c4ed26e944ef69297184de2785e3be
   - kind: registry
     name: web-sys
-    version: 0.3.94
-    sha: cd70027e39b12f0849461e08ffc50b9cd7688d942c1c8e3c7b22273236b4dd0a
+    version: 0.3.95
+    sha: 4f2dfbb17949fa2088e5d39408c48368947b86f7834484e87b73de55bc14d97d
   - kind: registry
     name: web-time
     version: 1.1.0
@@ -3360,77 +3368,77 @@ sources:
     version: 0.53.1
     sha: d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-android
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-appkit
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-common
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-core
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-orbital
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-uikit
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-wayland
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-web
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
     name: winit-win32
     version: 0.31.0-beta.2
   - kind: git
-    commit: a610ac9c7a72b39ff102ed4d946291618dc725b6
+    commit: 261cda54017f98a12dc55569c864430fe6770366
     repo: github:pop-os/winit.git
     query:
       tag: cosmic-0.14
