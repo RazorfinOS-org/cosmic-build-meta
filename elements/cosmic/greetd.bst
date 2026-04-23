@@ -21,7 +21,7 @@ sources:
 - kind: git_repo
   url: srht:~kennylevinsen/greetd
   track: master
-  ref: 0.10.3-17-g1bf47d7b2029233361be3c772a66384bb54a458d
+  ref: 0.10.3-20-gd3b45e7398d3eed65b39c532c713ea052a5b9278
 - kind: cargo2
   url: "crates:"
   ref:

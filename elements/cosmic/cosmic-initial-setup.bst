@@ -19,7 +19,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-initial-setup.git
   track: master
-  ref: epoch-1.0.10-0-g67496c56ead939c1cbe2a1776ca7e73d52d0f1a0
+  ref: epoch-1.0.11-0-g67496c56ead939c1cbe2a1776ca7e73d52d0f1a0
 - kind: cargo2
   url: "crates:"
   ref:
