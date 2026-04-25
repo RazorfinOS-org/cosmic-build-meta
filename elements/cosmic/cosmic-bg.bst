@@ -18,7 +18,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-bg.git
   track: master
-  ref: epoch-1.0.10-0-g06970d5945b45a634b9ed314f5ca3a86a8502fd8
+  ref: epoch-1.0.11-0-g06970d5945b45a634b9ed314f5ca3a86a8502fd8
 - kind: cargo2
   url: "crates:"
   ref:

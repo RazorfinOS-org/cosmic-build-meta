@@ -22,7 +22,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-edit.git
   track: master
-  ref: epoch-1.0.10-1-g5f96f6191b10fce12242991c03714d8675fbc6d7
+  ref: epoch-1.0.11-0-g5f96f6191b10fce12242991c03714d8675fbc6d7
 - kind: cargo2
   url: "crates:"
   ref:
