@@ -1,0 +1,22 @@
+[terminal]
+# greetd runs on tty1; getty@tty1 is masked by 90-cosmic.preset.
+vt = 1
+
+# Default session: launch the graphical login via our wrapper.
+# /usr/local/bin/cosmic-greeter-wrapper is a drop-in replacement for
+# upstream's /usr/bin/cosmic-greeter-start that:
+#   - passes --no-xwayland (we don't ship XWayland; without the flag
+#     cosmic-comp's kiosk child fails to spawn -> blank screen)
+#   - tees stdout/stderr to the journal so failures are debuggable
+#     (upstream redirects to /dev/null which hid earlier issues)
+[default_session]
+command = "/usr/local/bin/cosmic-greeter-wrapper"
+user = "cosmic-greeter"
+
+# initial_session runs exactly once on first boot, no auth.
+# Same wrapper pattern but launching cosmic-initial-setup as the
+# kiosk child instead of cosmic-greeter.
+# https://man.sr.ht/~kennylevinsen/greetd/config.5.md
+[initial_session]
+command = "/usr/local/bin/cosmic-initial-setup-wrapper"
+user = "cosmic-greeter"

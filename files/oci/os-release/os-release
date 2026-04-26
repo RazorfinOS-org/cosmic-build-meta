@@ -1,0 +1,12 @@
+NAME="COSMIC"
+ID=cosmic
+ID_LIKE="freedesktop-sdk"
+VARIANT="COSMIC base"
+VARIANT_ID=cosmic-base
+PRETTY_NAME="COSMIC (cosmic-build-meta)"
+ANSI_COLOR="1;38;2;82;177;230"
+HOME_URL="https://github.com/razorfinos-org/cosmic-build-meta"
+DOCUMENTATION_URL="https://github.com/razorfinos-org/cosmic-build-meta"
+SUPPORT_URL="https://github.com/razorfinos-org/cosmic-build-meta/issues"
+BUG_REPORT_URL="https://github.com/razorfinos-org/cosmic-build-meta/issues"
+DEFAULT_HOSTNAME=cosmic

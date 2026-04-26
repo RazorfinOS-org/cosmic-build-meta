@@ -1,0 +1,31 @@
+# Default unit policy for the COSMIC bootc image.
+#
+# COSMIC ships cosmic-greeter via greetd as the default display manager.
+# This is uncharted territory -- no major distro has packaged it as the
+# default DM yet -- so we are explicit about what we enable and disable.
+
+# Display manager
+enable greetd.service
+
+# Core platform
+enable systemd-networkd.service
+enable systemd-resolved.service
+enable NetworkManager.service
+enable pipewire.socket
+enable pipewire-pulse.socket
+enable wireplumber.service
+enable dbus-broker.service
+enable polkit.service
+enable accounts-daemon.service
+enable bootc-fetch-apply-updates.timer
+
+# Container tooling
+enable podman.socket
+
+# COSMIC user services are activated by the user session, not enabled here.
+
+# Disable text-mode logins on tty1 -- cosmic-greeter owns it.
+# (Note: `mask` is NOT a valid preset verb -- systemd-preset only
+# supports enable/disable. Hard-masking happens via a /dev/null
+# symlink in oci/cosmic/stack.bst's integration-commands instead.)
+disable getty@tty1.service

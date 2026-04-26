@@ -1,0 +1,7 @@
+#!/bin/sh
+# Mirror of cosmic-greeter-wrapper for the first-boot setup wizard.
+# See cosmic-greeter-wrapper for rationale (absolute paths + journal
+# capture). greetd's initial_session executes this exactly once on
+# first boot, then reverts to default_session for all subsequent boots.
+exec /usr/bin/systemd-cat -t cosmic-initial-setup-session \
+    /usr/bin/cosmic-comp /usr/bin/cosmic-initial-setup

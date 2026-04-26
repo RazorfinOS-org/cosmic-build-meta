@@ -288,23 +288,23 @@ config:
   - |
     install -Dm755 target/release/greetd "%{install-root}%{bindir}/greetd"
     install -Dm755 target/release/agreety "%{install-root}%{bindir}/agreety"
-    # Install config - check multiple possible locations
-    if [ -f config.toml ]; then
-      install -Dm644 config.toml "%{install-root}%{sysconfdir}/greetd/config.toml"
-    elif [ -f greetd/config.toml ]; then
-      install -Dm644 greetd/config.toml "%{install-root}%{sysconfdir}/greetd/config.toml"
+    # Install upstream's systemd unit. Without this, `systemctl enable
+    # greetd.service` is a silent no-op (no symlink target) and the
+    # booted system falls back to getty@tty1.
+    if [ -f greetd.service ]; then
+      install -Dm644 greetd.service "%{install-root}%{libdir}/systemd/system/greetd.service"
+    elif [ -f dist/init/systemd/greetd.service ]; then
+      install -Dm644 dist/init/systemd/greetd.service "%{install-root}%{libdir}/systemd/system/greetd.service"
     else
-      # Create a minimal default config
-      mkdir -p "%{install-root}%{sysconfdir}/greetd"
-      cat > "%{install-root}%{sysconfdir}/greetd/config.toml" << 'CONF'
-    [terminal]
-    vt = 1
-
-    [default_session]
-    command = "agreety --cmd /bin/sh"
-    user = "greeter"
-    CONF
+      echo "ERROR: cannot find greetd.service in upstream tree" >&2
+      find . -name 'greetd.service' >&2
+      exit 1
     fi
+    # /etc/greetd/config.toml is owned by
+    # oci/integration/cosmic-greeter-config.bst (it points greetd at
+    # cosmic-greeter / cosmic-initial-setup with an initial_session
+    # for first-boot user creation). Don't ship a default here --
+    # would overlap that element.
   strip-commands:
   - |
     %{strip-binaries}

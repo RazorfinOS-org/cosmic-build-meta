@@ -7,6 +7,10 @@ workspaces/
 # Build artifacts
 target/
 
+# VM / image artifacts produced by `just build`, `just generate-bootable-image`,
+# and `just boot-vm` (OCI checkout, sparse disk, OVMF NVRAM, debug socket, console log).
+build/
+
 # Python
 __pycache__/
 *.pyc

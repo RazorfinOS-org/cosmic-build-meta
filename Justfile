@@ -15,6 +15,28 @@ bst2_image := env_var_or_default("BST2_IMAGE", "registry.gitlab.com/freedesktop-
 # Common BST options
 bst_opts := "--option arch " + arch
 
+# Identity of the local podman image produced by `just load-image`.
+# Defaults match the `org.opencontainers.image.ref.name` annotation in
+# elements/oci/cosmic/image.bst so the installed system's upgrade origin
+# (`bootc upgrade`) points at the same tag we'd push to GHCR.
+image_name := env_var_or_default("COSMIC_IMAGE_NAME", "ghcr.io/razorfinos-org/cosmic-build-meta")
+image_tag := env_var_or_default("COSMIC_IMAGE_TAG", "cosmic-nightly")
+
+# Filesystem for `bootc install to-disk` (btrfs|xfs|ext4).
+filesystem := env_var_or_default("COSMIC_FILESYSTEM", "btrfs")
+
+# Sparse loopback file `generate-bootable-image` writes the install into.
+bootable_image := env_var_or_default("COSMIC_BOOTABLE_IMAGE", "build/bootable.raw")
+bootable_size := env_var_or_default("COSMIC_BOOTABLE_SIZE", "30G")
+
+# QEMU knobs for `just boot-vm`. The bootc-installed image is UEFI-only
+# (systemd-boot lives on the EFI System Partition), so OVMF is mandatory.
+# Default firmware path is Fedora's; override on other distros.
+vm_memory := env_var_or_default("COSMIC_VM_MEMORY", "4G")
+vm_cpus := env_var_or_default("COSMIC_VM_CPUS", "4")
+ovmf_code := env_var_or_default("COSMIC_OVMF_CODE", "/usr/share/edk2/ovmf/OVMF_CODE.fd")
+ovmf_vars := env_var_or_default("COSMIC_OVMF_VARS", "/usr/share/edk2/ovmf/OVMF_VARS.fd")
+
 # ── BuildStream wrapper ──────────────────────────────────────────────
 # Runs any bst command inside the bst2 container via podman.
 # Set BST_FLAGS env var to prepend flags (e.g. --no-interactive --config ...).
@@ -52,15 +74,190 @@ bst *args:
 
 # ── Build ────────────────────────────────────────────────────────────
 
-# Build a specific element
+# Build the final COSMIC bootc/OCI image and load it into rootful
+# podman storage as ${COSMIC_IMAGE_NAME}:${COSMIC_IMAGE_TAG} so it's
+# immediately usable by `just bootc` and `just generate-bootable-image`.
+# (Multi-hour cold build the first time.)
+# To build a specific element, use `just bst build <element>` directly.
 [group('build')]
-build *elements:
-    just bst build {{elements}}
+build:
+    just bst build oci/cosmic/image.bst
+    just load-image
 
-# Build the full COSMIC stack
+# Build the full COSMIC stack only (no system, no image)
 [group('build')]
 build-all:
     just bst build cosmic/deps.bst
+
+# Build the system dependency aggregate (FDSDK base + COSMIC binaries)
+[group('build')]
+build-system:
+    just bst build system/deps.bst
+
+# Build the squashed COSMIC bootc/OCI sysroot (no image yet)
+[group('build')]
+build-filesystem:
+    just bst build oci/cosmic/filesystem.bst
+
+# Resolve the full dep graph for the OCI image without building.
+# Use this to validate elements/* without paying for a build.
+[group('info')]
+show-image:
+    just bst show oci/cosmic/image.bst
+
+# Checkout the produced OCI image to ./build/oci-image (skopeo-loadable)
+[group('dev')]
+checkout-image dir="build/oci-image":
+    just bst artifact checkout --directory {{dir}} oci/cosmic/image.bst
+
+# Load the OCI artifact into rootful podman storage as
+# ${COSMIC_IMAGE_NAME}:${COSMIC_IMAGE_TAG} (default
+# ghcr.io/razorfinos-org/cosmic-build-meta:cosmic-nightly).
+#
+# Mirrors projectbluefin/dakota's `export` recipe: `podman pull oci:`
+# the BST checkout, then `podman build --squash-all` via an inline
+# Containerfile to collapse the 3 build-oci layers into a single layer.
+# The squash is mandatory -- bootc 1.15.0's splitstream parser chokes
+# with "Unexpected EOF in splitstream" reading our raw multi-layer
+# build-oci output, but works fine on the squashed result.
+#
+# Checkout dir lives under build/ because `just bst` only bind-mounts
+# {{justfile_directory()}} into the bst2 container.
+[group('image')]
+load-image:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    stagedir="build/oci-image"
+    rm -rf "${stagedir}"
+    mkdir -p "$(dirname ${stagedir})"
+    just bst artifact checkout --directory "${stagedir}" oci/cosmic/image.bst
+    image_id=$(sudo podman pull -q "oci:${stagedir}")
+    printf 'FROM %s\n' "${image_id}" | sudo podman build \
+        --pull=never \
+        --squash-all \
+        --security-opt label=type:unconfined_t \
+        -t "{{image_name}}:{{image_tag}}" \
+        -f - .
+    sudo podman rmi "${image_id}" >/dev/null 2>&1 || true
+
+# Run `bootc <args>` inside the loaded image, with host container
+# storage and /dev exposed (privileged; required for `install to-disk`).
+# Mounts the repo at /data so loopback paths under build/ are reachable.
+[group('image')]
+bootc *args:
+    sudo podman run \
+        --rm --privileged --pid=host \
+        -it \
+        -v /var/lib/containers:/var/lib/containers \
+        -v /dev:/dev \
+        -e RUST_LOG=debug \
+        -v "{{justfile_directory()}}:/data" \
+        --security-opt label=type:unconfined_t \
+        "{{image_name}}:{{image_tag}}" bootc {{args}}
+
+# Allocate a sparse raw disk and `bootc install to-disk` the loaded
+# image into it via loopback. Result is a qemu-runnable image at
+# ${COSMIC_BOOTABLE_IMAGE} (default build/bootable.raw, 30G sparse).
+# Assumes `just load-image` has already populated podman storage.
+#
+# --source-imgref / --target-imgref are pinned to our localhost image
+# so bootc never falls back to detecting the running container's image
+# or pulling from a registry. Signature verification is disabled
+# because the local image isn't signed.
+[group('image')]
+generate-bootable-image:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p "$(dirname {{bootable_image}})"
+    # Always start from a fresh sparse file. Reusing a previous file
+    # leaves on-disk signatures (e.g. btrfs label) that make mkfs.btrfs
+    # refuse to overwrite, and `bootc install --wipe` doesn't propagate
+    # `-f` to the mkfs invocation. Sparse fallocate is cheap.
+    sudo rm -f "{{bootable_image}}"
+    fallocate -l "{{bootable_size}}" "{{bootable_image}}"
+    # Kargs:
+    #   console=tty0          -- keep kernel output on the GTK display
+    #   console=ttyS0         -- also pipe to serial0 so we can capture
+    #                            the full log to a host file (boot-vm
+    #                            redirects this to build/console.log)
+    #   systemd.debug_shell=ttyS1
+    #                         -- always-on emergency root shell on
+    #                            serial1 (pts), reachable even when
+    #                            graphical session is broken.
+    #   systemd.log_target=kmsg systemd.log_color=0
+    #                         -- logs everything readable on serial,
+    #                            no ANSI escapes that confuse less.
+    just bootc install to-disk --composefs-backend \
+        --source-imgref "containers-storage:{{image_name}}:{{image_tag}}" \
+        --target-imgref "{{image_name}}:{{image_tag}}" \
+        --target-transport containers-storage \
+        --target-no-signature-verification \
+        --via-loopback "/data/{{bootable_image}}" \
+        --filesystem "{{filesystem}}" \
+        --wipe \
+        --bootloader systemd \
+        --karg console=tty0 \
+        --karg console=ttyS0,115200n8 \
+        --karg systemd.debug_shell=ttyS1 \
+        --karg systemd.log_target=kmsg \
+        --karg systemd.log_color=0
+
+# Boot ${COSMIC_BOOTABLE_IMAGE} in QEMU with KVM + UEFI. The OVMF VARS
+# file is copied per-boot to build/OVMF_VARS.fd so the host's read-only
+# vendor copy isn't mutated and EFI boot entries persist across runs.
+[group('image')]
+boot-vm:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -e "{{bootable_image}}" ]; then
+        echo "error: {{bootable_image}} does not exist; run \`just generate-bootable-image\` first" >&2
+        exit 1
+    fi
+    if [ ! -e "{{ovmf_code}}" ]; then
+        echo "error: OVMF firmware not found at {{ovmf_code}}" >&2
+        echo "  Fedora:  sudo dnf install edk2-ovmf" >&2
+        echo "  Debian:  sudo apt install ovmf  (then set COSMIC_OVMF_CODE=/usr/share/OVMF/OVMF_CODE.fd)" >&2
+        echo "  Arch:    sudo pacman -S edk2-ovmf  (then set COSMIC_OVMF_CODE=/usr/share/edk2-ovmf/x64/OVMF_CODE.fd)" >&2
+        exit 1
+    fi
+    mkdir -p build
+    if [ ! -e build/OVMF_VARS.fd ]; then
+        cp "{{ovmf_vars}}" build/OVMF_VARS.fd
+    fi
+    # Serial wiring (matches kargs in generate-bootable-image):
+    #   serial0 (ttyS0): kernel console + systemd journal -> THIS terminal
+    #                    via `-serial mon:stdio` (mux'd with QEMU monitor;
+    #                    Ctrl-A C toggles between them). All kernel/systemd
+    #                    output appears here at human-readable speed and
+    #                    sits in your terminal scrollback after the VM
+    #                    quits. Also tee'd to build/console.log for grep.
+    #   serial1 (ttyS1): systemd.debug_shell=ttyS1 -- always-on root
+    #                    shell bound to a UNIX socket. From another
+    #                    terminal:
+    #                       socat - UNIX-CONNECT:build/debug-shell.sock
+    rm -f build/console.log build/debug-shell.sock
+    echo "==> Serial console: this terminal (also tee'd to build/console.log)"
+    echo "==> Debug shell:    socat - UNIX-CONNECT:build/debug-shell.sock"
+    echo "==> QEMU monitor:   Ctrl-A then C in this terminal"
+    echo
+    qemu-system-x86_64 \
+        -enable-kvm \
+        -cpu host \
+        -smp "{{vm_cpus}}" \
+        -m "{{vm_memory}}" \
+        -machine q35 \
+        -drive if=pflash,format=raw,readonly=on,file="{{ovmf_code}}" \
+        -drive if=pflash,format=raw,file=build/OVMF_VARS.fd \
+        -drive file="{{bootable_image}}",format=raw,if=virtio \
+        -device virtio-net-pci,netdev=net0 \
+        -netdev user,id=net0 \
+        -device virtio-vga-gl \
+        -display gtk,gl=on \
+        -device virtio-rng-pci \
+        -serial mon:stdio \
+        -chardev socket,id=dbgshell,path=build/debug-shell.sock,server=on,wait=off \
+        -serial chardev:dbgshell \
+        2>&1 | tee build/console.log
 
 # Build just the session (no apps)
 [group('build')]
