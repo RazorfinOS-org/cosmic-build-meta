@@ -9,8 +9,8 @@ build-depends:
 - freedesktop-sdk.bst:components/libinput.bst
 - freedesktop-sdk.bst:components/findutils.bst
 - freedesktop-sdk.bst:components/sed.bst
-- cosmic/just.bst
-- cosmic/libcosmic.bst
+- core-deps/just.bst
+- core/libcosmic.bst
 
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
@@ -20,6 +20,73 @@ sources:
   url: github:pop-os/cosmic-initial-setup.git
   track: master
   ref: epoch-1.0.11-0-g67496c56ead939c1cbe2a1776ca7e73d52d0f1a0
+
+# Several files in res/ are Git LFS objects upstream; the git_repo
+# plugin only fetches the LFS *pointers* (~130 bytes each) because we
+# disable LFS smudge globally in the Justfile (cargo2 vendoring breaks
+# otherwise -- see Justfile comment). Without the real blobs:
+#   - cities.bitcode-v0-6 -- the wizard's city search returns nothing
+#     (include_bytes! at compile time would bake in the pointer text).
+#   - cosmic-{dark,light}.png -- the appearance page's COSMIC Dark and
+#     COSMIC Light theme thumbnails are blank/broken (also include_bytes!
+#     -- src/page/appearance.rs:15-16).
+#   - themes/*.png -- the four extra-theme thumbnails (Comet Light,
+#     Cream Light, Mocha Dark, Nebula Dark) load via std::fs at runtime
+#     from /usr/share/cosmic-themes/*.png (installed by `just install`),
+#     so pointer files would land at that path and render as broken
+#     images.
+#   - layouts/*/icon.png -- the layout-configuration page thumbnails
+#     (Top Panel & Bottom Dock, Bottom Panel) load at runtime from
+#     /usr/share/cosmic-layouts/*/icon.png. Same failure mode.
+# Overlay the actual blobs from GitHub's media endpoint. ref values are
+# the LFS oid sha256 (= SHA256 of file content, what `kind: remote`
+# expects).
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/cities.bitcode-v0-6
+  ref: ae15dde8fe7213dd8f3cd2ca2fd4e226d8342bd06a6501613ecf111280fd4f7b
+  filename: cities.bitcode-v0-6
+  directory: res
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/cosmic-dark.png
+  ref: 6313fa0a8f06f3a62ea8ccba4eae40a7104d494c090fe8c41c9efeecd77ce0e9
+  filename: cosmic-dark.png
+  directory: res
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/cosmic-light.png
+  ref: 892b2d45a283c489af523560d013c8d9934f37c294a413a0506b8ff7d2dec908
+  filename: cosmic-light.png
+  directory: res
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/themes/comet-light.png
+  ref: 00a675189b0e1bc012f6958a751fd438bf08c926bf2e74dfee6262cf4aa3b83b
+  filename: comet-light.png
+  directory: res/themes
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/themes/cream-light.png
+  ref: 360b5bce3df4f103346b4b8d7a2ed7197b95375daa844086934333982216052f
+  filename: cream-light.png
+  directory: res/themes
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/themes/mocha-dark.png
+  ref: 4642683fad524bbfd11cf5dcecd8fb03f6bc3ff93f18e60da08e398857ae15db
+  filename: mocha-dark.png
+  directory: res/themes
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/themes/nebula-dark.png
+  ref: b3fe8023d3ca7074bea4550c32e1befcba5c31193627a28fb1bddd3acea40060
+  filename: nebula-dark.png
+  directory: res/themes
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/layouts/bottom-panel/icon.png
+  ref: 10967b37fe0b785b4abf9772806fea331b7c7120dfe38411c7ed139debcf6168
+  filename: icon.png
+  directory: res/layouts/bottom-panel
+- kind: remote
+  url: github-media:pop-os/cosmic-initial-setup/67496c56ead939c1cbe2a1776ca7e73d52d0f1a0/res/layouts/top-panel-and-bottom-dock/icon.png
+  ref: 80f753efbed5796fec6f3e5f49464304f7de5c2e4ac8cef85f88b0316af988e4
+  filename: icon.png
+  directory: res/layouts/top-panel-and-bottom-dock
+
 - kind: cargo2
   url: "crates:"
   ref:
@@ -33,49 +100,49 @@ sources:
     sha: 366ffbaa4442f4684d91e2cd7c5ea7c4ed8add41959a31447066e279e432b618
   - kind: git
     commit: c46afc041b1968a5af0186fa6aba3ea9cf24c8c3
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: iced-xdg-surface-0.13-rc
     name: accesskit
     version: 0.16.0
   - kind: git
     commit: c46afc041b1968a5af0186fa6aba3ea9cf24c8c3
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: iced-xdg-surface-0.13-rc
     name: accesskit_atspi_common
     version: 0.9.0
   - kind: git
     commit: c46afc041b1968a5af0186fa6aba3ea9cf24c8c3
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: iced-xdg-surface-0.13-rc
     name: accesskit_consumer
     version: 0.24.0
   - kind: git
     commit: c46afc041b1968a5af0186fa6aba3ea9cf24c8c3
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: iced-xdg-surface-0.13-rc
     name: accesskit_macos
     version: 0.17.0
   - kind: git
     commit: c46afc041b1968a5af0186fa6aba3ea9cf24c8c3
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: iced-xdg-surface-0.13-rc
     name: accesskit_unix
     version: 0.12.0
   - kind: git
     commit: c46afc041b1968a5af0186fa6aba3ea9cf24c8c3
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: iced-xdg-surface-0.13-rc
     name: accesskit_windows
     version: 0.22.0
   - kind: git
     commit: c46afc041b1968a5af0186fa6aba3ea9cf24c8c3
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: iced-xdg-surface-0.13-rc
     name: accesskit_winit
@@ -219,7 +286,7 @@ sources:
     sha: 1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
-    repo: https://github.com/jackpot51/rust-atomicwrites
+    repo: github:jackpot51/rust-atomicwrites
     name: atomicwrites
     version: 0.4.2
   - kind: registry
@@ -1471,7 +1538,7 @@ sources:
     sha: 08d2c35b16f4483f6c26f0e4e9550717a2f6575bcd6f12a53ff0c490a94a6934
   - kind: git
     commit: e5b66fbe3a55182174caf6aec171ff4ae8285626
-    repo: https://github.com/AerynOS/locales-rs
+    repo: github:AerynOS/locales-rs
     name: locales-rs
     version: 0.1.0
   - kind: registry
@@ -3286,7 +3353,6 @@ sources:
     name: zvariant_utils
     version: 3.3.0
     sha: f75c23a64ef8f40f13a6989991e643554d9bef1d682a281160cf0c1bc389c5e9
-
 config:
   configure-commands: []
   build-commands:

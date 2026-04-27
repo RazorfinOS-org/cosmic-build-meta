@@ -5,8 +5,8 @@ build-depends:
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/gcc-base.bst
 - freedesktop-sdk.bst:bootstrap/binutils.bst
-- cosmic/just.bst
-- cosmic/greetd.bst
+- core-deps/just.bst
+- core-deps/greetd.bst
 - freedesktop-sdk.bst:components/linux-pam.bst
 - freedesktop-sdk.bst:components/libxkbcommon.bst
 - freedesktop-sdk.bst:components/wayland.bst
@@ -14,7 +14,7 @@ build-depends:
 - freedesktop-sdk.bst:components/libinput.bst
 
 depends:
-- cosmic/greetd.bst
+- core-deps/greetd.bst
 - freedesktop-sdk.bst:components/linux-pam.bst
 - freedesktop-sdk.bst:components/libxkbcommon.bst
 - freedesktop-sdk.bst:components/wayland.bst
@@ -26,6 +26,22 @@ sources:
   url: github:pop-os/cosmic-greeter.git
   track: master
   ref: epoch-1.0.11-0-g619910c5cc5bb31479230744e1814c71a1a1aeb3
+
+# res/background.jpg is a Git LFS object (~3.7 MB) -- the orion-nebula
+# image used as the greeter's `fallback_background` via include_bytes!
+# at compile time (src/common.rs:107). Our globally-disabled LFS smudge
+# (see Justfile) leaves a 132-byte pointer file in the source tree, so
+# the compiled binary embeds 132 bytes of pointer text instead of a real
+# JPEG -- the greeter renders no fallback background. Overlay the actual
+# blob from GitHub's media endpoint; ref is the LFS oid sha256 (= SHA256
+# of file content). Same pattern as cosmic-wallpapers / cosmic-initial-
+# setup.
+- kind: remote
+  url: github-media:pop-os/cosmic-greeter/619910c5cc5bb31479230744e1814c71a1a1aeb3/res/background.jpg
+  ref: 7500f702f0488d4a8df2c5abeb7ca9107a7ca7998e0441727cbaf79465b02388
+  filename: background.jpg
+  directory: res
+
 - kind: cargo2
   url: "crates:"
   ref:

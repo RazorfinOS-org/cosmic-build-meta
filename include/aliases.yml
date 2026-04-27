@@ -7,6 +7,14 @@ aliases:
   crates: https://static.crates.io/crates/
   pypi: https://files.pythonhosted.org/packages/
   github-releases: https://github.com/
+  # Git-LFS objects served from GitHub. Used for LFS-backed JPEG/binary
+  # blobs that the git_repo plugin can only fetch as pointer files
+  # (we disable LFS smudge globally in the Justfile, see comments there).
+  github-media: https://media.githubusercontent.com/media/
+  # Plain raw blob content served from GitHub. Used when we need a single
+  # file out of an upstream repo without cloning the whole thing
+  # (e.g. pop-robot.png from pop-os/default-settings).
+  github-raw: https://raw.githubusercontent.com/
 
   # Git repository aliases
   github: https://github.com/
@@ -14,3 +22,5 @@ aliases:
   gnome: https://gitlab.gnome.org/
   freedesktop: https://gitlab.freedesktop.org/
   srht: https://git.sr.ht/
+  netfilter: https://git.netfilter.org/
+  kernel: https://git.kernel.org/
