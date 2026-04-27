@@ -1,0 +1,12 @@
+#!/bin/sh
+# Inner kiosk script run by cosmic-comp as its sole child. cosmic-comp
+# sets WAYLAND_DISPLAY for this script before exec; we fork cosmic-bg
+# (the wallpaper daemon, which inherits the env) and then exec the
+# actual wizard. Without this, cosmic-bg never starts and the
+# compositor renders a solid color background instead of a wallpaper.
+#
+# We don't run cosmic-session (which would spawn cosmic-bg + many
+# others), because cosmic-session expects an already-logged-in user
+# with a full desktop. greetd's initial_session is a kiosk context.
+/usr/bin/cosmic-bg &
+exec /usr/bin/cosmic-initial-setup

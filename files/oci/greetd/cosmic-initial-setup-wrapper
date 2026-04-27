@@ -1,7 +1,22 @@
 #!/bin/sh
 # Mirror of cosmic-greeter-wrapper for the first-boot setup wizard.
 # See cosmic-greeter-wrapper for rationale (absolute paths + journal
-# capture). greetd's initial_session executes this exactly once on
-# first boot, then reverts to default_session for all subsequent boots.
+# capture). greetd's [initial_session] runs once per greetd lifetime,
+# but a fresh greetd lifetime starts on every reboot -- so without a
+# guard, the wizard runs again on every boot. Skip it if a real user
+# (UID 1000-64999, excluding system users like cosmic-greeter at 950
+# and cosmic-initial-setup at 980) already exists. greetd treats a
+# clean exit from initial_session as "done" and transitions to
+# default_session (cosmic-greeter).
+if getent passwd | awk -F: '$3 >= 1000 && $3 < 65000 { found = 1 } END { exit !found }'; then
+    exit 0
+fi
+
+# xdg-desktop-portal-cosmic's manifest gates on UseIn=COSMIC; without
+# this export, portal queries (color-scheme, file chooser, screenshot)
+# fall through to no backend, libcosmic times out on the Settings
+# proxy, and form widgets render in a broken theme state.
+export XDG_CURRENT_DESKTOP=COSMIC
+
 exec /usr/bin/systemd-cat -t cosmic-initial-setup-session \
-    /usr/bin/cosmic-comp /usr/bin/cosmic-initial-setup
+    /usr/bin/cosmic-comp /usr/local/bin/cosmic-initial-setup-kiosk

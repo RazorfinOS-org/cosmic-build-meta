@@ -1,0 +1,7 @@
+#!/bin/sh
+# Inner kiosk script run by cosmic-comp as its sole child for the
+# default (login) session. Same pattern as cosmic-initial-setup-kiosk:
+# fork cosmic-bg for the wallpaper, exec cosmic-greeter as the focused
+# kiosk app.
+/usr/bin/cosmic-bg &
+exec /usr/bin/cosmic-greeter

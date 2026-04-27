@@ -34,6 +34,15 @@ bootable_size := env_var_or_default("COSMIC_BOOTABLE_SIZE", "30G")
 # Default firmware path is Fedora's; override on other distros.
 vm_memory := env_var_or_default("COSMIC_VM_MEMORY", "4G")
 vm_cpus := env_var_or_default("COSMIC_VM_CPUS", "4")
+# Static guest resolution. Dynamic resize on host window resize is broken
+# upstream -- smithay's ConnectorScanner drops mode-change events on a
+# still-Connected connector, so cosmic-comp never sees virtio-gpu's hotplug
+# updates. Fix landed in smithay PR #1923 (2026-02-15) but cosmic-comp
+# still pins an older rev. Until that propagates, pin a sane initial mode
+# big enough for cosmic-initial-setup's 900x650 widget plus chrome.
+# Tracker: https://github.com/pop-os/cosmic-epoch/issues/1351
+vm_xres := env_var_or_default("COSMIC_VM_XRES", "1680")
+vm_yres := env_var_or_default("COSMIC_VM_YRES", "1050")
 ovmf_code := env_var_or_default("COSMIC_OVMF_CODE", "/usr/share/edk2/ovmf/OVMF_CODE.fd")
 ovmf_vars := env_var_or_default("COSMIC_OVMF_VARS", "/usr/share/edk2/ovmf/OVMF_VARS.fd")
 
@@ -41,10 +50,10 @@ ovmf_vars := env_var_or_default("COSMIC_OVMF_VARS", "/usr/share/edk2/ovmf/OVMF_V
 # Runs any bst command inside the bst2 container via podman.
 # Set BST_FLAGS env var to prepend flags (e.g. --no-interactive --config ...).
 # Element paths are relative to element-path (elements/) set in project.conf,
-# so use e.g. "just bst build cosmic/deps.bst" not "elements/cosmic/deps.bst".
-# Usage: just bst build cosmic/deps.bst
-#        just bst show cosmic/just.bst
-#        BST_FLAGS="--no-interactive" just bst build cosmic/deps.bst
+# so use e.g. "just bst build core/deps.bst" not "elements/core/deps.bst".
+# Usage: just bst build core/deps.bst
+#        just bst show core-deps/just.bst
+#        BST_FLAGS="--no-interactive" just bst build core/deps.bst
 [group('dev')]
 bst *args:
     #!/usr/bin/env bash
@@ -63,9 +72,11 @@ bst *args:
         "{{bst2_image}}" \
         bash -c '\
             # Disable Git LFS inside the container: the bst2 image ships git-lfs \
-            # but there are no LFS objects in this repo. Without these overrides, \
-            # LFS smudge/clean filters error out when BuildStream runs git \
-            # operations (git_repo source plugin) because there is no LFS server. \
+            # but cargo2 vendoring of crate trees breaks if the LFS smudge filter \
+            # runs (HangupException -- there is no LFS server for synthetic crate \
+            # repos). Cosmic-initial-setup needs an LFS blob (cities.bitcode-v0-6) \
+            # but we fetch it as a sidecar `kind: remote` source rather than via \
+            # LFS smudge -- see elements/core/cosmic-initial-setup.bst. \
             git config --global filter.lfs.process "git-lfs filter-process --skip" 2>/dev/null; \
             git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f" 2>/dev/null; \
             git config --global filter.lfs.required false 2>/dev/null; \
@@ -87,12 +98,12 @@ build:
 # Build the full COSMIC stack only (no system, no image)
 [group('build')]
 build-all:
-    just bst build cosmic/deps.bst
+    just bst build core/deps.bst
 
 # Build the system dependency aggregate (FDSDK base + COSMIC binaries)
 [group('build')]
 build-system:
-    just bst build system/deps.bst
+    just bst build cosmic-deps/deps.bst
 
 # Build the squashed COSMIC bootc/OCI sysroot (no image yet)
 [group('build')]
@@ -176,17 +187,52 @@ generate-bootable-image:
     sudo rm -f "{{bootable_image}}"
     fallocate -l "{{bootable_size}}" "{{bootable_image}}"
     # Kargs:
-    #   console=tty0          -- keep kernel output on the GTK display
-    #   console=ttyS0         -- also pipe to serial0 so we can capture
-    #                            the full log to a host file (boot-vm
-    #                            redirects this to build/console.log)
+    #   console=ttyS0         -- kernel + systemd output goes to serial0
+    #                            only. boot-vm pipes this through `tee
+    #                            build/console.log` so the full log is
+    #                            available on the host. Intentionally NO
+    #                            `console=tty0` -- without it, the kernel
+    #                            doesn't write to the GTK display, so
+    #                            cosmic-comp paints over a clean black
+    #                            VT instead of competing with scrolling
+    #                            boot text.
+    #   quiet loglevel=3      -- silence kernel printk below WARN. The
+    #                            ones we'd actually want to see in a hang
+    #                            still go to ttyS0 because dmesg keeps
+    #                            the full ringbuffer regardless.
+    #   systemd.show_status=false rd.udev.log_level=3
+    #                         -- silence systemd's per-unit start lines
+    #                            and udev's coldplug spam (both go to
+    #                            tty0 by default, even without
+    #                            console=tty0).
+    #   vt.global_cursor_default=0
+    #                         -- hide the blinking text cursor on tty0
+    #                            during the brief window before
+    #                            cosmic-comp takes over the display.
     #   systemd.debug_shell=ttyS1
     #                         -- always-on emergency root shell on
-    #                            serial1 (pts), reachable even when
-    #                            graphical session is broken.
+    #                            serial1 (UNIX socket), reachable even
+    #                            when graphical session is broken.
     #   systemd.log_target=kmsg systemd.log_color=0
-    #                         -- logs everything readable on serial,
-    #                            no ANSI escapes that confuse less.
+    #                         -- systemd logs to the kernel ringbuffer
+    #                            (so they go out ttyS0 alongside kernel
+    #                            messages), no ANSI escapes that confuse
+    #                            `less` on the serial capture.
+    #   video=Virtual-1:{{vm_xres}}x{{vm_yres}}
+    #                         -- pin the virtio-gpu connector to a fixed
+    #                            mode at boot. Belt-and-suspenders with
+    #                            `-device virtio-vga-gl,xres=,yres=,edid=on`
+    #                            in `boot-vm`. Needed because cosmic-comp
+    #                            doesn't react to dynamic mode changes
+    #                            on an already-connected connector
+    #                            (smithay PR #1923, not yet picked up
+    #                            by cosmic-comp's pinned rev). Without
+    #                            this, the kernel's default preferred
+    #                            mode is 640x480; even 1280x800 clips
+    #                            cosmic-initial-setup's create-account
+    #                            page (avatar + 4 inputs + buttons need
+    #                            ~880px tall to render without dropping
+    #                            the password fields off the bottom).
     just bootc install to-disk --composefs-backend \
         --source-imgref "containers-storage:{{image_name}}:{{image_tag}}" \
         --target-imgref "{{image_name}}:{{image_tag}}" \
@@ -196,11 +242,16 @@ generate-bootable-image:
         --filesystem "{{filesystem}}" \
         --wipe \
         --bootloader systemd \
-        --karg console=tty0 \
         --karg console=ttyS0,115200n8 \
+        --karg quiet \
+        --karg loglevel=3 \
+        --karg systemd.show_status=false \
+        --karg rd.udev.log_level=3 \
+        --karg vt.global_cursor_default=0 \
         --karg systemd.debug_shell=ttyS1 \
         --karg systemd.log_target=kmsg \
-        --karg systemd.log_color=0
+        --karg systemd.log_color=0 \
+        --karg video=Virtual-1:{{vm_xres}}x{{vm_yres}}
 
 # Boot ${COSMIC_BOOTABLE_IMAGE} in QEMU with KVM + UEFI. The OVMF VARS
 # file is copied per-boot to build/OVMF_VARS.fd so the host's read-only
@@ -251,8 +302,8 @@ boot-vm:
         -drive file="{{bootable_image}}",format=raw,if=virtio \
         -device virtio-net-pci,netdev=net0 \
         -netdev user,id=net0 \
-        -device virtio-vga-gl \
-        -display gtk,gl=on \
+        -device virtio-vga-gl,xres="{{vm_xres}}",yres="{{vm_yres}}",edid=on \
+        -display gtk,gl=on,zoom-to-fit=on,show-cursor=on \
         -device virtio-rng-pci \
         -serial mon:stdio \
         -chardev socket,id=dbgshell,path=build/debug-shell.sock,server=on,wait=off \
@@ -262,12 +313,12 @@ boot-vm:
 # Build just the session (no apps)
 [group('build')]
 build-session:
-    just bst build cosmic/public-stacks/cosmic-session.bst
+    just bst build core/public-stacks/cosmic-session.bst
 
 # Build just the applications
 [group('build')]
 build-apps:
-    just bst build cosmic/public-stacks/cosmic-apps.bst
+    just bst build core/public-stacks/cosmic-apps.bst
 
 # Clean the build cache
 [group('build')]
@@ -289,14 +340,14 @@ track *elements:
 # Track all COSMIC element sources (recursive)
 [group('track')]
 track-all:
-    just bst source track --deps all cosmic/deps.bst
+    just bst source track --deps all core/deps.bst
 
 # ── Inspection ───────────────────────────────────────────────────────
 
 # Validate all element definitions (YAML parsing, deps, variables)
 [group('info')]
 check:
-    just bst show --deps all cosmic/deps.bst
+    just bst show --deps all core/deps.bst
 
 # Show element info
 [group('info')]
@@ -306,7 +357,7 @@ show element:
 # List all elements in the dependency tree
 [group('info')]
 list:
-    just bst show --format '%{name}' cosmic/deps.bst
+    just bst show --format '%{name}' core/deps.bst
 
 # Show the dependency tree for an element
 [group('info')]

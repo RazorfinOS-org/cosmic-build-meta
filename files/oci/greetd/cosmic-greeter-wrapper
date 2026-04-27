@@ -14,5 +14,12 @@
 # from /etc/greetd/config.toml so it takes precedence over the
 # upstream binary in /usr/bin/.
 rm -rf /run/cosmic-greeter/cosmic/com.system76.CosmicSettingsDaemon/v1/* >/dev/null 2>&1
+
+# xdg-desktop-portal-cosmic's manifest gates on UseIn=COSMIC; without
+# this export, portal queries (color-scheme, file chooser, screenshot)
+# fall through to no backend and libcosmic times out on the Settings
+# proxy, leaving the greeter rendered in a broken theme state.
+export XDG_CURRENT_DESKTOP=COSMIC
+
 exec /usr/bin/systemd-cat -t cosmic-greeter-session \
-    /usr/bin/cosmic-comp /usr/bin/cosmic-greeter
+    /usr/bin/cosmic-comp /usr/local/bin/cosmic-greeter-kiosk

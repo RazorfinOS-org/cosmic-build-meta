@@ -1,0 +1,4 @@
+[Icon Theme]
+Name=Default
+Comment=Default cursor theme for the COSMIC bootc image
+Inherits=Cosmic
