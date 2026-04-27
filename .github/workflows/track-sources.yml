@@ -1,5 +1,22 @@
 name: Track Sources
 
+# Known wart: `bst source track` short-circuits when the resolved commit
+# hash for an element doesn't change, even if upstream has cut a new
+# annotated tag pointing to the same commit. System76 routinely re-tags
+# unchanged COSMIC repos (cosmic-wallpapers, cosmic-idle, cosmic-panel,
+# cosmic-randr, cosmic-settings-daemon, pop-launcher have all done this
+# across the 1.0.7 -> 1.0.11 epoch series). The artifact is byte-
+# identical, but the .bst `ref:` field keeps the older `epoch-X.Y.Z-...`
+# describe string -- visible drift between elements of the same epoch.
+#
+# After this workflow opens its PR, manually scan for elements still
+# pinned to an older epoch tag than the rest of the tree. For each one,
+# verify the commit hash matches latest-tag's dereferenced commit
+# (`git ls-remote --tags <repo> | grep '\^{}$'`); if so, hand-edit the
+# `ref:` field to the new describe string. No rebuild -- BST keys
+# artifacts on commit hash, not the human-readable describe string.
+# A scripted version of this check would be a worthwhile follow-up.
+
 on:
   schedule:
     # Monday and Thursday at 06:00 UTC (before build workflow)

@@ -5,8 +5,8 @@ build-depends:
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/gcc-base.bst
 - freedesktop-sdk.bst:bootstrap/binutils.bst
-- cosmic/just.bst
-- cosmic/libcosmic.bst
+- core-deps/just.bst
+- core/libcosmic.bst
 - freedesktop-sdk.bst:components/wayland.bst
 
 depends:
@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-idle.git
   track: master
-  ref: epoch-1.0.9-0-gc95d066b5b640509a6369634b669ca60dc50e168
+  ref: epoch-1.0.11-0-gc95d066b5b640509a6369634b669ca60dc50e168
 - kind: cargo2
   url: "crates:"
   ref:

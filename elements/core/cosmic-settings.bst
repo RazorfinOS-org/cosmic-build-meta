@@ -5,8 +5,8 @@ build-depends:
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/gcc-base.bst
 - freedesktop-sdk.bst:bootstrap/binutils.bst
-- cosmic/just.bst
-- cosmic/libcosmic.bst
+- core-deps/just.bst
+- core/libcosmic.bst
 - freedesktop-sdk.bst:components/fontconfig.bst
 - freedesktop-sdk.bst:components/freetype.bst
 - freedesktop-sdk.bst:components/libinput.bst
@@ -25,7 +25,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings.git
   track: master
-  ref: epoch-1.0.11-4-g78644a32e3741f8f80e9b8ce65c3550c85f9c1f8
+  ref: epoch-1.0.11-5-gfa085f9006f36e0df965819a1ead02749a18e3ba
 - kind: cargo2
   url: "crates:"
   ref:
@@ -39,49 +39,49 @@ sources:
     sha: 366ffbaa4442f4684d91e2cd7c5ea7c4ed8add41959a31447066e279e432b618
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit
     version: 0.22.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_atspi_common
     version: 0.15.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_consumer
     version: 0.32.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_macos
     version: 0.23.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_unix
     version: 0.18.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_windows
     version: 0.30.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_winit
@@ -269,22 +269,22 @@ sources:
     sha: 1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
-    repo: https://github.com/jackpot51/rust-atomicwrites
+    repo: github:jackpot51/rust-atomicwrites
     name: atomicwrites
     version: 0.4.2
   - kind: git
     commit: e1e6e8bcd781a3155a9ff7e0b1e5193e5587f94c
-    repo: https://github.com/wash2/atspi
+    repo: github:wash2/atspi
     name: atspi
     version: 0.29.0
   - kind: git
     commit: e1e6e8bcd781a3155a9ff7e0b1e5193e5587f94c
-    repo: https://github.com/wash2/atspi
+    repo: github:wash2/atspi
     name: atspi-common
     version: 0.13.0
   - kind: git
     commit: e1e6e8bcd781a3155a9ff7e0b1e5193e5587f94c
-    repo: https://github.com/wash2/atspi
+    repo: github:wash2/atspi
     name: atspi-proxies
     version: 0.13.0
   - kind: registry
@@ -1839,7 +1839,7 @@ sources:
     sha: 08d2c35b16f4483f6c26f0e4e9550717a2f6575bcd6f12a53ff0c490a94a6934
   - kind: git
     commit: e5b66fbe3a55182174caf6aec171ff4ae8285626
-    repo: https://github.com/AerynOS/locales-rs
+    repo: github:AerynOS/locales-rs
     name: locales-rs
     version: 0.1.0
   - kind: registry

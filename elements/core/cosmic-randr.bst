@@ -5,13 +5,13 @@ build-depends:
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/gcc-base.bst
 - freedesktop-sdk.bst:bootstrap/binutils.bst
-- cosmic/just.bst
-- cosmic/libcosmic.bst
-- cosmic/libdisplay-info.bst
+- core-deps/just.bst
+- core/libcosmic.bst
+- core-deps/libdisplay-info.bst
 - freedesktop-sdk.bst:components/wayland.bst
 
 depends:
-- cosmic/libdisplay-info.bst
+- core-deps/libdisplay-info.bst
 - freedesktop-sdk.bst:components/wayland.bst
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
@@ -19,7 +19,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-randr.git
   track: master
-  ref: epoch-1.0.9-0-g6e8e795970fa06d434af22775e415b517f7552d3
+  ref: epoch-1.0.11-0-g6e8e795970fa06d434af22775e415b517f7552d3
 - kind: cargo2
   url: "crates:"
   ref:

@@ -23,7 +23,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings-daemon.git
   track: master
-  ref: epoch-1.0.9-0-g716da6d6af0b252e2f78aba2ad72ee19ae0241e0
+  ref: epoch-1.0.11-0-g716da6d6af0b252e2f78aba2ad72ee19ae0241e0
 - kind: cargo2
   url: "crates:"
   ref:
@@ -2726,4 +2726,15 @@ config:
   build-commands:
   - cargo build --release --frozen
   install-commands:
-  - install -Dm0755 target/release/cosmic-settings-daemon %{install-root}%{prefix}/bin/cosmic-settings-daemon
+  # Mirror upstream Makefile's `install` target. Shipping only the
+  # binary leaves system_actions.ron (defaults for media/power/lock
+  # keys) and the polkit rules (rfkill, brightness, time/date)
+  # uninstalled -- the daemon then can't react to hardware keys or
+  # perform privileged actions without authentication prompts.
+  - |
+    install -Dm0755 target/release/cosmic-settings-daemon \
+        %{install-root}%{prefix}/bin/cosmic-settings-daemon
+    install -Dm0644 data/system_actions.ron \
+        %{install-root}%{datadir}/cosmic/com.system76.CosmicSettings.Shortcuts/v1/system_actions
+    install -Dm0644 data/polkit-1/rules.d/cosmic-settings-daemon.rules \
+        %{install-root}%{datadir}/polkit-1/rules.d/cosmic-settings-daemon.rules
