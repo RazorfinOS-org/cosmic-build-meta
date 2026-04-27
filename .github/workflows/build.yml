@@ -1,52 +1,188 @@
-name: Build COSMIC
+name: Build & Publish OCI image
 
 on:
   schedule:
-    # Weekly build on Monday at 08:00 UTC
+    # Weekly Monday 08:00 UTC. Cold builds are multi-hour (BST + Rust);
+    # daily isn't realistic until the artifact cache is consistently warm.
     - cron: '0 8 * * 1'
-  workflow_dispatch:
   push:
     branches: [main]
-    paths-ignore:
-      - '.github/workflows/**'
-      - '*.md'
-      - 'LICENSE*'
+    paths-ignore: ['*.md', 'LICENSE*']
   pull_request:
     branches: [main]
+    paths-ignore: ['*.md', 'LICENSE*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write       # GHCR push for image + BST artifact cache
+  id-token: write       # OIDC for keyless cosign signing
+  attestations: write   # Sigstore build-provenance attestations
 
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  IMAGE_REGISTRY: ghcr.io/razorfinos-org/cosmic-build-meta
+  BST_CACHE_REGISTRY: ghcr.io/razorfinos-org/cosmic-build-meta-cache
+
 jobs:
-  build:
+  build_and_push:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
+
+    # Skip image rebuild on most PRs to save runner minutes; only run on:
+    #   - non-PR events (push/cron/workflow_dispatch)
+    #   - auto-track PRs (verifies upstream-source bumps build cleanly)
+    #   - PRs explicitly labelled `build` (manual opt-in)
     if: >-
       github.event_name != 'pull_request' ||
-      startsWith(github.head_ref, 'auto/track-')
+      startsWith(github.head_ref, 'auto/track-') ||
+      contains(github.event.pull_request.labels.*.name, 'build')
+
+    outputs:
+      pushed: ${{ steps.push.outputs.pushed }}
+      digest: ${{ steps.push.outputs.digest }}
+      image_ref: ${{ steps.push.outputs.image_ref }}
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install just
-      uses: extractions/setup-just@v2
+      - name: Free disk space on runner
+        # ubuntu-24.04 ships ~14 GB free; BST cache + podman storage
+        # easily blow past that on cold builds. Frees ~30 GB by removing
+        # Android SDK, .NET, GHC, Haskell tools, etc.
+        uses: ublue-os/remove-unwanted-software@v9
 
-    - name: Restore BuildStream cache
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/buildstream
-        key: bst-cache-${{ runner.arch }}-${{ github.run_id }}
-        restore-keys: |
-          bst-cache-${{ runner.arch }}-
+      - name: Install just
+        uses: extractions/setup-just@v2
 
-    - name: Build full COSMIC stack
-      run: BST_FLAGS="--no-interactive --on-error=continue" just build-all
+      - name: Determine push eligibility
+        id: eligibility
+        # PRs from forks have a read-only GITHUB_TOKEN -- push to GHCR
+        # would fail. Build still runs (validates the change), push and
+        # cache-write are skipped.
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && \
+             [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "can_push=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::PR from fork; image push and cache-write disabled (read-only token)"
+          else
+            echo "can_push=true" >> "$GITHUB_OUTPUT"
+          fi
 
-    - name: Upload build logs
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-logs
-        path: ~/.cache/buildstream/logs/
-        retention-days: 7
+      - name: Determine image tags
+        id: tags
+        # PR builds get a single :pr-N tag (cleaned up when PR closes).
+        # Everything else gets :nightly + :nightly.YYYYMMDD.
+        run: |
+          DATE=$(date -u +%Y%m%d)
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "primary_tag=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "additional_tags=" >> "$GITHUB_OUTPUT"
+          else
+            echo "primary_tag=nightly" >> "$GITHUB_OUTPUT"
+            echo "additional_tags=nightly.${DATE}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure BuildStream OCI artifact cache
+        # BuildStream 2.x can use an OCI registry as its artifact cache,
+        # making future runs incremental. Push only when can_push=true
+        # (read-only PRs still pull from cache, just don't write to it).
+        # Config lives in the repo root (gitignored) because the bst2
+        # container the Justfile invokes only bind-mounts /src; we use
+        # `--config /src/.bst-ci-config.yml` via BST_FLAGS to point at it.
+        run: |
+          cat > .bst-ci-config.yml <<EOF
+          # CI-only artifact cache. Not committed -- local-dev users use
+          # plain BST default config (no remote artifact cache).
+          artifacts:
+          - url: oci://${{ env.BST_CACHE_REGISTRY }}
+            push: ${{ steps.eligibility.outputs.can_push }}
+            auth:
+              username: ${{ github.actor }}
+              password: \${GITHUB_TOKEN}
+          EOF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore BuildStream local cache
+        # Belt-and-suspenders: actions/cache for the local CAS on top of
+        # the OCI artifact cache. Helps when registry RTT dominates for
+        # small elements. Stable restore-key (no run_id) so successive
+        # runs reuse prior caches; new key per run so updates write back.
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/buildstream
+          key: bst-cache-${{ runner.arch }}-${{ github.run_id }}
+          restore-keys: |
+            bst-cache-${{ runner.arch }}-
+
+      - name: Build OCI image
+        # `just build` = bst build oci/cosmic/image.bst then `just load-image`
+        # (skopeo + podman build --squash-all to flatten layers for
+        # bootc 1.15 compatibility). COSMIC_IMAGE_TAG flows through to
+        # tag the local podman image; we override per-event.
+        env:
+          COSMIC_IMAGE_TAG: ${{ steps.tags.outputs.primary_tag }}
+          BST_FLAGS: '--no-interactive --on-error=continue --config /src/.bst-ci-config.yml'
+        run: just build
+
+      - name: Log in to GHCR
+        if: steps.eligibility.outputs.can_push == 'true'
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image to GHCR
+        id: push
+        if: steps.eligibility.outputs.can_push == 'true'
+        env:
+          PRIMARY_TAG: ${{ steps.tags.outputs.primary_tag }}
+          ADDITIONAL_TAGS: ${{ steps.tags.outputs.additional_tags }}
+        run: |
+          set -euo pipefail
+          sudo podman push "${IMAGE_REGISTRY}:${PRIMARY_TAG}"
+          for tag in ${ADDITIONAL_TAGS}; do
+            sudo podman tag "${IMAGE_REGISTRY}:${PRIMARY_TAG}" "${IMAGE_REGISTRY}:${tag}"
+            sudo podman push "${IMAGE_REGISTRY}:${tag}"
+          done
+          DIGEST=$(sudo podman inspect --format '{{ "{{.Digest}}" }}' "${IMAGE_REGISTRY}:${PRIMARY_TAG}")
+          echo "pushed=true"   >> "$GITHUB_OUTPUT"
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "image_ref=${IMAGE_REGISTRY}@${DIGEST}" >> "$GITHUB_OUTPUT"
+
+      - name: Install cosign
+        if: steps.push.outputs.pushed == 'true'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image (keyless via Sigstore OIDC)
+        if: steps.push.outputs.pushed == 'true'
+        # No private key needed. Sigstore Fulcio CA issues a short-lived
+        # cert tied to this workflow's GitHub OIDC identity. Verify with:
+        #   cosign verify ${IMAGE_REGISTRY}:nightly \
+        #     --certificate-identity-regexp \
+        #       'https://github.com/razorfinos-org/cosmic-build-meta/.github/workflows/build.yml@.+' \
+        #     --certificate-oidc-issuer https://token.actions.githubusercontent.com
+        run: cosign sign --yes "${{ steps.push.outputs.image_ref }}"
+
+      - name: Generate build provenance attestation
+        if: steps.push.outputs.pushed == 'true'
+        # SLSA build-provenance v1; verifiable via `cosign verify-attestation`
+        # or `gh attestation verify`. Stored as a sibling artifact to the image.
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.IMAGE_REGISTRY }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+
+      - name: Upload BST logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: ~/.cache/buildstream/logs/
+          retention-days: 7

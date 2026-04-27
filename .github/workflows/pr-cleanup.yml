@@ -1,0 +1,48 @@
+name: PR cleanup
+
+# Delete the :pr-N tag from GHCR when the PR closes (merged or not).
+# Build workflow pushes :pr-N for internal-source PRs (auto/track-* or
+# `build`-labelled). Without cleanup, those tags pile up forever.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  packages: write
+
+jobs:
+  delete_pr_tag:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete pr-${{ github.event.pull_request.number }} from GHCR
+        # Use gh CLI to delete by tag. actions/delete-package-versions
+        # only supports deletion by version-id, which would require an
+        # extra lookup step; the gh API call does it in one shot.
+        # Tolerate 404 (tag may not exist if the build was skipped).
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_TAG: pr-${{ github.event.pull_request.number }}
+          PACKAGE: cosmic-build-meta
+        run: |
+          set -euo pipefail
+          OWNER="${GITHUB_REPOSITORY_OWNER}"
+
+          # Resolve tag -> version id, then delete that version. If the
+          # tag doesn't exist (PR was filtered out of the build matrix)
+          # we silently succeed.
+          VERSION_ID=$(gh api \
+            "/orgs/${OWNER}/packages/container/${PACKAGE}/versions" \
+            --paginate \
+            --jq ".[] | select(.metadata.container.tags[]? == \"${PR_TAG}\") | .id" \
+            | head -n1)
+
+          if [ -z "${VERSION_ID}" ]; then
+            echo "::notice::Tag ${PR_TAG} not found; nothing to delete"
+            exit 0
+          fi
+
+          echo "Deleting version ${VERSION_ID} (tag ${PR_TAG})"
+          gh api \
+            --method DELETE \
+            "/orgs/${OWNER}/packages/container/${PACKAGE}/versions/${VERSION_ID}"

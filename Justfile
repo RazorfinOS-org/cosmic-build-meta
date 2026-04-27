@@ -20,7 +20,7 @@ bst_opts := "--option arch " + arch
 # elements/oci/cosmic/image.bst so the installed system's upgrade origin
 # (`bootc upgrade`) points at the same tag we'd push to GHCR.
 image_name := env_var_or_default("COSMIC_IMAGE_NAME", "ghcr.io/razorfinos-org/cosmic-build-meta")
-image_tag := env_var_or_default("COSMIC_IMAGE_TAG", "cosmic-nightly")
+image_tag := env_var_or_default("COSMIC_IMAGE_TAG", "nightly")
 
 # Filesystem for `bootc install to-disk` (btrfs|xfs|ext4).
 filesystem := env_var_or_default("COSMIC_FILESYSTEM", "btrfs")
