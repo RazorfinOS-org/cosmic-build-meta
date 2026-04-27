@@ -37,6 +37,9 @@ sources:
 - kind: local
   path: files/oci/cosmic-defaults
   directory: cosmic-defaults
+- kind: local
+  path: files/oci/sudoers
+  directory: sudoers
 
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
@@ -100,6 +103,15 @@ config:
   # cosmic-comp -- without this, the compositor renders at QEMU's
   # 640x480 EDID default and resize events from the host are dropped.
   - install -Dm644 cosmic-defaults/outputs.ron "%{install-root}/usr/share/cosmic-vm-defaults/outputs.ron"
+  # Grant `wheel` group sudo. accountsservice puts admin accounts in
+  # wheel (FDSDK 25.08 sudo's compile-time admin group), but ships
+  # /etc/sudoers without the `%wheel ALL=(ALL:ALL) ALL` line. Without
+  # this drop-in, the user created by cosmic-initial-setup is in wheel
+  # but `sudo` rejects them. Mode MUST be 0440 -- sudo refuses to read
+  # any file in /etc/sudoers.d that is group- or world-writable.
+  # Filename has no extension on purpose: sudo skips files with `.` in
+  # the name (matches Fedora/Arch conventions; `man sudoers.d`).
+  - install -Dm440 sudoers/wheel "%{install-root}/etc/sudoers.d/wheel"
   # Pre-populate the new user's home with cosmic-initial-setup's "done"
   # marker so its XDG autostart entry exits immediately after first
   # login. Background:
