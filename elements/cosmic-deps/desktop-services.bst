@@ -52,6 +52,32 @@ depends:
   # GnuPG bindings (portals, password managers)
   - freedesktop-sdk.bst:components/gpgme.bst
 
+  # Notification API used by virtually every non-COSMIC desktop app
+  # (Firefox, Thunderbird, GIMP, Inkscape, Telegram, ...). cosmic-
+  # notifications listens on the org.freedesktop.Notifications bus;
+  # libnotify is the client-side library apps link against to emit them.
+  - freedesktop-sdk.bst:components/libnotify.bst
+
+  # GLib HTTP / WebSocket library. Used by Epiphany, Geary, Polari,
+  # gnome-online-accounts, GJS apps, and a long tail of GTK utilities.
+  # Missing it = those apps fail to make any network request.
+  - freedesktop-sdk.bst:components/libsoup.bst
+
+  # Tablet / pen / stylus database. cosmic-settings has a tablet panel
+  # that needs this to display device info and per-device config.
+  - freedesktop-sdk.bst:components/libwacom.bst
+
+  # Populates the new user's ~/Documents, ~/Downloads, ~/Music etc. on
+  # first login (per ~/.config/user-dirs.dirs). Without it, cosmic-files
+  # opens to bare $HOME and the standard XDG categories don't exist.
+  - freedesktop-sdk.bst:components/xdg-user-dirs.bst
+
+  # Accessibility bus (D-Bus + at-spi). Foundation for any future a11y
+  # work: screen readers, magnifiers, accessibility-aware widgets all
+  # publish/consume on this bus. GTK apps silently disable their a11y
+  # paths if the bus isn't running.
+  - freedesktop-sdk.bst:components/at-spi2-core.bst
+
   # Wayland-ecosystem runtime libs cosmic-comp dlopen()s. Without
   # libdisplay-info the dynamic linker fails before main() and the
   # compositor crashes immediately, taking down greetd's whole session.

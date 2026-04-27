@@ -23,5 +23,13 @@ depends:
   - freedesktop-sdk.bst:components/dosfstools.bst
   - freedesktop-sdk.bst:components/lvm2.bst
 
+  # LUKS disk encryption. Required for `bootc install` with luks-backed
+  # root-fs layouts and for unlocking encrypted partitions at boot. We
+  # don't enable encryption by default in `just generate-bootable-image`
+  # (the VM target uses plain btrfs), but downstream installers building
+  # on this base image will reach for cryptsetup the moment they offer
+  # disk-encryption at install time.
+  - freedesktop-sdk.bst:components/cryptsetup.bst
+
   # Removable-media auto-mount (cosmic-files); vendored locally
   - cosmic-deps/udisks2.bst

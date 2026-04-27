@@ -30,3 +30,4 @@ depends:
   - cosmic-deps/diagnostics.bst       # man-db, usbutils
   - cosmic-deps/storage.bst           # bootc, composefs, ostree, podman, mkfs.*, udisks2
   - cosmic-deps/power.bst             # upower, power-profiles-daemon
+  - cosmic-deps/sandboxing.bst        # flatpak, bubblewrap, xdg-dbus-proxy
