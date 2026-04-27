@@ -1,0 +1,20 @@
+[Unit]
+Description=Configure Flathub Flatpak remote on first boot
+Documentation=https://flathub.org/setup
+After=network-online.target
+Wants=network-online.target
+# `flatpak remote-add --if-not-exists` is idempotent and cheap, so no
+# stamp-file gating -- we just let it no-op on subsequent boots.
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Pulls flathub.flatpakrepo from Flathub directly (small text file with
+# the GPG key blob). Avoids vendoring a copy that goes stale if Flathub
+# rotates keys. First-boot needs network; if offline, the unit fails
+# (loud and visible) and `flatpak install` will tell the user to add a
+# remote -- preferable to silently shipping a stale GPG key.
+ExecStart=/usr/bin/flatpak remote-add --if-not-exists --system flathub https://flathub.org/repo/flathub.flatpakrepo
+
+[Install]
+WantedBy=multi-user.target

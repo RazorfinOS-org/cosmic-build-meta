@@ -1,0 +1,9 @@
+# Default unit policy for Flatpak setup.
+#
+# flathub-remote-add.service is a oneshot that configures the Flathub
+# remote (--if-not-exists, system-wide) at first network availability.
+# Vendor-neutral: downstream distros that prefer a different remote
+# (e.g. razorfin's own mirror, or Fedora's flatpak remote) can drop a
+# 92-<thing>.preset that disables this and enables their alternative.
+
+enable flathub-remote-add.service
