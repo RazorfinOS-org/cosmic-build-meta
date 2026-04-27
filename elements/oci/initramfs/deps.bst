@@ -27,5 +27,5 @@ depends:
 - freedesktop-sdk.bst:components/zstd.bst
 - freedesktop-sdk.bst:components/composefs.bst
 - freedesktop-sdk.bst:components/ostree.bst
-- cosmic/bootc.bst
+- cosmic-deps/bootc.bst
 - oci/integration/os-release.bst

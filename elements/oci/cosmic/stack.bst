@@ -6,7 +6,7 @@ kind: stack
 
 depends:
   # System + COSMIC binary aggregate
-  - system/deps.bst
+  - cosmic-deps/deps.bst
 
   # Branding + bootc/composefs config
   - oci/integration/os-release.bst
@@ -15,7 +15,7 @@ depends:
   - oci/integration/cosmic-greeter-config.bst
   - oci/integration/extrafs.bst
 
-  # Kernel firmware + initramfs (kernel itself comes via system/deps.bst)
+  # Kernel firmware + initramfs (kernel itself comes via cosmic-deps/deps.bst)
   - oci/initramfs.bst
 
 public:

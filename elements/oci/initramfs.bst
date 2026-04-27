@@ -2,7 +2,7 @@
 # /usr/lib/modules/$kver/initramfs.img -- exactly where bootc expects it.
 #
 # Mirrors elements/oci/initramfs.bst from gnome-build-meta. Uses the
-# `generate-initramfs` script we ship in cosmic/generate-initramfs.bst.
+# `generate-initramfs` script we ship in core-deps/generate-initramfs.bst.
 # The kernel must be staged in the build sandbox so /lib/modules/$kver
 # exists, hence the build-depend on components/linux.bst.
 #
@@ -13,8 +13,8 @@ kind: script
 build-depends:
 - oci/initramfs/deps.bst
 - oci/initramfs/initial-scripts.bst
-- cosmic/generate-initramfs.bst
-- cosmic/bootc.bst
+- core-deps/generate-initramfs.bst
+- cosmic-deps/bootc.bst
 - freedesktop-sdk.bst:components/linux.bst
 - freedesktop-sdk.bst:components/fakecap.bst
 - freedesktop-sdk.bst:vm/prepare-image.bst
