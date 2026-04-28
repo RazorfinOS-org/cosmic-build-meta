@@ -35,6 +35,23 @@ depends:
   - freedesktop-sdk.bst:components/dav1d.bst
   - freedesktop-sdk.bst:components/aom.bst
 
+  # Audio codec libraries gstreamer-bad / ffmpeg dlopen at runtime.
+  # They build with optional support for these and silently degrade
+  # if a library is missing -- Speex .spx voice notes, MP3 encode
+  # via lame, libsndfile-based recorders/editors (Audacity, ardour).
+  - freedesktop-sdk.bst:components/speex.bst
+  - freedesktop-sdk.bst:components/speexdsp.bst
+  - freedesktop-sdk.bst:components/lame.bst
+  - freedesktop-sdk.bst:components/sndfile.bst
+
+  # Color management library. colord (in desktop-services) plus any
+  # printer / display calibration workflow link against lcms2.
+  - freedesktop-sdk.bst:components/lcms.bst
+
+  # EXIF metadata reader. cosmic-files thumbnailing reads orientation
+  # tags via this -- without it phone photos preview sideways.
+  - freedesktop-sdk.bst:components/libexif.bst
+
   # GStreamer (codecs + plugins)
   - freedesktop-sdk.bst:components/gstreamer.bst
   - freedesktop-sdk.bst:components/gstreamer-plugins-base.bst

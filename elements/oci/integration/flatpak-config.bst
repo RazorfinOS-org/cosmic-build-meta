@@ -43,10 +43,15 @@ variables:
 
 config:
   install-commands:
-  - install -Dm644 flatpak/flathub-remote-add.service  "%{install-root}/usr/lib/systemd/system/flathub-remote-add.service"
-  - install -Dm644 flatpak/flatpak-preinstall.service  "%{install-root}/usr/lib/systemd/system/flatpak-preinstall.service"
+  - install -Dm644 flatpak/flathub-remote-add.service     "%{install-root}/usr/lib/systemd/system/flathub-remote-add.service"
+  - install -Dm644 flatpak/flatpak-preinstall.service     "%{install-root}/usr/lib/systemd/system/flatpak-preinstall.service"
+  # Daily flatpak update timer (with metered-connection guard).
+  # Mirrors ublue-os-update-services. Catches up via Persistent= on
+  # next boot if the machine was off / asleep at 04:00.
+  - install -Dm644 flatpak/flatpak-system-update.service  "%{install-root}/usr/lib/systemd/system/flatpak-system-update.service"
+  - install -Dm644 flatpak/flatpak-system-update.timer    "%{install-root}/usr/lib/systemd/system/flatpak-system-update.timer"
   # Vendor-shipped preinstall drop-ins live under /usr/share (OS image
   # state); /etc/flatpak/preinstall.d is reserved for site-local
   # additions made after deployment.
   - install -Dm644 flatpak/preinstall.d/org.mozilla.firefox.preinstall "%{install-root}/usr/share/flatpak/preinstall.d/org.mozilla.firefox.preinstall"
-  - install -Dm644 systemd-presets/91-flatpak.preset   "%{install-root}/usr/lib/systemd/system-preset/91-flatpak.preset"
+  - install -Dm644 systemd-presets/91-flatpak.preset      "%{install-root}/usr/lib/systemd/system-preset/91-flatpak.preset"

@@ -20,8 +20,27 @@ depends:
 
   # Convenience userland (mirrors gnomeos-deps).
   # bash and coreutils live under bootstrap/ in FDSDK 25.08.
+  # System CA bundle. Without /etc/ssl/certs/ca-certificates.crt
+  # populated, every HTTPS client (curl, wget, git, python requests,
+  # rust reqwest with native-tls) outside Flatpak fails verification.
+  # fdsdk's vm/desktop pulls this in; we were missing it.
+  - freedesktop-sdk.bst:components/ca-certificates.bst
+
+  # GPG TUI pin entry. Required for `gpg`, `git commit -S`, smart-card
+  # workflows (Yubikey/Nitrokey via tpm2-pkcs11 / scdaemon) when no
+  # GUI pinentry is available. Tiny (~120 KB) curses binary.
+  - freedesktop-sdk.bst:components/pinentry-ncurses.bst
+
   - freedesktop-sdk.bst:bootstrap/bash.bst
   - freedesktop-sdk.bst:components/bash-completion.bst
+  # Ships /etc/bashrc, /etc/profile, /etc/skel/.bashrc + .profile.
+  # Without this fdsdk leaves the rootfs with no system-wide bash
+  # startup files at all, so interactive non-login shells (e.g. the
+  # shell cosmic-term spawns) never source /etc/profile.d/*.sh -- and
+  # /etc/profile.d/bash_completion.sh is what activates the
+  # tab-completion data shipped by bash-completion.bst. Same element
+  # fdsdk's vm/desktop image pulls in.
+  - freedesktop-sdk.bst:components/bash-config.bst
   - freedesktop-sdk.bst:bootstrap/coreutils.bst
   - freedesktop-sdk.bst:components/less.bst
   - freedesktop-sdk.bst:components/nano.bst

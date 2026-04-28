@@ -1,0 +1,21 @@
+[Unit]
+Description=Update system Flatpaks
+Documentation=man:flatpak-update(1)
+After=network-online.target flathub-remote-add.service
+Wants=network-online.target
+ConditionPathExists=/usr/bin/flatpak
+# Skip on metered connections (NetworkManager exposes the property
+# via D-Bus). Mirrors ublue-os-update-services. `nm-online -m` would
+# be cleaner but isn't in 1.x; the busctl call is portable.
+ExecCondition=/bin/sh -c 'test "$(busctl --system get-property org.freedesktop.NetworkManager /org/freedesktop/NetworkManager org.freedesktop.NetworkManager Metered 2>/dev/null | awk "{print $2}")" != "1"'
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+# `update --or-update` would be ideal but isn't a flag yet; plain
+# update is a no-op when nothing's changed. --noninteractive returns
+# an error code on conflicts rather than prompting.
+ExecStart=/usr/bin/flatpak update -y --noninteractive --system
+# Reap unused runtimes after the update completes; otherwise old
+# org.freedesktop.Platform//23.08 etc. accumulate forever.
+ExecStartPost=/usr/bin/flatpak uninstall --unused -y --noninteractive --system

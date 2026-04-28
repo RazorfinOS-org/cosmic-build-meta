@@ -1,0 +1,14 @@
+[Unit]
+Description=Daily Flatpak system update
+Documentation=man:flatpak-update(1)
+
+[Timer]
+# Once a day at 04:00 local with 1h jitter so 10k images don't
+# hammer Flathub at the same instant. Persistent= catches up on the
+# next boot if the laptop was asleep at 04:00 (typical case).
+OnCalendar=*-*-* 04:00:00
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target

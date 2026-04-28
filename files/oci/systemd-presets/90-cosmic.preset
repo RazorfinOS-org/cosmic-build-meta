@@ -30,6 +30,22 @@ enable polkit.service
 enable accounts-daemon.service
 enable bootc-fetch-apply-updates.timer
 
+# mDNS / DNS-SD: `ssh hostname.local`, network printer discovery,
+# Bonjour-style service browse. Socket-activated; no idle cost.
+enable avahi-daemon.socket
+enable avahi-daemon.service
+
+# Maintenance timers
+#
+# fstrim: weekly TRIM/discard pass on SSDs/NVMe. Without this,
+# garbage collection on the drive falls behind and write performance
+# degrades over months of use. Default fdsdk policy is opt-in.
+enable fstrim.timer
+# fwupd-refresh: pulls firmware metadata from LVFS daily so
+# `fwupdmgr update` can show available updates without a manual
+# refresh first. Daily cadence is fwupd's own default.
+enable fwupd-refresh.timer
+
 # Container tooling
 enable podman.socket
 

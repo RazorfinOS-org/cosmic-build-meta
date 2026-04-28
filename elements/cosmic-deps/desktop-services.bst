@@ -52,6 +52,19 @@ depends:
   # GnuPG bindings (portals, password managers)
   - freedesktop-sdk.bst:components/gpgme.bst
 
+  # Spell checking. hunspell is the de-facto Linux spell-check engine
+  # (LibreOffice, Thunderbird, Firefox via gspell). dictionaries.bst
+  # ships the hunspell dictionary trees under /usr/share/hunspell/, so
+  # "spell check while typing" works the moment a user picks a locale.
+  - freedesktop-sdk.bst:components/hunspell.bst
+  - freedesktop-sdk.bst:components/dictionaries.bst
+
+  # IBus client library. Required for CJK / non-Latin input methods.
+  # No daemon enabled by default -- shipping the lib lets users layer
+  # in (or Flatpak) the engine of their choice (ibus-anthy, libpinyin,
+  # hangul, fcitx5-mozc) and have GTK / Qt apps pick it up at startup.
+  - freedesktop-sdk.bst:components/libibus.bst
+
   # Notification API used by virtually every non-COSMIC desktop app
   # (Firefox, Thunderbird, GIMP, Inkscape, Telegram, ...). cosmic-
   # notifications listens on the org.freedesktop.Notifications bus;

@@ -15,3 +15,10 @@ enable flathub-remote-add.service
 # uninstalls (it won't reinstall what the user explicitly removed).
 # See cosmic-deps/flatpak.bst for why we vendor flatpak 1.17.6.
 enable flatpak-preinstall.service
+
+# flatpak-system-update.timer fires daily at 04:00 (with up to 1h
+# jitter, Persistent= to catch up after sleep) and runs
+# `flatpak update -y --noninteractive`. ExecCondition= on the service
+# skips on metered NetworkManager connections so it doesn't burn
+# tethered data. Mirrors ublue-os-update-services.
+enable flatpak-system-update.timer

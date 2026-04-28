@@ -22,6 +22,21 @@ depends:
   - freedesktop-sdk.bst:components/xfsprogs.bst
   - freedesktop-sdk.bst:components/dosfstools.bst
   - freedesktop-sdk.bst:components/lvm2.bst
+  # Partition editor (parted/partprobe). Needed by `bootc install
+  # to-disk` for non-trivial layouts and by users repairing partition
+  # tables after a botched flash.
+  - freedesktop-sdk.bst:components/parted.bst
+  # Removable-media filesystems: exFAT (cameras / SD cards / large USB
+  # sticks) and F2FS (flash-friendly fs common on embedded SSDs).
+  # Tiny on-disk; saves "why won't my SD card mount" tickets.
+  - freedesktop-sdk.bst:components/exfat-progs.bst
+  - freedesktop-sdk.bst:components/f2fs-tools.bst
+
+  # OCI runtime invoked by podman to actually exec containers. fdsdk's
+  # podman.bst pulls runc transitively, but crun is faster, smaller,
+  # and the default on every modern Fedora-derived bootc image.
+  # Shipping both is fine -- /etc/containers/containers.conf picks one.
+  - freedesktop-sdk.bst:components/crun.bst
 
   # LUKS disk encryption. Required for `bootc install` with luks-backed
   # root-fs layouts and for unlocking encrypted partitions at boot. We
