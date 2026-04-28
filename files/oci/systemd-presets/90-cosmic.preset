@@ -25,7 +25,11 @@ enable NetworkManager-wait-online.service
 enable pipewire.socket
 enable pipewire-pulse.socket
 enable wireplumber.service
-enable dbus-broker.service
+# dbus.service is socket-activated via dbus.socket -- no explicit
+# enable needed (it's `Loaded: static`). Ours is the reference
+# dbus-daemon from fdsdk, not Fedora's dbus-broker; the file-
+# descriptor-limit drop-in lives in dbus.service.d/, see
+# oci/integration/cosmic-tuning.bst.
 enable polkit.service
 enable accounts-daemon.service
 enable bootc-fetch-apply-updates.timer

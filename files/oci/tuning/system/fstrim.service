@@ -1,0 +1,21 @@
+[Unit]
+Description=Discard unused filesystem blocks
+Documentation=man:fstrim(8)
+ConditionVirtualization=!container
+ConditionPathExists=!/etc/initrd-release
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/fstrim --listed-in /etc/fstab:/proc/self/mountinfo --verbose --quiet-unsupported
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateDevices=no
+PrivateNetwork=yes
+PrivateUsers=no
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+MemoryDenyWriteExecute=yes
+SystemCallFilter=@system-service @mount
+SystemCallFilter=~@privileged @resources
+SystemCallErrorNumber=EPERM
