@@ -50,3 +50,15 @@ config:
   # to keep firmware GC ahead of the host.
   - install -Dm644 tuning/system/fstrim.service "%{install-root}/usr/lib/systemd/system/fstrim.service"
   - install -Dm644 tuning/system/fstrim.timer   "%{install-root}/usr/lib/systemd/system/fstrim.timer"
+
+  # NetworkManager privacy defaults: per-SSID stable MAC, scan-time
+  # MAC randomization, IPv6 SLAAC temporary-address preference.
+  # Closes passive Wi-Fi fingerprinting without breaking captive
+  # portals or DHCP reservations.
+  - install -Dm644 tuning/NetworkManager/conf.d/10-cosmic-privacy.conf "%{install-root}/usr/lib/NetworkManager/conf.d/10-cosmic-privacy.conf"
+
+  # GeoClue WiFi backend -> BeaconDB. Mozilla Location Service shut
+  # down 2024-06, and GeoClue's compiled-in default still points at
+  # it; without this drop-in every WiFi-based location query (cosmic
+  # weather applet, Firefox location, auto-timezone) silently fails.
+  - install -Dm644 tuning/geoclue/conf.d/10-beacondb.conf "%{install-root}/etc/geoclue/conf.d/10-beacondb.conf"
