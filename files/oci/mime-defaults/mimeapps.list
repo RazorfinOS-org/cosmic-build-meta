@@ -1,0 +1,21 @@
+# System-wide MIME defaults for the COSMIC bootc image.
+#
+# Lives at /etc/xdg/mimeapps.list (XDG search path). Per-user
+# ~/.config/mimeapps.list overrides this when the user picks a
+# different app in COSMIC Settings > Default Applications.
+#
+# The .desktop targets must resolve at lookup time. Flatpak-installed
+# apps export their .desktop into /var/lib/flatpak/exports/share/applications,
+# which is on XDG_DATA_DIRS by default, so org.mozilla.firefox.desktop
+# resolves once the preinstall.d service has fetched Firefox.
+
+[Default Applications]
+text/html=org.mozilla.firefox.desktop
+application/xhtml+xml=org.mozilla.firefox.desktop
+x-scheme-handler/http=org.mozilla.firefox.desktop
+x-scheme-handler/https=org.mozilla.firefox.desktop
+x-scheme-handler/about=org.mozilla.firefox.desktop
+x-scheme-handler/unknown=org.mozilla.firefox.desktop
+
+inode/directory=com.system76.CosmicFiles.desktop
+text/plain=com.system76.CosmicEdit.desktop

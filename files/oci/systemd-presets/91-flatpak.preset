@@ -7,3 +7,11 @@
 # 92-<thing>.preset that disables this and enables their alternative.
 
 enable flathub-remote-add.service
+
+# flatpak-preinstall.service runs `flatpak preinstall` (1.17+) to
+# materialise every app declared by .preinstall files under
+# /usr/share/flatpak/preinstall.d/ and /etc/flatpak/preinstall.d/.
+# The subcommand is idempotent across boots and respects user
+# uninstalls (it won't reinstall what the user explicitly removed).
+# See cosmic-deps/flatpak.bst for why we vendor flatpak 1.17.6.
+enable flatpak-preinstall.service

@@ -14,6 +14,7 @@ depends:
   - oci/integration/cosmic-presets.bst
   - oci/integration/cosmic-greeter-config.bst
   - oci/integration/flatpak-config.bst
+  - oci/integration/mime-defaults.bst
   - oci/integration/extrafs.bst
 
   # Kernel firmware + initramfs (kernel itself comes via cosmic-deps/deps.bst)

@@ -14,6 +14,13 @@ RemainAfterExit=yes
 # rotates keys. First-boot needs network; if offline, the unit fails
 # (loud and visible) and `flatpak install` will tell the user to add a
 # remote -- preferable to silently shipping a stale GPG key.
+# Mirrors ublue-os/main's flatpak-add-flathub-repos.service: no
+# --collection-id, no GPG-import gymnastics. Flatpak `preinstall`
+# matches refs against remotes by app id when neither side declares a
+# CollectionID, so org.mozilla.firefox.preinstall resolves correctly.
+# (Setting --collection-id triggers strict GPG-collection mode which
+# rejects URL-form .flatpakrepo adds with "GPG verification is
+# required if collections are enabled".)
 ExecStart=/usr/bin/flatpak remote-add --if-not-exists --system flathub https://flathub.org/repo/flathub.flatpakrepo
 
 [Install]

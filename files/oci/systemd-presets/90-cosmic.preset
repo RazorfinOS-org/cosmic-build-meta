@@ -8,9 +8,20 @@
 enable greetd.service
 
 # Core platform
-enable systemd-networkd.service
+#
+# NetworkManager owns interface management for the desktop image; we
+# leave systemd-networkd disabled. Enabling both is what stalls
+# network-online.target on first boot: NetworkManager-wait-online
+# completes (NM brings up the link), but systemd-networkd-wait-online
+# blocks indefinitely because systemd-networkd has no managed
+# interfaces of its own. network-online.target waits for *all* such
+# units to complete, so anything ordered After= it (e.g.
+# flathub-remote-add.service, flatpak-preinstall.service) never fires.
+disable systemd-networkd.service
+disable systemd-networkd-wait-online.service
 enable systemd-resolved.service
 enable NetworkManager.service
+enable NetworkManager-wait-online.service
 enable pipewire.socket
 enable pipewire-pulse.socket
 enable wireplumber.service

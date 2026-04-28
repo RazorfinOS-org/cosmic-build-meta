@@ -7,10 +7,10 @@ build-depends:
 - freedesktop-sdk.bst:bootstrap/binutils.bst
 - core-deps/just.bst
 - core/libcosmic.bst
-- freedesktop-sdk.bst:components/flatpak.bst
+- cosmic-deps/flatpak.bst
 
 depends:
-- freedesktop-sdk.bst:components/flatpak.bst
+- cosmic-deps/flatpak.bst
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 sources:
