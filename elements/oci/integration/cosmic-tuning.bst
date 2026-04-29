@@ -62,3 +62,20 @@ config:
   # it; without this drop-in every WiFi-based location query (cosmic
   # weather applet, Firefox location, auto-timezone) silently fails.
   - install -Dm644 tuning/geoclue/conf.d/10-beacondb.conf "%{install-root}/etc/geoclue/conf.d/10-beacondb.conf"
+
+  # I/O scheduler udev rules: kyber for NVMe + non-rotational SCSI/MMC,
+  # bfq for spinning rust. Kernel rejects writes that name an unbuilt
+  # scheduler, so this is safe across fdsdk kernel rebuilds.
+  - install -Dm644 tuning/udev/rules.d/60-cosmic-schedulers.rules "%{install-root}/usr/lib/udev/rules.d/60-cosmic-schedulers.rules"
+
+  # systemd-coredump: write cores to /var/lib/systemd/coredump/ (not
+  # the journal) and zstd-compress them. Keeps `journalctl` fast and
+  # prevents multi-MB Electron/compositor crashes from evicting log
+  # lines under our SystemMaxUse=1000M cap.
+  - install -Dm644 tuning/coredump.conf.d/10-cosmic.conf "%{install-root}/usr/lib/systemd/coredump.conf.d/10-cosmic.conf"
+
+  # Bluetooth suspend/resume workaround: rfkill-block before sleep,
+  # unblock after, so controllers that lose firmware state across the
+  # power transition (common on Intel/Realtek) come back via the
+  # normal init path instead of needing a btusb reload or reboot.
+  - install -Dm755 tuning/system-sleep/bluetooth-suspend "%{install-root}/usr/lib/systemd/system-sleep/bluetooth-suspend"
