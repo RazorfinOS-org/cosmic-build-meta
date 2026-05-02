@@ -10,7 +10,7 @@ default:
 arch := env_var_or_default("BST_ARCH", `uname -m`)
 
 # Same bst2 container image CI uses -- pinned by SHA for reproducibility
-bst2_image := env_var_or_default("BST2_IMAGE", "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images/bst2:f89b4aef847ef040b345acceda15a850219eb8f1")
+bst2_image := env_var_or_default("BST2_IMAGE", "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images/bst2:8fe67f04619da91755dc2bd923009e723678e24d")
 
 # Common BST options
 bst_opts := "--option arch " + arch
