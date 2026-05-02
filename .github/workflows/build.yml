@@ -98,11 +98,12 @@ jobs:
           # CI-only artifact cache. Not committed -- local-dev users use
           # plain BST default config (no remote artifact cache).
           artifacts:
-          - url: oci://${{ env.BST_CACHE_REGISTRY }}
-            push: ${{ steps.eligibility.outputs.can_push }}
-            auth:
-              username: ${{ github.actor }}
-              password: \${GITHUB_TOKEN}
+            servers:
+            - url: oci://${{ env.BST_CACHE_REGISTRY }}
+              push: ${{ steps.eligibility.outputs.can_push }}
+              auth:
+                username: ${{ github.actor }}
+                password: \${GITHUB_TOKEN}
           EOF
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
