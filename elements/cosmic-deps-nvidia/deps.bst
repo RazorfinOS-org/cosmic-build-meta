@@ -16,3 +16,5 @@ depends:
   - cosmic-deps-nvidia/egl-external-platform.bst
   - cosmic-deps-nvidia/nvidia-egl-wayland.bst
   - cosmic-deps-nvidia/nvidia-modprobe-config.bst
+  - cosmic-deps-nvidia/nvidia-container-toolkit.bst
+  - cosmic-deps-nvidia/nvidia-container-toolkit-preset.bst
