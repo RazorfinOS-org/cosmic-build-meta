@@ -18,7 +18,3 @@ __pycache__/
 # Editor backups
 *~
 *.swp
-
-# Per-run CI BuildStream config (artifact cache + GHCR auth) -- written
-# by .github/workflows/build.yml, not relevant to local dev.
-/.bst-ci-config.yml

@@ -25,7 +25,6 @@ concurrency:
 
 env:
   IMAGE_REGISTRY: ghcr.io/razorfinos-org/cosmic-build-meta
-  BST_CACHE_REGISTRY: ghcr.io/razorfinos-org/cosmic-build-meta-cache
 
 jobs:
   build_and_push:
@@ -86,33 +85,13 @@ jobs:
             echo "additional_tags=nightly.${DATE}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Configure BuildStream OCI artifact cache
-        # BuildStream 2.x can use an OCI registry as its artifact cache,
-        # making future runs incremental. Push only when can_push=true
-        # (read-only PRs still pull from cache, just don't write to it).
-        # Config lives in the repo root (gitignored) because the bst2
-        # container the Justfile invokes only bind-mounts /src; we use
-        # `--config /src/.bst-ci-config.yml` via BST_FLAGS to point at it.
-        run: |
-          cat > .bst-ci-config.yml <<EOF
-          # CI-only artifact cache. Not committed -- local-dev users use
-          # plain BST default config (no remote artifact cache).
-          artifacts:
-            servers:
-            - url: oci://${{ env.BST_CACHE_REGISTRY }}
-              push: ${{ steps.eligibility.outputs.can_push }}
-              auth:
-                username: ${{ github.actor }}
-                password: \${GITHUB_TOKEN}
-          EOF
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Restore BuildStream local cache
-        # Belt-and-suspenders: actions/cache for the local CAS on top of
-        # the OCI artifact cache. Helps when registry RTT dominates for
-        # small elements. Stable restore-key (no run_id) so successive
-        # runs reuse prior caches; new key per run so updates write back.
+        # BuildStream/buildbox-casd has no OCI registry support -- artifact
+        # caches speak Bazel Remote CAS gRPC, not OCI distribution-spec.
+        # Until we stand up a real bst-artifact-server, rely on
+        # actions/cache for ~/.cache/buildstream. Stable restore-key (no
+        # run_id) so successive runs reuse prior caches; new key per run
+        # so updates write back. Cap is 10 GB per repo on github-hosted.
         uses: actions/cache@v4
         with:
           path: ~/.cache/buildstream
@@ -127,7 +106,7 @@ jobs:
         # tag the local podman image; we override per-event.
         env:
           COSMIC_IMAGE_TAG: ${{ steps.tags.outputs.primary_tag }}
-          BST_FLAGS: '--no-interactive --on-error=continue --config /src/.bst-ci-config.yml -o x86_64_v3 true'
+          BST_FLAGS: '--no-interactive --on-error=continue -o x86_64_v3 true'
         run: just build
 
       - name: Log in to GHCR
