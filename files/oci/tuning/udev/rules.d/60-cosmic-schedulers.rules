@@ -1,0 +1,20 @@
+# I/O scheduler selection for the COSMIC bootc image.
+#
+# Linux's multi-queue block layer ships several schedulers; the kernel's
+# default (`none` for NVMe, `mq-deadline` for SCSI) is conservative and
+# leaves desktop responsiveness on the table. Pick per device class:
+#
+# - kyber: lightweight mq scheduler tuned for fast flash. Low CPU
+#   overhead, keeps read latency bounded under heavy write load -- the
+#   right pick for NVMe and SATA SSDs on an interactive desktop.
+# - bfq:   budget fair queueing. Prioritises foreground/interactive I/O
+#   over background bulk transfers. Higher CPU cost is justified on
+#   rotational media where head-seek dominates anyway.
+#
+# Writes to queue/scheduler that name an unbuilt scheduler are silently
+# rejected by the kernel (the previous value stays), so these rules are
+# safe even if a future fdsdk kernel drops kyber or bfq.
+
+ACTION=="add|change", KERNEL=="nvme[0-9]*n[0-9]*", ATTR{queue/scheduler}="kyber"
+ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"

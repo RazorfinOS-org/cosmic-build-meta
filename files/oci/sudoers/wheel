@@ -1,0 +1,6 @@
+# Allow members of the wheel group to execute any command as any user.
+# accountsservice's CreateUser puts "administrator" accounts in `wheel`
+# (FDSDK 25.08 sudo defaults to wheel as the admin group); without this
+# rule, the user created by cosmic-initial-setup ends up in wheel but
+# can't actually use sudo.
+%wheel ALL=(ALL:ALL) ALL

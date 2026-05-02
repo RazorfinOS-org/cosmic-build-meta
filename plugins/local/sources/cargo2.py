@@ -1270,9 +1270,16 @@ class CargoSource(Source):
         self.mark_download_url(self.url)
 
         # Needs to be marked here such that it can be used in fetch later.
+        # Apply git-mirrors translation up front so the URL we register
+        # with BuildStream is the aliased form -- otherwise BST emits an
+        # [unaliased-url] warning even though the actual fetch later goes
+        # through `mirrored_git_url()`.
         for crate in node.get_sequence("ref", []):
             if crate.get_str("kind", "") == "git":
-                self.mark_download_url(crate.get_str("repo"), primary=False)
+                self.mark_download_url(
+                    self.mirrored_git_url(crate.get_str("repo")),
+                    primary=False,
+                )
 
         self.load_ref(node)
 

@@ -1,0 +1,62 @@
+# Default unit policy for the COSMIC bootc image.
+#
+# COSMIC ships cosmic-greeter via greetd as the default display manager.
+# This is uncharted territory -- no major distro has packaged it as the
+# default DM yet -- so we are explicit about what we enable and disable.
+
+# Display manager
+enable greetd.service
+
+# Core platform
+#
+# NetworkManager owns interface management for the desktop image; we
+# leave systemd-networkd disabled. Enabling both is what stalls
+# network-online.target on first boot: NetworkManager-wait-online
+# completes (NM brings up the link), but systemd-networkd-wait-online
+# blocks indefinitely because systemd-networkd has no managed
+# interfaces of its own. network-online.target waits for *all* such
+# units to complete, so anything ordered After= it (e.g.
+# flathub-remote-add.service, flatpak-preinstall.service) never fires.
+disable systemd-networkd.service
+disable systemd-networkd-wait-online.service
+enable systemd-resolved.service
+enable NetworkManager.service
+enable NetworkManager-wait-online.service
+enable pipewire.socket
+enable pipewire-pulse.socket
+enable wireplumber.service
+# dbus.service is socket-activated via dbus.socket -- no explicit
+# enable needed (it's `Loaded: static`). Ours is the reference
+# dbus-daemon from fdsdk, not Fedora's dbus-broker; the file-
+# descriptor-limit drop-in lives in dbus.service.d/, see
+# oci/integration/cosmic-tuning.bst.
+enable polkit.service
+enable accounts-daemon.service
+enable bootc-fetch-apply-updates.timer
+
+# mDNS / DNS-SD: `ssh hostname.local`, network printer discovery,
+# Bonjour-style service browse. Socket-activated; no idle cost.
+enable avahi-daemon.socket
+enable avahi-daemon.service
+
+# Maintenance timers
+#
+# fstrim: weekly TRIM/discard pass on SSDs/NVMe. Without this,
+# garbage collection on the drive falls behind and write performance
+# degrades over months of use. Default fdsdk policy is opt-in.
+enable fstrim.timer
+# fwupd-refresh: pulls firmware metadata from LVFS daily so
+# `fwupdmgr update` can show available updates without a manual
+# refresh first. Daily cadence is fwupd's own default.
+enable fwupd-refresh.timer
+
+# Container tooling
+enable podman.socket
+
+# COSMIC user services are activated by the user session, not enabled here.
+
+# Disable text-mode logins on tty1 -- cosmic-greeter owns it.
+# (Note: `mask` is NOT a valid preset verb -- systemd-preset only
+# supports enable/disable. Hard-masking happens via a /dev/null
+# symlink in oci/cosmic/stack.bst's integration-commands instead.)
+disable getty@tty1.service

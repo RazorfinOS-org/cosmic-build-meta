@@ -1,0 +1,27 @@
+[terminal]
+# greetd runs on tty1; getty@tty1 is masked by 90-cosmic.preset.
+vt = 1
+
+# Default session: launch the graphical login via our wrapper.
+# /usr/local/bin/cosmic-greeter-wrapper is a drop-in replacement for
+# upstream's /usr/bin/cosmic-greeter-start that tees stdout/stderr to
+# the journal so failures are debuggable (upstream redirects to
+# /dev/null which hid earlier issues).
+[default_session]
+command = "/usr/local/bin/cosmic-greeter-wrapper"
+user = "cosmic-greeter"
+
+# initial_session runs exactly once on first boot, no auth.
+# Same wrapper pattern but launching cosmic-initial-setup as the
+# kiosk child instead of cosmic-greeter.
+#
+# IMPORTANT: must run as the cosmic-initial-setup system user (NOT
+# cosmic-greeter). The wizard's main.rs gates the user-creation page
+# on `current_user.name == "cosmic-initial-setup"`. The polkit rules
+# shipped by upstream (20-cosmic-initial-setup.rules) also key off
+# this exact username for accountsservice / hostnamed / timedated /
+# NetworkManager permissions.
+# https://man.sr.ht/~kennylevinsen/greetd/config.5.md
+[initial_session]
+command = "/usr/local/bin/cosmic-initial-setup-wrapper"
+user = "cosmic-initial-setup"

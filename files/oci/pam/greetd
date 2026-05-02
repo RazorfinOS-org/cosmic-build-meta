@@ -1,0 +1,8 @@
+#%PAM-1.0
+# PAM stack for greetd. Mirrors what Pop!_OS / Arch ship: defer
+# everything to system-auth so password policies / shadow / PAM
+# modules stay consistent with `login` and `sshd`.
+auth      include  system-auth
+account   include  system-auth
+password  include  system-auth
+session   include  system-auth

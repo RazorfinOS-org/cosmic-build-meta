@@ -1,0 +1,26 @@
+#!/bin/sh
+# Workaround for Bluetooth radios that don't reinitialise after a
+# suspend/resume cycle. Some Intel and Realtek controllers lose their
+# firmware state across PCI/USB power transitions; the visible symptom
+# is "bluetoothctl show" returning Powered: no after resume, with no
+# way to recover short of `modprobe -r btusb && modprobe btusb` or a
+# reboot.
+#
+# Blocking the radio via rfkill before suspend forces the kernel to
+# tear the controller down cleanly; unblocking on resume brings it back
+# through the normal init path. Mirrors the script Pop!_OS ships at
+# /lib/systemd/system-sleep/bluetooth-suspend.
+#
+# systemd invokes system-sleep scripts twice: once with $1=pre before
+# the freeze, once with $1=post after thaw. $2 is the sleep operation
+# (suspend, hibernate, hybrid-sleep, suspend-then-hibernate); we apply
+# the workaround to all of them.
+
+case "$1" in
+    pre)
+        rfkill block bluetooth
+        ;;
+    post)
+        rfkill unblock bluetooth
+        ;;
+esac

@@ -1,0 +1,48 @@
+// Default cosmic-comp output config for the bootc/OCI image. Pinned to
+// 1680x1050 on QEMU's virtio-vga-gl connector so the compositor doesn't
+// boot at the EDID-default 640x480. cosmic-initial-setup caps its
+// window at 900x650 (src/main.rs:80) -- 1680x1050 leaves comfortable
+// margin around the full Create-Account form (avatar + 4 inputs +
+// buttons). Smaller resolutions like 1280x800 hide the password
+// fields below the visible card area.
+//
+// Format / matching semantics (from pop-os/cosmic-comp epoch-1.0.11,
+// cosmic-comp-config/src/output/comp.rs):
+//   - File lives at $XDG_STATE_HOME/cosmic-comp/outputs.ron (~/.local/state).
+//   - HashMap is keyed by the *full set* of connected outputs as
+//     [(connector, make, model)]. cosmic-comp computes that key from
+//     EDID at startup and looks it up; a non-match means it falls back
+//     to the connector's preferred mode (640x480 for QEMU's auto-EDID).
+//     "Red Hat, Inc." / "QEMU Monitor" are exactly what QEMU 10.x
+//     advertises -- verified against a running VM's persisted file.
+//   - mode is ((width, height), Some(refresh_in_millihertz)). cosmic-comp
+//     filters connector modes by exact pixel-size match, then picks the
+//     mode whose refresh rate is closest to the configured value
+//     (src/backend/kms/mod.rs around line 860). 60000 mHz snaps to the
+//     CVT-RB ~59.81 Hz mode QEMU advertises for 1280x800.
+//
+// This file is copied per-user via tmpfiles.d (C-type) on first boot.
+// Once the smithay PR #1923 fix propagates to cosmic-comp, dynamic
+// resize will work and this preset becomes a soft default the user can
+// override by changing display settings.
+(
+    config: {
+        [
+            (
+                connector: "Virtual-1",
+                make: "Red Hat, Inc.",
+                model: "QEMU Monitor",
+            ),
+        ]: [
+            (
+                mode: ((1680, 1050), Some(60000)),
+                vrr: r#false,
+                scale: 1.0,
+                transform: Normal,
+                position: (0, 0),
+                enabled: r#true,
+                xwayland_primary: true,
+            ),
+        ],
+    },
+)

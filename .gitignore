@@ -7,6 +7,10 @@ workspaces/
 # Build artifacts
 target/
 
+# VM / image artifacts produced by `just build`, `just generate-bootable-image`,
+# and `just boot-vm` (OCI checkout, sparse disk, OVMF NVRAM, debug socket, console log).
+build/
+
 # Python
 __pycache__/
 *.pyc
@@ -14,3 +18,7 @@ __pycache__/
 # Editor backups
 *~
 *.swp
+
+# Per-run CI BuildStream config (artifact cache + GHCR auth) -- written
+# by .github/workflows/build.yml, not relevant to local dev.
+/.bst-ci-config.yml

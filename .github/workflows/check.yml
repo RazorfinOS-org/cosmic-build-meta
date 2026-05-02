@@ -27,4 +27,4 @@ jobs:
           bst-cache-${{ runner.arch }}
 
     - name: Validate all element definitions
-      run: BST_FLAGS="--no-interactive" just check
+      run: BST_FLAGS="--no-interactive -o x86_64_v3 true" just check
