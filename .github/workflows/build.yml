@@ -126,7 +126,7 @@ jobs:
         # tag the local podman image; we override per-event.
         env:
           COSMIC_IMAGE_TAG: ${{ steps.tags.outputs.primary_tag }}
-          BST_FLAGS: '--no-interactive --on-error=continue --config /src/.bst-ci-config.yml'
+          BST_FLAGS: '--no-interactive --on-error=continue --config /src/.bst-ci-config.yml -o x86_64_v3 true'
         run: just build
 
       - name: Log in to GHCR
