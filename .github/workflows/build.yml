@@ -1,4 +1,4 @@
-name: Build & Publish OCI image + Live ISO
+name: Build & Publish OCI image
 
 on:
   schedule:
@@ -15,13 +15,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write       # GH Releases upload (tag pushes)
-  packages: write       # GHCR push for image + BST artifact cache
+  contents: read
+  packages: write       # GHCR push for image
   id-token: write       # OIDC for keyless cosign signing
   attestations: write   # Sigstore build-provenance attestations
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: build-image-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -50,10 +50,6 @@ jobs:
       github.event_name != 'pull_request' ||
       startsWith(github.head_ref, 'auto/track-') ||
       contains(github.event.pull_request.labels.*.name, 'build')
-
-    outputs:
-      pushed_cosmic: ${{ steps.publish.outputs.pushed_cosmic }}
-      pushed_cosmic_nvidia: ${{ steps.publish.outputs.pushed_cosmic_nvidia }}
 
     steps:
       - uses: actions/checkout@v4
@@ -107,10 +103,9 @@ jobs:
         # BuildStream/buildbox-casd has no OCI registry support -- artifact
         # caches speak Bazel Remote CAS gRPC, not OCI distribution-spec.
         # Until we stand up a real bst-artifact-server, rely on
-        # actions/cache for ~/.cache/buildstream. Per-variant key so the
-        # two matrix jobs don't fight over the same cache; stable restore-
-        # key allows reuse across runs; new key per run writes back fresh
-        # state. Cap is 10 GB per repo on github-hosted.
+        # actions/cache for ~/.cache/buildstream. Per-variant key shared
+        # with iso.yml so both workflows reuse the same artifact pool.
+        # Cap is 10 GB per repo on github-hosted.
         uses: actions/cache@v4
         with:
           path: ~/.cache/buildstream
@@ -129,15 +124,6 @@ jobs:
           COSMIC_IMAGE_TAG: ${{ steps.tags.outputs.primary_tag }}
           BST_FLAGS: '--no-interactive --on-error=continue'
         run: just build-variant ${{ matrix.variant }}
-
-      - name: Build Live ISO (${{ matrix.variant }})
-        # ISO comes from the same BST graph -- it's just another artifact
-        # produced by `kind: script` element installer/live-image-<v>.bst
-        # wrapping systemd-repart --offline. Output lands at
-        # build/iso/<v>-stable-amd64.iso.
-        env:
-          BST_FLAGS: '--no-interactive --on-error=continue'
-        run: just build-iso ${{ matrix.variant }}
 
       - name: Log in to GHCR
         if: steps.eligibility.outputs.can_push == 'true'
@@ -179,20 +165,6 @@ jobs:
         #     --certificate-oidc-issuer https://token.actions.githubusercontent.com
         run: cosign sign --yes "${{ steps.push.outputs.image_ref }}"
 
-      - name: Sign Live ISO (keyless via Sigstore OIDC)
-        if: steps.push.outputs.pushed == 'true'
-        # Sign the ISO blob alongside its image. Verify with:
-        #   cosign verify-blob --signature <sig> --certificate <cert> ...
-        # cosign emits .sig + .cert files alongside the input.
-        run: |
-          set -euo pipefail
-          ISO="build/iso/${{ matrix.variant }}-stable-amd64.iso"
-          cosign sign-blob --yes \
-              --output-signature "${ISO}.sig" \
-              --output-certificate "${ISO}.cert" \
-              "${ISO}"
-          sha256sum "${ISO}" > "${ISO}.sha256"
-
       - name: Generate build provenance attestation
         if: steps.push.outputs.pushed == 'true'
         # SLSA build-provenance v1; verifiable via `cosign verify-attestation`
@@ -202,34 +174,6 @@ jobs:
           subject-name: ${{ env.IMAGE_REGISTRY }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-
-      - name: Upload ISO as workflow artifact
-        # Always upload the ISO (even when can_push=false on fork PRs)
-        # so reviewers can download and smoke-test from the workflow run.
-        # Tag-push uploads to GH Releases happen in the next step.
-        uses: actions/upload-artifact@v4
-        with:
-          name: iso-${{ matrix.variant }}
-          path: |
-            build/iso/${{ matrix.variant }}-stable-amd64.iso
-            build/iso/${{ matrix.variant }}-stable-amd64.iso.sha256
-            build/iso/${{ matrix.variant }}-stable-amd64.iso.sig
-            build/iso/${{ matrix.variant }}-stable-amd64.iso.cert
-          retention-days: 90
-          if-no-files-found: warn
-
-      - name: Upload ISO to GitHub Release (tag push only)
-        if: github.ref_type == 'tag' && steps.eligibility.outputs.can_push == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            build/iso/${{ matrix.variant }}-stable-amd64.iso
-            build/iso/${{ matrix.variant }}-stable-amd64.iso.sha256
-            build/iso/${{ matrix.variant }}-stable-amd64.iso.sig
-            build/iso/${{ matrix.variant }}-stable-amd64.iso.cert
-          # Don't override release body across matrix runs -- each
-          # variant's upload is additive.
-          append_body: false
 
       - name: Upload BST logs (on failure)
         if: failure()
