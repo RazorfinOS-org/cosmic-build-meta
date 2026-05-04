@@ -1,0 +1,148 @@
+name: Build & Publish Live ISO
+
+on:
+  # Manual-dispatch only. ISOs are heavyweight (multi-hour cold builds)
+  # and consumed less frequently than the OCI image -- run them on
+  # demand from the Actions UI or `gh workflow run iso.yml`. The OCI
+  # image is the primary deliverable and ships from build.yml on every
+  # push to main; the ISO is downstream of that and rebuilt only when
+  # someone is actually about to cut a release or smoke-test the live
+  # env.
+  workflow_dispatch:
+
+permissions:
+  contents: write       # GH Releases upload (tag pushes)
+  id-token: write       # OIDC for keyless cosign signing
+
+concurrency:
+  group: build-iso-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE_REGISTRY: ghcr.io/razorfinos-org/cosmic-build-meta
+
+jobs:
+  build_iso:
+    name: Build ISO ${{ matrix.variant }}
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 360
+
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [cosmic, cosmic-nvidia]
+
+    # Same PR gating as build.yml: only run on auto-track PRs or PRs
+    # explicitly labelled `build`. ISOs are heavyweight; don't build
+    # them speculatively for every drive-by PR.
+    if: >-
+      github.event_name != 'pull_request' ||
+      startsWith(github.head_ref, 'auto/track-') ||
+      contains(github.event.pull_request.labels.*.name, 'build')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space on runner
+        uses: ublue-os/remove-unwanted-software@v9
+
+      - name: Install just
+        uses: extractions/setup-just@v2
+
+      - name: Install flatpak
+        # `just prefetch-installer-flatpak` shells out to `flatpak --user`
+        # to assemble the bootc-installer's /var/lib/flatpak tree (see
+        # Justfile line ~155 for why this happens on the host instead
+        # of in the BST sandbox). Not preinstalled on ubuntu-24.04.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends flatpak
+
+      - name: Determine eligibility
+        id: eligibility
+        # Forks can't sign with this repo's OIDC; skip signing + release
+        # uploads, still produce the artifact for reviewer download.
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] && \
+             [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+            echo "can_sign=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::PR from fork; ISO signing disabled (read-only token)"
+          else
+            echo "can_sign=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore BuildStream local cache
+        # Shares cache key prefix with build.yml so we reuse the OCI
+        # image element + COSMIC stack artifacts that workflow already
+        # built. New run_id key on write back means cold-start ISO
+        # builds populate the cache for next run too.
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/buildstream
+          key: bst-cache-${{ runner.arch }}-${{ matrix.variant }}-iso-${{ github.run_id }}
+          restore-keys: |
+            bst-cache-${{ runner.arch }}-${{ matrix.variant }}-iso-
+            bst-cache-${{ runner.arch }}-${{ matrix.variant }}-
+            bst-cache-${{ runner.arch }}-
+
+      - name: Build Live ISO (${{ matrix.variant }})
+        # `just build-iso` first runs `just prefetch-installer-flatpak`
+        # if build/installer-prebake/var/lib/flatpak/app is missing,
+        # then `bst build installer/live-image-<v>.bst`. BST resolves
+        # the full graph (FDSDK + COSMIC stack + OCI sysroot) -- those
+        # elements are cache hits if build.yml already ran for this
+        # ref. Output: build/iso/<v>-stable-amd64.iso.
+        env:
+          BST_FLAGS: '--no-interactive --on-error=continue'
+        run: just build-iso ${{ matrix.variant }}
+
+      - name: Install cosign
+        if: steps.eligibility.outputs.can_sign == 'true'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign Live ISO (keyless via Sigstore OIDC)
+        if: steps.eligibility.outputs.can_sign == 'true'
+        # cosign sign-blob emits .sig + .cert files alongside the input.
+        # Verify with cosign verify-blob --signature ... --certificate ...
+        run: |
+          set -euo pipefail
+          ISO="build/iso/${{ matrix.variant }}-stable-amd64.iso"
+          cosign sign-blob --yes \
+              --output-signature "${ISO}.sig" \
+              --output-certificate "${ISO}.cert" \
+              "${ISO}"
+          sha256sum "${ISO}" > "${ISO}.sha256"
+
+      - name: Upload ISO as workflow artifact
+        # Always upload (even on fork PRs without signing) so reviewers
+        # can grab it from the workflow run UI.
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso-${{ matrix.variant }}
+          path: |
+            build/iso/${{ matrix.variant }}-stable-amd64.iso
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.sha256
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.sig
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.cert
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Upload ISO to GitHub Release (tag push only)
+        if: github.ref_type == 'tag' && steps.eligibility.outputs.can_sign == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/iso/${{ matrix.variant }}-stable-amd64.iso
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.sha256
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.sig
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.cert
+          # Each variant's upload is additive across matrix runs.
+          append_body: false
+
+      - name: Upload BST logs (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso-build-logs-${{ matrix.variant }}
+          path: ~/.cache/buildstream/logs/
+          retention-days: 7

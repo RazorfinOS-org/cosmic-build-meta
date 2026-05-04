@@ -23,7 +23,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings-daemon.git
   track: master
-  ref: epoch-1.0.11-0-g716da6d6af0b252e2f78aba2ad72ee19ae0241e0
+  ref: epoch-1.0.9-0-g716da6d6af0b252e2f78aba2ad72ee19ae0241e0
 - kind: cargo2
   url: "crates:"
   ref:
@@ -157,7 +157,7 @@ sources:
     sha: 1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
-    repo: https://github.com/jackpot51/rust-atomicwrites
+    repo: github:jackpot51/rust-atomicwrites
     name: atomicwrites
     version: 0.4.2
   - kind: registry

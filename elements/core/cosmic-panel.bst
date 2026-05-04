@@ -20,7 +20,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-panel.git
   track: master
-  ref: epoch-1.0.11-0-gd518c7d25ef96f1a9696aa8cce008656bf66ece4
+  ref: epoch-1.0.9-0-gd518c7d25ef96f1a9696aa8cce008656bf66ece4
 - kind: cargo2
   url: "crates:"
   ref:
@@ -130,7 +130,7 @@ sources:
     sha: 628d228f918ac3b82fe590352cc719d30664a0c13ca3a60266fe02c7132d480a
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
-    repo: https://github.com/jackpot51/rust-atomicwrites
+    repo: github:jackpot51/rust-atomicwrites
     name: atomicwrites
     version: 0.4.2
   - kind: registry
