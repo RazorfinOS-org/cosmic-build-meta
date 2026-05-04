@@ -22,7 +22,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-edit.git
   track: master
-  ref: epoch-1.0.11-0-g5f96f6191b10fce12242991c03714d8675fbc6d7
+  ref: epoch-1.0.11-1-g4c53d607f7ffc247a50bbea7de6f68a8ac353fb1
 - kind: cargo2
   url: "crates:"
   ref:
@@ -36,49 +36,49 @@ sources:
     sha: 366ffbaa4442f4684d91e2cd7c5ea7c4ed8add41959a31447066e279e432b618
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit
     version: 0.22.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_atspi_common
     version: 0.15.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_consumer
     version: 0.32.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_macos
     version: 0.23.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_unix
     version: 0.18.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_windows
     version: 0.30.0
   - kind: git
     commit: f0599eed5f18111228266fe3f28991cc48b5964f
-    repo: https://github.com/wash2/accesskit
+    repo: github:wash2/accesskit
     query:
       tag: cosmic-0.14
     name: accesskit_winit
@@ -253,7 +253,7 @@ sources:
     sha: 1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
-    repo: https://github.com/jackpot51/rust-atomicwrites
+    repo: github:jackpot51/rust-atomicwrites
     name: atomicwrites
     version: 0.4.2
   - kind: registry
@@ -2072,14 +2072,14 @@ sources:
     sha: 384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe
   - kind: git
     commit: ccd37464e28d045362a2a42fb3fc2745a2580820
-    repo: https://github.com/rust-onig/rust-onig.git
+    repo: github:rust-onig/rust-onig.git
     query:
       branch: main
     name: onig
     version: 6.5.1
   - kind: git
     commit: ccd37464e28d045362a2a42fb3fc2745a2580820
-    repo: https://github.com/rust-onig/rust-onig.git
+    repo: github:rust-onig/rust-onig.git
     query:
       branch: main
     name: onig_sys
@@ -2928,7 +2928,7 @@ sources:
     sha: cb7f578e5945fb242538965c2d0b04418d38ec25c79d160cd279bf0731c8d319
   - kind: git
     commit: a225f753a88e722aeeb27bb2fb00144739911035
-    repo: https://github.com/jackpot51/trash-rs.git
+    repo: github:jackpot51/trash-rs.git
     query:
       branch: cosmic
     name: trash
@@ -3611,7 +3611,7 @@ sources:
     sha: 2fb433233f2df9344722454bc7e96465c9d03bff9d77c248f9e7523fe79585b5
   - kind: git
     commit: f8efb3fb1fad582539e2af7d1e9fbc9613dcc7d9
-    repo: https://github.com/ebassi/xdg-mime-rs
+    repo: github:ebassi/xdg-mime-rs
     name: xdg-mime
     version: 0.4.0
   - kind: registry

@@ -33,7 +33,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-comp.git
   track: master
-  ref: epoch-1.0.11-0-g21679f215acfa7ae86072362c5d91b0cc4ed1fcd
+  ref: epoch-1.0.11-8-ge4dfd411bbb7e108dda4e65a9ac15b22a2fdeb8e
 - kind: cargo2
   url: "crates:"
   ref:
@@ -171,7 +171,7 @@ sources:
     sha: 628d228f918ac3b82fe590352cc719d30664a0c13ca3a60266fe02c7132d480a
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
-    repo: https://github.com/jackpot51/rust-atomicwrites
+    repo: github:jackpot51/rust-atomicwrites
     name: atomicwrites
     version: 0.4.2
   - kind: registry
@@ -547,8 +547,8 @@ sources:
     sha: 97369cbbc041bc366949bc74d34658d6cda5621039731c6310521892a3a20ae0
   - kind: registry
     name: dlib
-    version: 0.5.2
-    sha: 330c60081dcc4c72131f8eb70510f1ac07223e5d4163db481a04a0befcffa412
+    version: 0.5.3
+    sha: ab8ecd87370524b461f8557c119c405552c396ed91fc0a8eec68679eab26f94a
   - kind: git
     commit: f68595ee0e62fbd6589f4709b5aaa5c3c7ea5f6c
     repo: github:pop-os/window_clipboard.git
@@ -1100,12 +1100,12 @@ sources:
     sha: e05c02b5e89bff3b946cedeca278abc628fe811e604f027c45a8aa3cf793d0eb
   - kind: registry
     name: input
-    version: 0.9.1
-    sha: fbdc09524a91f9cacd26f16734ff63d7dc650daffadd2b6f84d17a285bd875a9
+    version: 0.10.0
+    sha: f9793345a65d71317763a33066b5d8351f8760dde8d4930fe9e39b5f14a7959d
   - kind: registry
     name: input-sys
-    version: 1.18.0
-    sha: bd4f5b4d1c00331c5245163aacfe5f20be75b564c7112d45893d4ae038119eb0
+    version: 1.19.0
+    sha: 36eee07d8e02bd95bf52b2e642cf13d33701b94c6e4b04fbf1d1fb07e9cb19e7
   - kind: registry
     name: intl-memoizer
     version: 0.5.3
@@ -1748,8 +1748,8 @@ sources:
     sha: a993555f31e5a609f617c12db6250dedcac1b0a85076912c436e6fc9b2c8e6a3
   - kind: registry
     name: quick-xml
-    version: 0.38.4
-    sha: b66c2058c55a409d601666cffe35f04333cf1013010882cec174a7467cd4e21c
+    version: 0.39.2
+    sha: 958f21e8e7ceb5a1aa7fa87fab28e7c75976e0bfe7e23ff069e0a260f894067d
   - kind: registry
     name: quote
     version: 1.0.44
@@ -2031,10 +2031,10 @@ sources:
     version: 1.15.1
     sha: 67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03
   - kind: git
-    commit: e84a4ca82d58d783839083bd48c4ab120715c4b6
+    commit: 211c19d712dc5f1b78eb879f1c195715801e37ff
     repo: github:smithay/smithay.git
     query:
-      rev: e84a4ca
+      rev: 211c19d
     name: smithay
     version: 0.7.0
   - kind: registry
@@ -2429,56 +2429,56 @@ sources:
     sha: 1c598d6b99ea013e35844697fc4670d08339d5cda15588f193c6beedd12f644b
   - kind: registry
     name: wayland-backend
-    version: 0.3.12
-    sha: fee64194ccd96bf648f42a65a7e589547096dfa702f7cadef84347b66ad164f9
+    version: 0.3.15
+    sha: 2857dd20b54e916ec7253b3d6b4d5c4d7d4ca2c33c2e11c6c76a99bd8744755d
   - kind: registry
     name: wayland-client
-    version: 0.31.12
-    sha: b8e6faa537fbb6c186cb9f1d41f2f811a4120d1b57ec61f50da451a0c5122bec
+    version: 0.31.14
+    sha: 645c7c96bb74690c3189b5c9cb4ca1627062bb23693a4fad9d8c3de958260144
   - kind: registry
     name: wayland-csd-frame
     version: 0.3.0
     sha: 625c5029dbd43d25e6aa9615e88b829a5cad13b2819c4ae129fdbb7c31ab4c7e
   - kind: registry
     name: wayland-cursor
-    version: 0.31.12
-    sha: 5864c4b5b6064b06b1e8b74ead4a98a6c45a285fe7a0e784d24735f011fdb078
+    version: 0.31.14
+    sha: 4a52d18780be9b1314328a3de5f930b73d2200112e3849ca6cb11822793fb34d
   - kind: registry
     name: wayland-egl
-    version: 0.32.9
-    sha: 8a2c9ef35f3b2e11d5709d8e75dc1e7e064fd8eec5d705d56073fafca85de854
+    version: 0.32.11
+    sha: 9b97bdb7c49e5bd9b7562f38ff84f0dad47079fdc9e926f691a787f6dbc05451
   - kind: registry
     name: wayland-protocols
-    version: 0.32.10
-    sha: baeda9ffbcfc8cd6ddaade385eaf2393bd2115a69523c735f12242353c3df4f3
+    version: 0.32.12
+    sha: 563a85523cade2429938e790815fd7319062103b9f4a2dc806e9b53b95982d8f
   - kind: registry
     name: wayland-protocols-experimental
     version: 20250721.0.1
     sha: 40a1f863128dcaaec790d7b4b396cc9b9a7a079e878e18c47e6c2d2c5a8dcbb1
   - kind: registry
     name: wayland-protocols-misc
-    version: 0.3.10
-    sha: 791c58fdeec5406aa37169dd815327d1e47f334219b523444bc26d70ceb4c34e
+    version: 0.3.12
+    sha: 6e9567599ef23e09b8dad6e429e5738d4509dfc46b3b21f32841a304d16b29c8
   - kind: registry
     name: wayland-protocols-plasma
     version: 0.3.10
     sha: aa98634619300a535a9a97f338aed9a5ff1e01a461943e8346ff4ae26007306b
   - kind: registry
     name: wayland-protocols-wlr
-    version: 0.3.10
-    sha: e9597cdf02cf0c34cd5823786dce6b5ae8598f05c2daf5621b6e178d4f7345f3
+    version: 0.3.12
+    sha: eb04e52f7836d7c7976c78ca0250d61e33873c34156a2a1fc9474828ec268234
   - kind: registry
     name: wayland-scanner
-    version: 0.31.8
-    sha: 5423e94b6a63e68e439803a3e153a9252d5ead12fd853334e2ad33997e3889e3
+    version: 0.31.10
+    sha: 9c324a910fd86ebdc364a3e61ec1f11737d3b1d6c273c0239ee8ff4bc0d24b4a
   - kind: registry
     name: wayland-server
-    version: 0.31.11
-    sha: 9297ab90f8d1f597711d36455c5b1b2290eca59b8134485e377a296b80b118c9
+    version: 0.31.13
+    sha: cc1846eb04c49182e04f4a099e2a830a2b745610bbc1d61246e206f29c7000a0
   - kind: registry
     name: wayland-sys
-    version: 0.31.8
-    sha: 1e6dbfc3ac5ef974c92a2235805cc0114033018ae1290a72e474aa8b28cbbdfd
+    version: 0.31.11
+    sha: d8eab23fefc9e41f8e841df4a9c707e8a8c4ed26e944ef69297184de2785e3be
   - kind: registry
     name: web-sys
     version: 0.3.89
