@@ -1,17 +1,13 @@
 name: Build & Publish Live ISO
 
 on:
-  schedule:
-    # Weekly Monday 09:00 UTC -- one hour after build.yml so the BST
-    # cache it populated is hot for our restore.
-    - cron: '0 9 * * 1'
-  push:
-    branches: [main]
-    tags: ['v*']
-    paths-ignore: ['*.md', 'LICENSE*']
-  pull_request:
-    branches: [main]
-    paths-ignore: ['*.md', 'LICENSE*']
+  # Manual-dispatch only. ISOs are heavyweight (multi-hour cold builds)
+  # and consumed less frequently than the OCI image -- run them on
+  # demand from the Actions UI or `gh workflow run iso.yml`. The OCI
+  # image is the primary deliverable and ships from build.yml on every
+  # push to main; the ISO is downstream of that and rebuilt only when
+  # someone is actually about to cut a release or smoke-test the live
+  # env.
   workflow_dispatch:
 
 permissions:
