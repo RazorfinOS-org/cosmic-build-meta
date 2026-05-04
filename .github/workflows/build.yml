@@ -30,7 +30,7 @@ env:
 jobs:
   build_and_push:
     name: Build & Push ${{ matrix.variant }}
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 360
 
     strategy:
