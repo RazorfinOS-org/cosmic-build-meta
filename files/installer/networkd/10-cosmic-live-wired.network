@@ -1,0 +1,26 @@
+# Bring up wired interfaces on the live env via systemd-networkd DHCP.
+#
+# Why this exists: FDSDK ships both NetworkManager.service and
+# NetworkManager-initrd.service with the same D-Bus bus name
+# (org.freedesktop.NetworkManager). systemd's loader refuses to load
+# both, NetworkManager.service ends up "not loaded properly", no
+# network manager runs in the booted system, ens3/ethN stays
+# `unmanaged` per `networkctl`. systemd-networkd IS running (provided
+# by FDSDK by default) but has no .network file matching wired
+# interfaces -- so DHCP never fires.
+#
+# This drop-in tells systemd-networkd to manage any en*/eth* link via
+# DHCP, which gets us an IP + DNS from the upstream router (or QEMU's
+# SLIRP NAT in the VM). Sidesteps the NM conflict entirely.
+#
+# Real fix for v1.1: mask NetworkManager-initrd.service in the base
+# image (it's an initramfs-only unit, has no business being active in
+# the booted system), then NM works as intended. For now the live env
+# uses networkd because the install flow needs network at install
+# time and we're not blocked on which manager runs it.
+[Match]
+Name=en* eth*
+
+[Network]
+DHCP=yes
+IPv6AcceptRA=yes

@@ -1,0 +1,37 @@
+# Dedicated tmpfs at /var/lib/containers for the live env's podman
+# storage during the install flow. Default /var lives on the volatile-
+# overlay tmpfs which systemd caps at ~25% of RAM (4G on a 16G VM,
+# too small for our 6.6G uncompressed COSMIC OCI layer). A separate
+# tmpfs here gets its own size limit (16G) without competing with the
+# rest of /var for headroom.
+#
+# Why not bind-mount or symlink to /tmp: bootc install
+# --experimental-unified-storage compares the in-container
+# /var/lib/containers (bind-mounted from host) against the host's view
+# via /proc/1/root/. A symlink breaks the comparison; a real mount
+# point keeps both views as the same inode/device.
+#
+# Sizing: 16G fits the unpacked COSMIC layer (~6.6G) plus the
+# compressed copy podman keeps in overlay-layers (~6.6G), with slack.
+# tmpfs is RAM-backed so the limit only matters under pressure --
+# light usage costs nothing. On a real 16G+ machine the user will
+# have ~8G tmpfs after other allocations, just enough.
+#
+# Lives at /usr/lib/systemd/system/ + symlinked into local-fs.target
+# via the Install section. Only enabled in the live env (live-extras
+# is not in oci/cosmic/stack.bst), so installed systems use a regular
+# /var/lib/containers backed by the persistent disk.
+[Unit]
+Description=Container storage tmpfs (live install scratch)
+DefaultDependencies=no
+Before=local-fs.target
+ConditionPathExists=/usr/share/cosmic-installer
+
+[Mount]
+What=tmpfs
+Where=/var/lib/containers
+Type=tmpfs
+Options=size=16G,mode=755
+
+[Install]
+WantedBy=local-fs.target

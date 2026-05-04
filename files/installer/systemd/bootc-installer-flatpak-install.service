@@ -1,0 +1,32 @@
+[Unit]
+Description=Install bootc-installer Flatpak from staged bundle (first boot)
+Documentation=https://github.com/tuna-os/tuna-installer
+# Ordered after Flathub remote-add (we need a remote configured to
+# resolve the GNOME Platform 49 runtime that the bundle declares as a
+# dependency) and after network-online -- the runtime fetch needs net.
+#
+# v1 limitation: this service requires network at first live boot to
+# pull org.gnome.Platform//49 from Flathub. For a fully-offline ISO
+# (v1.1+), we'd pre-stage the runtime bundle alongside the app bundle
+# and do a runtime install before the app install.
+After=network-online.target flathub-remote-add.service
+Wants=network-online.target
+Requires=flathub-remote-add.service
+ConditionPathExists=/usr/share/cosmic-installer/org.bootcinstaller.Installer.flatpak
+ConditionPathExists=!/var/lib/flatpak/app/org.bootcinstaller.Installer
+StartLimitIntervalSec=600
+StartLimitBurst=3
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# --bundle of an app .flatpak that doesn't embed its runtime needs the
+# runtime already present. Flatpak resolves missing runtimes by pulling
+# from configured remotes -- flathub is configured by
+# flathub-remote-add.service, sequenced via Requires/After above.
+ExecStart=/usr/bin/flatpak install --system --noninteractive --bundle /usr/share/cosmic-installer/org.bootcinstaller.Installer.flatpak
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

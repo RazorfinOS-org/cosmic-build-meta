@@ -1,4 +1,4 @@
-name: Build & Publish OCI image
+name: Build & Publish OCI image + Live ISO
 
 on:
   schedule:
@@ -7,6 +7,7 @@ on:
     - cron: '0 8 * * 1'
   push:
     branches: [main]
+    tags: ['v*']
     paths-ignore: ['*.md', 'LICENSE*']
   pull_request:
     branches: [main]
@@ -14,7 +15,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write       # GH Releases upload (tag pushes)
   packages: write       # GHCR push for image + BST artifact cache
   id-token: write       # OIDC for keyless cosign signing
   attestations: write   # Sigstore build-provenance attestations
@@ -28,8 +29,18 @@ env:
 
 jobs:
   build_and_push:
+    name: Build & Push ${{ matrix.variant }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Two image variants ship from this repo: the open-source GPU
+        # variant (cosmic) and the NVIDIA proprietary one (cosmic-nvidia).
+        # Both build from the same BST graph; only the image element +
+        # bootc-defaults differ.
+        variant: [cosmic, cosmic-nvidia]
 
     # Skip image rebuild on most PRs to save runner minutes; only run on:
     #   - non-PR events (push/cron/workflow_dispatch)
@@ -41,9 +52,8 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'build')
 
     outputs:
-      pushed: ${{ steps.push.outputs.pushed }}
-      digest: ${{ steps.push.outputs.digest }}
-      image_ref: ${{ steps.push.outputs.image_ref }}
+      pushed_cosmic: ${{ steps.publish.outputs.pushed_cosmic }}
+      pushed_cosmic_nvidia: ${{ steps.publish.outputs.pushed_cosmic_nvidia }}
 
     steps:
       - uses: actions/checkout@v4
@@ -73,41 +83,61 @@ jobs:
 
       - name: Determine image tags
         id: tags
-        # PR builds get a single :pr-N tag (cleaned up when PR closes).
-        # Everything else gets :nightly + :nightly.YYYYMMDD.
+        # Tags are now variant-prefixed (cosmic-nightly, cosmic-nvidia-nightly)
+        # so both variants coexist in the same registry repo. PR builds get
+        # a single :{variant}-pr-N tag; tag-push events get :{variant}-{ref}
+        # plus :{variant}-stable; everything else gets :{variant}-nightly +
+        # :{variant}-nightly.YYYYMMDD.
         run: |
           DATE=$(date -u +%Y%m%d)
+          V="${{ matrix.variant }}"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "primary_tag=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "primary_tag=${V}-pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
             echo "additional_tags=" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref_type }}" = "tag" ]; then
+            REF="${GITHUB_REF#refs/tags/}"
+            echo "primary_tag=${V}-${REF}" >> "$GITHUB_OUTPUT"
+            echo "additional_tags=${V}-stable" >> "$GITHUB_OUTPUT"
           else
-            echo "primary_tag=nightly" >> "$GITHUB_OUTPUT"
-            echo "additional_tags=nightly.${DATE}" >> "$GITHUB_OUTPUT"
+            echo "primary_tag=${V}-nightly" >> "$GITHUB_OUTPUT"
+            echo "additional_tags=${V}-nightly.${DATE}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Restore BuildStream local cache
         # BuildStream/buildbox-casd has no OCI registry support -- artifact
         # caches speak Bazel Remote CAS gRPC, not OCI distribution-spec.
         # Until we stand up a real bst-artifact-server, rely on
-        # actions/cache for ~/.cache/buildstream. Stable restore-key (no
-        # run_id) so successive runs reuse prior caches; new key per run
-        # so updates write back. Cap is 10 GB per repo on github-hosted.
+        # actions/cache for ~/.cache/buildstream. Per-variant key so the
+        # two matrix jobs don't fight over the same cache; stable restore-
+        # key allows reuse across runs; new key per run writes back fresh
+        # state. Cap is 10 GB per repo on github-hosted.
         uses: actions/cache@v4
         with:
           path: ~/.cache/buildstream
-          key: bst-cache-${{ runner.arch }}-${{ github.run_id }}
+          key: bst-cache-${{ runner.arch }}-${{ matrix.variant }}-${{ github.run_id }}
           restore-keys: |
+            bst-cache-${{ runner.arch }}-${{ matrix.variant }}-
             bst-cache-${{ runner.arch }}-
 
-      - name: Build OCI image
-        # `just build` = bst build oci/cosmic/image.bst then `just load-image`
-        # (skopeo + podman build --squash-all to flatten layers for
-        # bootc 1.15 compatibility). COSMIC_IMAGE_TAG flows through to
-        # tag the local podman image; we override per-event.
+      - name: Build OCI image (${{ matrix.variant }})
+        # `just build-variant <v>` = `bst build oci/<v>/image.bst` then
+        # `just load-image-variant <v>` (skopeo + podman build --squash-all
+        # to flatten layers for bootc 1.15 compatibility). COSMIC_IMAGE_TAG
+        # gets the full variant-prefixed tag so the local podman tag
+        # matches what we push to GHCR.
         env:
           COSMIC_IMAGE_TAG: ${{ steps.tags.outputs.primary_tag }}
-          BST_FLAGS: '--no-interactive --on-error=continue -o x86_64_v3 true'
-        run: just build
+          BST_FLAGS: '--no-interactive --on-error=continue'
+        run: just build-variant ${{ matrix.variant }}
+
+      - name: Build Live ISO (${{ matrix.variant }})
+        # ISO comes from the same BST graph -- it's just another artifact
+        # produced by `kind: script` element installer/live-image-<v>.bst
+        # wrapping systemd-repart --offline. Output lands at
+        # build/iso/<v>-stable-amd64.iso.
+        env:
+          BST_FLAGS: '--no-interactive --on-error=continue'
+        run: just build-iso ${{ matrix.variant }}
 
       - name: Log in to GHCR
         if: steps.eligibility.outputs.can_push == 'true'
@@ -143,11 +173,25 @@ jobs:
         if: steps.push.outputs.pushed == 'true'
         # No private key needed. Sigstore Fulcio CA issues a short-lived
         # cert tied to this workflow's GitHub OIDC identity. Verify with:
-        #   cosign verify ${IMAGE_REGISTRY}:nightly \
+        #   cosign verify ${IMAGE_REGISTRY}:cosmic-nightly \
         #     --certificate-identity-regexp \
         #       'https://github.com/razorfinos-org/cosmic-build-meta/.github/workflows/build.yml@.+' \
         #     --certificate-oidc-issuer https://token.actions.githubusercontent.com
         run: cosign sign --yes "${{ steps.push.outputs.image_ref }}"
+
+      - name: Sign Live ISO (keyless via Sigstore OIDC)
+        if: steps.push.outputs.pushed == 'true'
+        # Sign the ISO blob alongside its image. Verify with:
+        #   cosign verify-blob --signature <sig> --certificate <cert> ...
+        # cosign emits .sig + .cert files alongside the input.
+        run: |
+          set -euo pipefail
+          ISO="build/iso/${{ matrix.variant }}-stable-amd64.iso"
+          cosign sign-blob --yes \
+              --output-signature "${ISO}.sig" \
+              --output-certificate "${ISO}.cert" \
+              "${ISO}"
+          sha256sum "${ISO}" > "${ISO}.sha256"
 
       - name: Generate build provenance attestation
         if: steps.push.outputs.pushed == 'true'
@@ -159,10 +203,38 @@ jobs:
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
+      - name: Upload ISO as workflow artifact
+        # Always upload the ISO (even when can_push=false on fork PRs)
+        # so reviewers can download and smoke-test from the workflow run.
+        # Tag-push uploads to GH Releases happen in the next step.
+        uses: actions/upload-artifact@v4
+        with:
+          name: iso-${{ matrix.variant }}
+          path: |
+            build/iso/${{ matrix.variant }}-stable-amd64.iso
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.sha256
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.sig
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.cert
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Upload ISO to GitHub Release (tag push only)
+        if: github.ref_type == 'tag' && steps.eligibility.outputs.can_push == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/iso/${{ matrix.variant }}-stable-amd64.iso
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.sha256
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.sig
+            build/iso/${{ matrix.variant }}-stable-amd64.iso.cert
+          # Don't override release body across matrix runs -- each
+          # variant's upload is additive.
+          append_body: false
+
       - name: Upload BST logs (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-logs
+          name: build-logs-${{ matrix.variant }}
           path: ~/.cache/buildstream/logs/
           retention-days: 7

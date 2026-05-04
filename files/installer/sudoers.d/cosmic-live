@@ -1,0 +1,12 @@
+# Passwordless sudo for the Live env user.
+#
+# Filename intentionally has no extension: sudo skips files with `.` in
+# the name in /etc/sudoers.d/ (man sudoers, "Including other files").
+#
+# Scope: cosmic-live exists ONLY in Live ISO images; installed systems
+# do not ship this drop-in. The Live env's whole purpose is to drive
+# fisherman through a privileged install pipeline, so the security
+# trade-off (passwordless sudo for one user in an ephemeral live env)
+# is the same one Pop!_OS, Bluefin, dakota, and every other installer
+# Live env makes.
+cosmic-live ALL=(ALL) NOPASSWD: ALL

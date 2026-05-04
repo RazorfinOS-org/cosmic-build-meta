@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=Install COSMIC
+Comment=Install COSMIC to your computer
+# Launch the Flatpak'd tuna-installer. flatpak run resolves the app id
+# against the system installation populated by
+# bootc-installer-flatpak-install.service at first live boot.
+Exec=flatpak run org.bootcinstaller.Installer
+Icon=org.bootcinstaller.Installer
+Terminal=false
+Categories=System;
+# Only autostart in the Live env (cosmic-live user); the same desktop
+# files don't ship in installed systems' /etc/xdg/autostart, so this
+# is belt-and-suspenders.
+OnlyShowIn=COSMIC;

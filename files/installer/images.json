@@ -1,0 +1,20 @@
+{
+  "fallback_flatpaks": [],
+  "default_image": "ngcr.io/razorfinos/cosmic:nightly",
+  "images": [
+    {
+      "name": "COSMIC Desktop",
+      "desc": "Atomic COSMIC desktop on a bootc/composefs base.",
+      "children": [
+        {
+          "name": "COSMIC",
+          "desc": "Open-source GPU drivers (Mesa). For Intel and AMD graphics. Installed from ngcr.io over the network; bootc upgrade pulls future updates from the same ref.",
+          "imgref": "ngcr.io/razorfinos/cosmic:nightly",
+          "filesystem": "btrfs",
+          "composefs": true,
+          "bootloader": "systemd"
+        }
+      ]
+    }
+  ]
+}

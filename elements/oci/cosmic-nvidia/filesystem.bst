@@ -4,6 +4,11 @@ kind: compose
 
 build-depends:
 - oci/cosmic-nvidia/stack.bst
+# NVIDIA variant: pin bootc upgrade to :cosmic-nvidia-stable. Different
+# file than oci/cosmic/filesystem.bst's bootc-defaults-cosmic.bst, but
+# both ship at /etc/bootc/install/00-defaults.toml -- last writer wins
+# at compose time, and these are sibling filesystem builds (no overlap).
+- oci/integration/bootc-defaults-cosmic-nvidia.bst
 
 config:
   exclude:

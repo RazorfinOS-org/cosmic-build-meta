@@ -1,0 +1,29 @@
+// Allow the cosmic-live user to run pkexec without authentication.
+//
+// Why: tuna-installer's fisherman backend invokes
+//   `flatpak-spawn --host pkexec /home/cosmic-live/.cache/bootc-installer/fisherman <recipe.json>`
+// to escalate from the cosmic-live session to root for `bootc install
+// to-disk`. Without this rule polkit returns
+//   "Error executing command as another user: Not authorized"
+// because cosmic-live has no authentication agent attached and the
+// default policy for org.freedesktop.policykit.exec is auth_admin
+// (interactive admin password).
+//
+// Why a fixed allow (no prompt): the live env is single-user, no real
+// secrets on disk, the *only* reason to elevate is to install onto
+// the user's chosen target. Prompting for a password the user
+// doesn't have just blocks the install. Mirrors gnome-os installer's
+// passwordless rule for its OEM live user. Lives only in the live
+// ISO -- the installed system inherits no /etc/polkit-1/rules.d/
+// drop-in from this element because installer/live-extras.bst is not
+// in oci/cosmic/stack.bst.
+//
+// Filename ordering: 49- so that distro overrides at 50-* and admin
+// overrides at 90-* both win without renaming this file.
+
+polkit.addRule(function(action, subject) {
+    if (subject.user == "cosmic-live" &&
+        action.id == "org.freedesktop.policykit.exec") {
+        return polkit.Result.YES;
+    }
+});

@@ -1,0 +1,26 @@
+# Live env greetd config.
+#
+# Layered on top of files/oci/greetd/config.toml at integration time:
+# elements/oci/cosmic-live/* overwrites the base by re-installing this
+# file at /etc/greetd/config.toml. The cosmic-greeter session disappears;
+# the live env autologins as cosmic-live straight into a COSMIC session,
+# and tuna-installer auto-launches via the autostart .desktop entry.
+[terminal]
+vt = 1
+
+# greetd's [initial_session] is a one-shot autologin: runs exactly once
+# per greetd-state directory, then never again. For a Live ISO this is
+# exactly what we want because every USB boot is fresh -- greetd's
+# state lives on the read-only ISO image, so it appears "first boot"
+# every time the user reboots into the Live env.
+[initial_session]
+command = "/usr/local/bin/cosmic-live-session-wrapper"
+user = "cosmic-live"
+
+# default_session is required by greetd's parser even when initial_session
+# carries the actual autologin. If we somehow fall through to it, drop
+# the user into a sleep so the screen doesn't go to a no-session state
+# that's harder to diagnose than a black screen.
+[default_session]
+command = "/usr/bin/sleep infinity"
+user = "cosmic-live"

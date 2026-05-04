@@ -54,3 +54,32 @@ config:
     blacklist nouveau
     options nouveau modeset=0
     EOF
+
+    # Kernel cmdline for the installed bootc system. bootc reads files
+    # in /usr/lib/bootc/kargs.d/ at install/upgrade time and writes the
+    # kargs into the systemd-boot entry it generates.
+    #
+    # Why each one (mirrors uBlue/Bazzite's NVIDIA + Wayland baseline):
+    #   - rd.driver.blacklist=nouveau / modprobe.blacklist=nouveau
+    #     /etc/modprobe.d/blacklist-nouveau.conf isn't visible in the
+    #     initramfs, so without these the initramfs autoloads nouveau
+    #     before the rootfs blacklist applies; nouveau then claims the
+    #     DRM device and nvidia-drm fails to bind.
+    #   - nvidia-drm.modeset=1
+    #     Belt-and-braces with the modprobe.d option. If nvidia-drm gets
+    #     pulled in by udev before /etc/modprobe.d/nvidia.conf is read,
+    #     modeset stays off and any Wayland compositor (cosmic-comp)
+    #     refuses to acquire DRM master.
+    #   - initcall_blacklist=simpledrm_platform_driver_init
+    #     simpledrm binds to the EFI framebuffer very early; on some
+    #     hardware nvidia-drm refuses to take over, leaving cosmic-comp
+    #     without a working /dev/dri/card0.
+    install -d "%{install-root}/usr/lib/bootc/kargs.d"
+    cat > "%{install-root}/usr/lib/bootc/kargs.d/00-nvidia.toml" <<'EOF'
+    kargs = [
+        "rd.driver.blacklist=nouveau",
+        "modprobe.blacklist=nouveau",
+        "nvidia-drm.modeset=1",
+        "initcall_blacklist=simpledrm_platform_driver_init",
+    ]
+    EOF

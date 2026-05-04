@@ -1,0 +1,35 @@
+# bootc install defaults for the COSMIC NVIDIA variant.
+#
+# Same filesystem default as the cosmic variant (btrfs) plus the
+# NVIDIA-specific kernel cmdline that mirrors what
+# installer/live-image-cosmic-nvidia.bst sets for the live UKI:
+#
+#   rd.driver.blacklist=nouveau, modprobe.blacklist=nouveau
+#     Prevent the in-tree nouveau driver from claiming the GPU before
+#     nvidia-drm binds. Without these, on first boot the installed
+#     system races between nouveau (loads early) and the proprietary
+#     stack -- nouveau usually wins, user lands at a Wayland session
+#     running on llvmpipe with no NVIDIA accel.
+#   nvidia-drm.modeset=1
+#     Enable kernel modesetting on the NVIDIA module so cosmic-comp
+#     can drive the framebuffer over wayland. The proprietary driver
+#     defaults this to 0 on older releases.
+#   initcall_blacklist=simpledrm_platform_driver_init
+#     Skip the EFI framebuffer driver so nvidia-drm gets the primary
+#     display unmolested. simpledrm "owns" the screen otherwise and
+#     nvidia-drm fails to attach.
+#
+# These kargs only affect bootc install -- the user's installed system
+# will boot with these on every kernel from then on. The live ISO
+# sets the same values via its UKI cmdline (live-image-*.bst) so the
+# live env behaves the same as the future installed system.
+[install]
+kargs = [
+  "rd.driver.blacklist=nouveau",
+  "modprobe.blacklist=nouveau",
+  "nvidia-drm.modeset=1",
+  "initcall_blacklist=simpledrm_platform_driver_init",
+]
+
+[install.filesystem.root]
+type = "btrfs"

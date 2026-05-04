@@ -1,0 +1,15 @@
+# bootc install defaults for the COSMIC (open-source GPU drivers) variant.
+#
+# Read by `bootc install to-disk` and `bootc install to-filesystem` to
+# pre-set defaults that the user/installer doesn't override on the
+# command line. Schema doesn't accept `target-imgref` here -- that
+# field is command-line-only (`bootc install --target-imgref=<ref>`,
+# which fisherman passes explicitly). The installed system tracks its
+# upgrade origin from image metadata, so no config-file equivalent is
+# needed.
+#
+# Valid top-level keys under [install]: root-fs-type, block,
+# filesystem, kargs, match-architectures, ostree, stateroot,
+# root-mount-spec, boot-mount-spec, bootupd, bootloader.
+[install.filesystem.root]
+type = "btrfs"
