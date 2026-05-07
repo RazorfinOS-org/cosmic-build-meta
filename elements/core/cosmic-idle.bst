@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-idle.git
   track: master
-  ref: epoch-1.0.11-0-gc95d066b5b640509a6369634b669ca60dc50e168
+  ref: epoch-1.0.9-0-gc95d066b5b640509a6369634b669ca60dc50e168
 - kind: cargo2
   url: "crates:"
   ref:
@@ -99,7 +99,7 @@ sources:
     sha: 1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
-    repo: https://github.com/jackpot51/rust-atomicwrites
+    repo: github:jackpot51/rust-atomicwrites
     name: atomicwrites
     version: 0.4.2
   - kind: registry
@@ -1217,7 +1217,6 @@ sources:
     name: zvariant_utils
     version: 3.2.1
     sha: c6949d142f89f6916deca2232cf26a8afacf2b9fdc35ce766105e104478be599
-
 config:
   configure-commands: []
   build-commands:
