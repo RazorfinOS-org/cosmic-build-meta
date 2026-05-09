@@ -22,7 +22,7 @@ sources:
 - kind: git_repo
   url: github:flatpak/flatpak.git
   track: 1.17.*
-  ref: 1.17.7-0-gb4c53a4cfffd5dd471589249e35be6ab9e08b6a5
+  ref: 1.17.6-0-g926a7292749a6d4196ed01cc7400a8f7e425bc86
 
 build-depends:
 - freedesktop-sdk.bst:public-stacks/buildsystem-meson.bst

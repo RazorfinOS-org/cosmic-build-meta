@@ -28,8 +28,3 @@ config:
   overrides:
     components/flatpak.bst: cosmic-deps/flatpak.bst
     components/flatpak-minimal.bst: cosmic-deps/flatpak.bst
-    # Swap fdsdk's rustc 1.92 (built from source) for a prebuilt 1.93
-    # tarball. COSMIC 1.0.12 raised MSRV to 1.93; fdsdk 25.08.x is still
-    # on 1.92. See cosmic-deps/rust.bst for the full rationale and the
-    # condition under which this override should be removed.
-    components/rust.bst: cosmic-deps/rust.bst
