@@ -1,0 +1,197 @@
+# Shared scaffolding for the Live ISO assembly elements
+# (installer/live-image-cosmic.bst and live-image-cosmic-nvidia.bst).
+#
+# Both elements consume a squashed Live sysroot (kind: compose) at
+# /sysroot and produce a single live.iso under %{install-root}. They
+# diverge only in:
+#   - which filesystem.bst + install-source.bst they pull
+#   - iso-seed (deterministic UUIDs; distinct so dual-deploy doesn't clash)
+#   - efi-subdir + entry-name + entry-title + entry-version (ESP layout)
+#   - extra-kargs (NVIDIA wants nouveau blacklist + nvidia-drm.modeset=1
+#     + simpledrm blacklist; cosmic variant adds nothing)
+#
+# Everything else -- the /usr/etc -> /etc merge, sysusers + shadow synth,
+# preset-all, depmod, setuid restoration, graphical.target wiring, repart
+# definitions staging -- is identical across variants and lives here.
+# Drift between the two scripts cost us a session of bisecting the live
+# NVIDIA env (missing setuid + missing depmod silently broke pkexec and
+# btrfs auto-mount); this include exists so any future addition to the
+# shared sysroot-prep block lands in both variants by construction.
+
+build-depends:
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:components/jq.bst
+- freedesktop-sdk.bst:components/systemd.bst
+- freedesktop-sdk.bst:components/dosfstools.bst
+- freedesktop-sdk.bst:components/mtools.bst
+- freedesktop-sdk.bst:components/util-linux.bst
+- freedesktop-sdk.bst:components/erofs-utils.bst
+- installer/repart-config-iso.bst
+
+environment:
+  # FDSDK build sandboxes don't ship /tmp; systemd-repart fails with
+  # "Could not determine temporary directory" without one.
+  TMPDIR: /var/tmp
+
+config:
+  commands:
+  - mkdir -p /var/tmp /tmp
+  - chmod 1777 /var/tmp /tmp
+
+  # Apply image-time integration that oci/cosmic/image.bst runs for
+  # the regular OCI variant. The live filesystem (oci/cosmic-live/
+  # filesystem.bst) is a `kind: compose` and doesn't run these itself,
+  # so without this block:
+  #   - systemd presets are inert: greetd.service is not symlinked
+  #     into graphical.target.wants/, the live env hangs at
+  #     multi-user.target, no autologin happens.
+  #   - sysusers is inert: cosmic-live user from
+  #     files/installer/sysusers.d/cosmic-live.conf is never created,
+  #     greetd's [initial_session] would fail to find the user anyway.
+  #
+  # FDSDK follows the OSTree convention of shipping vendor-default
+  # /etc files under /usr/etc; the runtime layer is expected to merge
+  # them into /etc on first boot (or at image-assembly time). The
+  # bootc image does this merge in oci/cosmic/image.bst; the live env
+  # never did, so /etc/shadow (FDSDK's vendor copy) only ever existed
+  # at /usr/etc/shadow and was invisible to PAM at boot. Mirror the
+  # bootc image's merge before running sysusers so subsequent steps
+  # (and the boot itself) see a populated /etc.
+  - |
+    if [ -d /sysroot/usr/etc ]; then
+      mkdir -p /sysroot/etc
+      cp -a /sysroot/usr/etc/. /sysroot/etc/
+      rm -rf /sysroot/usr/etc
+    fi
+
+  # /etc/shells: required by pkexec for the SHELL-env-var safety check
+  # (polkit rejects pkexec invocations whose $SHELL isn't in this file
+  # with "The value for the SHELL variable was not found in the
+  # /etc/shells file"). FDSDK doesn't ship one, and cosmonaut-installer's
+  # privileged-pipeline path launches via pkexec from cosmic-live's
+  # bash shell -- without this file the install fails before fisherman
+  # ever touches the disk. Mirrors the standard Debian/Arch contents.
+  - |
+    printf '%s\n' /bin/sh /bin/bash /usr/bin/sh /usr/bin/bash /sbin/nologin /usr/sbin/nologin \
+        > /sysroot/etc/shells
+    chmod 0644 /sysroot/etc/shells
+
+  - systemd-sysusers --root /sysroot
+
+  # systemd-sysusers writes /etc/passwd and /etc/group but does NOT
+  # populate /etc/shadow when a user already exists in passwd (FDSDK's
+  # platform-oci ships passwd entries for system users without matching
+  # shadow rows -- sysusers's idempotency check looks at passwd only and
+  # silently skips shadow). With no shadow file, PAM's pam_unix `account`
+  # stack returns AUTHINFO_UNAVAIL for every user, greetd's session start
+  # fails, and after StartLimitBurst systemd logs "Failed to start
+  # Greeter daemon" -- the live env then sits at multi-user with no GUI.
+  #
+  # Fix: synthesize locked shadow/gshadow entries for every passwd/group
+  # entry that doesn't already have one. `!*` is the canonical "no
+  # password set / login disabled" placeholder; greetd's [initial_session]
+  # uses pam_succeed_if-style autologin via login -f and doesn't need a
+  # real password hash.
+  - |
+    # FDSDK's platform-oci ships /etc/shadow + /etc/gshadow with mode
+    # 0000 (the canonical secure perm). The BST sandbox runs without
+    # CAP_DAC_OVERRIDE, so root cannot open() a 0000 file for write
+    # even though it owns the file -- chmod 0600 first to make it
+    # appendable. (chmod itself only needs ownership, not DAC_OVERRIDE.)
+    # If the file doesn't exist yet, touch creates it with default
+    # mode and the chmod is a no-op refinement.
+    touch /sysroot/etc/shadow /sysroot/etc/gshadow
+    chmod 0600 /sysroot/etc/shadow /sysroot/etc/gshadow
+    while IFS=: read -r u _; do
+      grep -q "^${u}:" /sysroot/etc/shadow || \
+        printf '%s:!*:19000:0:99999:7:::\n' "$u" >> /sysroot/etc/shadow
+    done < /sysroot/etc/passwd
+    while IFS=: read -r g _ _ members; do
+      grep -q "^${g}:" /sysroot/etc/gshadow || \
+        printf '%s:!::%s\n' "$g" "$members" >> /sysroot/etc/gshadow
+    done < /sysroot/etc/group
+    # Leave at 0600 (not the canonical 0000): the systemd-repart step
+    # below runs mkfs.erofs in this same BST sandbox without
+    # CAP_DAC_OVERRIDE -- a 0000 file is unreadable to the build's own
+    # root and gets silently dropped from the EROFS image. PAM treats
+    # 0600 root:root as fine; unix_chkpwd is setuid root and reads it
+    # via owner perms.
+    chmod 0600 /sysroot/etc/shadow /sysroot/etc/gshadow
+    chown 0:0 /sysroot/etc/shadow /sysroot/etc/gshadow
+
+  - systemctl --root=/sysroot preset-all
+
+  # Generate modules.dep + modules.alias for the staged kernel.
+  # FDSDK ships /usr/lib/modules/<kver>/{kernel/,modules.builtin,...}
+  # but skips the depmod step that produces modules.dep, modules.alias,
+  # modules.symbols, modules.devname. Without those, kmod's
+  # request_module()/modprobe by alias fails -- which means:
+  #   - btrfs can't auto-load crc32c (mount fails with open_ctree -2)
+  #   - fuse can't auto-load (xdg-document-portal hangs)
+  #   - any modules-load.d entry by short name silently no-ops
+  # Running depmod against the staged sysroot reads the modules' own
+  # MODULE_ALIAS() / dependency strings and writes the canonical
+  # mapping files. depmod is in kmod.bst which is part of FDSDK's
+  # runtime-minimal stack (already a build-dep above), so no extra
+  # element is needed.
+  - |
+    KVER=$(ls /sysroot/usr/lib/modules | head -n1)
+    depmod -a -b /sysroot "$KVER"
+    echo "depmod wrote $(wc -l < /sysroot/usr/lib/modules/$KVER/modules.dep) module deps"
+
+  # Restore setuid bits on privileged binaries. BST's compose runs
+  # unprivileged so chmod u+s during dependency builds is a no-op,
+  # and the staged sysroot ends up with mode 0755 instead of 4755 on
+  # everything that should be setuid root. The bootc image build
+  # (oci/cosmic/image.bst) sidesteps this via fakecap LD_PRELOAD +
+  # build-oci's tar-with-explicit-mode emission, but the live env
+  # packs straight to EROFS without that round-trip -- we have to
+  # restore the bits by hand.
+  #
+  # Symptom we hit: cosmonaut-installer's privileged backend invokes
+  # `flatpak-spawn --host pkexec ...` and pkexec exits with
+  # `pkexec must be setuid root` -- install fails before fisherman
+  # ever calls bootc. Same applies to sudo, su, mount, umount, etc.
+  # via different code paths (sudo without setuid means cosmic-live's
+  # passwordless rule never fires either).
+  #
+  # The list is the canonical FDSDK setuid set; entries that don't
+  # exist in /sysroot (variant differences) silently no-op via
+  # `2>/dev/null || true`.
+  - |
+    for f in \
+      /sysroot/usr/bin/pkexec \
+      /sysroot/usr/bin/sudo \
+      /sysroot/usr/bin/su \
+      /sysroot/usr/bin/mount \
+      /sysroot/usr/bin/umount \
+      /sysroot/usr/bin/passwd \
+      /sysroot/usr/bin/chage \
+      /sysroot/usr/bin/chsh \
+      /sysroot/usr/bin/chfn \
+      /sysroot/usr/bin/expiry \
+      /sysroot/usr/bin/gpasswd \
+      /sysroot/usr/bin/newgrp \
+      /sysroot/usr/bin/newuidmap \
+      /sysroot/usr/bin/newgidmap \
+      /sysroot/usr/bin/nvidia-modprobe \
+      /sysroot/usr/libexec/dbus-daemon-launch-helper \
+      /sysroot/usr/lib/polkit-1/polkit-agent-helper-1 \
+      /sysroot/usr/lib/x86_64-linux-gnu/polkit-1/polkit-agent-helper-1 \
+    ; do
+      [ -f "$f" ] && chmod 4755 "$f" 2>/dev/null || true
+    done
+
+  # FDSDK's greetd.service [Install] section only declares
+  # `Alias=display-manager.service`, no `WantedBy=graphical.target`.
+  # systemctl preset-all therefore enables the alias but never wires
+  # greetd into graphical.target.wants/, so on boot the system
+  # progresses to graphical.target without a display manager and
+  # falls through to a serial getty. Pin the wants symlink manually.
+  - mkdir -p /sysroot/etc/systemd/system/graphical.target.wants
+  - ln -sf ../display-manager.service /sysroot/etc/systemd/system/graphical.target.wants/display-manager.service
+
+  # Stage the repart definitions into a writable dir (repart can't
+  # write back to its --definitions= when it's read-only in /usr/lib).
+  - mkdir -p definitions
+  - cp /usr/lib/repart.iso.d/*.conf definitions/

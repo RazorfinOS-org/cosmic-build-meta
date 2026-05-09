@@ -1,0 +1,59 @@
+# bootc install-config drop-in.
+#
+# Read by `bootc install to-{disk,filesystem}` from inside the COSMIC
+# bootc image during install, and appended to the kernel cmdline that
+# lands in the deployed system's BLS entries. One source of truth: any
+# karg here applies to every install path (cosmonaut-installer,
+# fisherman, generate-bootable-image, downstream tools) without those
+# tools needing to pass it via --karg explicitly.
+#
+# Each entry below is "universally safe" -- applies cleanly to QEMU
+# AND to real hardware. QEMU-debug-only kargs (console=ttyS0,
+# systemd.debug_shell=ttyS1, etc.) stay out of here -- they're added
+# at build time by `just generate-bootable-image` only, since we
+# don't want to hand a root shell on serial1 to anyone with physical
+# access to a deployed machine.
+#
+# Per karg:
+#
+#   video=Virtual-1:1680x1050
+#     Pins the virtio-gpu connector named "Virtual-1" (QEMU + KVM)
+#     to a 1680x1050 mode at boot. Without this the kernel picks
+#     virtio-gpu's default 640x480 and cosmic-initial-setup's
+#     "Create your account" page (~880px tall) clips the password /
+#     confirm fields off the bottom. On real hardware the connector
+#     is HDMI-1/eDP-1/DP-1/etc., so the kernel silently ignores this.
+#     Real fix: smithay PR #1923 + cosmic-initial-setup making the
+#     create-account page scrollable / shorter.
+#
+#   quiet
+#     Suppress kernel printk to console below WARN level. dmesg's
+#     ringbuffer keeps the full log regardless. Same default Fedora,
+#     Debian, Ubuntu, Arch all ship in their BLS entries.
+#
+#   loglevel=3
+#     Belt-and-suspenders with quiet: only KERN_ERR and above to
+#     console. Doesn't affect dmesg.
+#
+#   systemd.show_status=false
+#     Silence systemd's per-unit "Started/Reached/Mounted ..." lines
+#     on the console. Cleaner first-boot UX before greetd takes over.
+#     Status still in journalctl.
+#
+#   vt.global_cursor_default=0
+#     Hide the blinking text cursor on the active VT during the
+#     window between kernel handoff and cosmic-comp painting. Pure
+#     cosmetic; matters for the "looks polished out of the box"
+#     impression.
+#
+# Schema: bootc-install-config(5)
+#   https://bootc.dev/bootc/man/bootc-install-config.5.html
+
+[install]
+kargs = [
+    "video=Virtual-1:1680x1050",
+    "quiet",
+    "loglevel=3",
+    "systemd.show_status=false",
+    "vt.global_cursor_default=0",
+]

@@ -1,0 +1,31 @@
+// Allow the cosmic-live user to drive the cosmonaut-installer DBus
+// daemon (dev.cosmonaut.Installer1) without authentication.
+//
+// Why: cosmonaut-installer's daemon defines two polkit actions —
+//   dev.cosmonaut.installer.install   (run the install pipeline)
+//   dev.cosmonaut.installer.network   (configure wifi for the installer)
+// — both default to auth_admin_keep so a deployed system would prompt
+// for an admin password. The Live env's cosmic-live user has no
+// password and no authentication agent attached; without this allow
+// rule polkit returns "Not authorized" and the install can't start.
+//
+// Why a fixed allow (no prompt): the live env is single-user, no real
+// secrets on disk, the *only* reason to elevate is to install onto
+// the user's chosen target. Mirrors gnome-os-installer's passwordless
+// rule for its OEM live user.
+//
+// Scope: this file ships only via installer/live-extras.bst, which is
+// only depended on by oci/cosmic-live/stack.bst and oci/cosmic-nvidia-live/
+// stack.bst. The deployed installed system inherits no rule from this
+// file; cosmonaut-installer is live-only anyway (see plan §3).
+//
+// Filename ordering: 49- so distro overrides at 50-* and admin
+// overrides at 90-* both win without renaming this file.
+
+polkit.addRule(function(action, subject) {
+    if (subject.user == "cosmic-live" &&
+        (action.id == "dev.cosmonaut.installer.install" ||
+         action.id == "dev.cosmonaut.installer.network")) {
+        return polkit.Result.YES;
+    }
+});

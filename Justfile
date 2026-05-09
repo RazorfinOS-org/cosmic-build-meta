@@ -30,12 +30,10 @@ bootable_image := env_var_or_default("COSMIC_BOOTABLE_IMAGE", "build/bootable.ra
 bootable_size := env_var_or_default("COSMIC_BOOTABLE_SIZE", "30G")
 
 # Sparse target disk attached as a SECOND virtio drive to `boot-iso` /
-# `boot-iso-headless` so tuna-installer has somewhere to install onto.
-# 60G default -- tuna-installer's disk-picker enforces a 50G minimum
-# (its disk validator rejects anything smaller before letting fisherman
-# proceed), so 30G or 40G targets won't show up as installable. Sparse
-# allocation means the file only consumes blocks actually written by
-# bootc install (~5-10G in practice).
+# `boot-iso-headless` so cosmonaut-installer has somewhere to install
+# onto. 60G default; sparse allocation means the file only consumes
+# blocks actually written by `bootc install to-filesystem` (~5-10G in
+# practice).
 install_target := env_var_or_default("COSMIC_INSTALL_TARGET", "build/install-target.raw")
 install_target_size := env_var_or_default("COSMIC_INSTALL_TARGET_SIZE", "60G")
 
@@ -69,6 +67,15 @@ bst *args:
     #!/usr/bin/env bash
     set -euo pipefail
     mkdir -p "${HOME}/.cache/buildstream" "${HOME}/.config/buildstream"
+    # Placeholder dirs for `kind: local` sources that are normally
+    # populated by host-side prep recipes (build-iso → prep-install-source).
+    # BST refuses to load an element whose `kind: local` path doesn't
+    # exist, so we keep the dirs around as empty stubs for `bst show` /
+    # `bst build` of unrelated elements. The real squashed OCI overwrites
+    # them when build-iso runs.
+    mkdir -p \
+        "{{justfile_directory()}}/build/install-source-cosmic" \
+        "{{justfile_directory()}}/build/install-source-cosmic-nvidia"
     # Bump BST's CAS quota to 200G. Default is too small for our
     # workload -- the live ISO artifact is ~25G (OCI image baked in,
     # plus pre-deployed flatpak runtime, plus the COSMIC sysroot) and
@@ -85,6 +92,11 @@ bst *args:
     # BST_FLAGS env var allows CI to inject --no-interactive, --config, etc.
     # Word-splitting is intentional here (flags are space-separated).
     # shellcheck disable=SC2086
+    # EXTRA_MOUNTS env var lets dev workflows bind-mount additional host
+    # paths into the sandbox (e.g. an unpublished sibling repo consumed
+    # via `kind: local` or a `file:///src/dev/...` URL). Format is one
+    # or more space-separated `-v src:dst[:opts]` flags. Unset in CI.
+    # Word-splitting is intentional. shellcheck disable=SC2086
     podman run --rm \
         --privileged \
         --device /dev/fuse \
@@ -92,6 +104,7 @@ bst *args:
         -v "{{justfile_directory()}}:/src:rw" \
         -v "${HOME}/.cache/buildstream:/root/.cache/buildstream:rw" \
         -v "${HOME}/.config/buildstream:/root/.config/buildstream:ro" \
+        ${EXTRA_MOUNTS:-} \
         -w /src \
         "{{bst2_image}}" \
         bash -c '\
@@ -123,9 +136,10 @@ build:
 # into rootful podman storage. Used by CI's matrix; locally use this if
 # you want to iterate on the nvidia variant without retypng paths.
 #
-# Tag the loaded image carries comes from $COSMIC_IMAGE_TAG (default
-# "nightly") -- CI overrides per matrix value to cosmic-nightly /
-# cosmic-nvidia-nightly etc.
+# Tagging follows load-image-variant below: the base variant preserves
+# COSMIC_IMAGE_TAG, while non-base variants prefix unqualified tags
+# (default cosmic-nvidia -> nvidia-nightly). CI passes already-prefixed
+# tags (cosmic-nightly / cosmic-nvidia-nightly), which are preserved.
 [group('build')]
 build-variant variant="cosmic":
     just bst build oci/{{variant}}/image.bst
@@ -152,135 +166,55 @@ build-filesystem:
 show-image:
     just bst show oci/cosmic/image.bst
 
-# Pre-fetch the bootc-installer Flatpak + its GNOME 50 runtime into
-# build/installer-prebake/ as a deployed /var/lib/flatpak tree. The
-# `installer/installer-prebake.bst` element BST-imports this tree into
-# the live env's rootfs at /var/lib/flatpak so first-boot doesn't need
-# network or free tmpfs to launch the installer.
+# Removed: prefetch-installer-flatpak (and its build/installer-prebake/
+# output) was the host-side host-side stage that pre-deployed the
+# org.bootcinstaller.Installer Flatpak + GNOME 50 runtime into the live
+# ISO. With cosmonaut-installer (libcosmic, no Flatpak), no host-side
+# Flatpak prereq exists. Old recipe history available in git for
+# reference if anyone needs to bring tuna-installer back temporarily.
+# Squash the bootc OCI image (built by `just build` / `just build-variant`)
+# into a single layer and stage it at build/install-source-{{variant}}/
+# for `oci/{{variant}}/install-source.bst` to import into the live ISO.
 #
-# Why on the host (not in BST): BST's kind:script command-execution
-# sandbox has no network access (only fetch-time network is allowed),
-# and `flatpak install --system` requires flatpak-system-helper (D-Bus
-# + polkit) which the sandbox doesn't have. Doing the install on the
-# host with `flatpak --user` sidesteps both -- the resulting on-disk
-# layout is byte-compatible with /var/lib/flatpak (bare-user-only
-# OSTree repo + app/runtime trees), so importing into the rootfs at
-# the system path Just Works.
+# Why this exists outside BST: bootc 1.x's composefs backend reads layer
+# tarballs via splitstream, which chokes on multi-layer images with
+# "Unexpected EOF in splitstream" (same root cause `load-image` already
+# squashes around for the registry workflow). build-oci's output is 3
+# layers; `podman build --squash-all` collapses them. There is no
+# in-BST-sandbox equivalent today (podman/buildah don't run cleanly
+# inside an FDSDK build sandbox without significant cap juggling), so
+# this is a host-side prep step.
 #
-# Idempotent: re-runs reuse the cached bundle (sha256-verified) and
-# skip the install if the same commits are already deployed.
+# `build-iso` always re-runs this so the staged dir tracks image.bst's
+# current artifact -- BST can't see this dir as an upstream of
+# install-source.bst, so don't skip it manually.
 [group('image')]
-prefetch-installer-flatpak:
+prep-install-source variant="cosmic":
     #!/usr/bin/env bash
     set -euo pipefail
-    # Pinned to match installer/tuna-installer.bst -- when bumping the
-    # tuna-installer version there, bump it here too (BST hashes the
-    # bundle separately for the .flatpak file shipped under
-    # /usr/share/cosmic-installer/, but the deployed tree comes from
-    # this prefetch).
-    BUNDLE_URL="https://github.com/tuna-os/tuna-installer/releases/download/v2.4.0/org.bootcinstaller.Installer.flatpak"
-    BUNDLE_SHA="9747530232987a517a5a7e464f72aba80d420edfe9559d6b3bc741ba0ace5b36"
-    STAGE="build/installer-prebake"
-    BUNDLE="build/installer-bundle.flatpak"
-    FLATPAK_DIR="${STAGE}/var/lib/flatpak"
-    # Wipe the staging tree on every run so partial state from a
-    # previous failed prefetch doesn't poison this one (flatpak install
-    # without --reinstall errors out if the ref is already deployed).
-    # Keep the cached bundle at ${BUNDLE} -- sha256 verified below.
-    rm -rf "${STAGE}"
-    mkdir -p "$(dirname ${BUNDLE})" "${FLATPAK_DIR}"
-    if [ ! -f "${BUNDLE}" ] || ! printf '%s  %s\n' "${BUNDLE_SHA}" "${BUNDLE}" | sha256sum -c >/dev/null 2>&1; then
-        echo "==> Fetching tuna-installer bundle"
-        curl -L --fail -o "${BUNDLE}" "${BUNDLE_URL}"
-        printf '%s  %s\n' "${BUNDLE_SHA}" "${BUNDLE}" | sha256sum -c
-    else
-        echo "==> Reusing cached bundle: ${BUNDLE}"
-    fi
-    # --user install into a custom FLATPAK_USER_DIR. Adds Flathub
-    # (idempotent), installs the runtime deps explicitly (flatpak
-    # install --bundle does NOT pull deps -- only the app -- so a
-    # bare bundle install leaves /var/lib/flatpak missing the GNOME
-    # Platform tree the app needs at run time), then installs the
-    # bundle itself. ~1.5 GB net pull on first run; cached in
-    # ${FLATPAK_DIR}/repo/objects/ for re-runs.
-    export FLATPAK_USER_DIR="${FLATPAK_DIR}"
-    flatpak --user remote-add --if-not-exists \
-        flathub https://flathub.org/repo/flathub.flatpakrepo
-    # Runtime deps as declared in the bundle's manifest. If a future
-    # tuna-installer bump changes the runtime branch (e.g. GNOME 50 ->
-    # 51), update these refs alongside BUNDLE_URL above. Inspect the
-    # bundle's runtime ref by grepping the .flatpak file:
-    #   strings build/installer-bundle.flatpak | grep ^runtime=
-    #
-    # Install runtime BEFORE the bundle. Caveats:
-    #   - `flatpak install --bundle` itself does NOT pull deps -- only
-    #     the app -- so this step is mandatory or `flatpak run` later
-    #     fails with "runtime/org.gnome.Platform/x86_64/50 not installed".
-    #   - Don't use `--or-update`: when the ref isn't already present
-    #     in the user installation, --or-update silently skips it
-    #     instead of installing. We want hard install semantics.
-    #   - One ref per command so a failure aborts (set -e) rather than
-    #     installing a partial set silently.
-    flatpak --user install --noninteractive flathub \
-        org.gnome.Platform/x86_64/50
-    flatpak --user install --noninteractive flathub \
-        org.freedesktop.Platform.GL.default/x86_64/25.08
-    flatpak --user install --noninteractive --bundle "${BUNDLE}"
-
-    # Patch the deployed loader to also look at /run/host/etc for the
-    # system-wide images.json override.
-    #
-    # Why: the bundle declares `filesystems=host`, which exposes the
-    # host's root at /run/host/ inside the sandbox -- NOT at /. So the
-    # loader's hardcoded `/etc/bootc-installer/images.json` lookup hits
-    # the runtime's own (empty) /etc and silently falls back to the
-    # bundled GResource catalog of tuna-os images. /etc and /usr are
-    # both "reserved by Flatpak" so a `--filesystem=/etc/...:ro`
-    # override is rejected (verified via `flatpak run --command=ls`
-    # against the live env -- flatpak prints
-    #   F: Not sharing "/etc/..." with sandbox: Path "/etc" is reserved
-    # and the bind silently no-op's). The only host paths reliably
-    # visible to a `filesystems=host` sandbox are under /run/host/ and
-    # outside reserved trees (/opt, /var, /home, /tmp).
-    #
-    # We patch image.py's _load_manifest to also check the /run/host/
-    # mirror of the system override path. Self-contained sed; idempotent
-    # against re-runs because the second invocation finds the patched
-    # string and skips.
-    IMG_PY=$(find "${FLATPAK_DIR}/app/org.bootcinstaller.Installer/x86_64/master" -path '*/files/share/org.bootcinstaller.Installer/bootc_installer/defaults/image.py' | head -1)
-    if [ -n "${IMG_PY}" ] && ! grep -q '/run/host/etc/bootc-installer' "${IMG_PY}"; then
-        # Single-line replacement: just retarget the system override
-        # path. Idempotent: a second run finds no matching string and
-        # does nothing. Adding a separate fallback "if not exists then
-        # check /etc/" isn't worth the complexity -- the in-sandbox
-        # /etc/bootc-installer never has our catalog (reserved path),
-        # and we only support running as flatpak today.
-        sed -i 's|"/etc/bootc-installer/images.json"|"/run/host/etc/bootc-installer/images.json"|' "${IMG_PY}"
-        echo "==> Patched ${IMG_PY} to read images.json from /run/host/etc/"
-    fi
-
-    # Patch processor.py to disable bootc's --experimental-unified-storage
-    # mode. Default in tuna-installer is `True` -- which makes bootc try to
-    # reuse the host's /var/lib/containers and reference the image via
-    # `containers-storage:[overlay@/run/bootc/storage+...]<ref>` after a
-    # zero-second "import". Empirically that reference never resolves to
-    # an image ID and bootc bails with
-    #   error: Installing to filesystem: Creating ostree deployment:
-    #   Failed to pull image: ... does not resolve to an image ID
-    # Switching the default to False makes fisherman omit the flag, and
-    # bootc does a normal pull into its own storage. Slower but works.
-    PROC_PY=$(find "${FLATPAK_DIR}/app/org.bootcinstaller.Installer/x86_64/master" -path '*/files/share/org.bootcinstaller.Installer/bootc_installer/utils/processor.py' | head -1)
-    if [ -n "${PROC_PY}" ] && grep -q 'sys_recipe.get("unifiedStorage", True)' "${PROC_PY}"; then
-        sed -i 's|sys_recipe.get("unifiedStorage", True)|sys_recipe.get("unifiedStorage", False)|' "${PROC_PY}"
-        echo "==> Patched ${PROC_PY} to default unifiedStorage=False"
-    fi
-
-    echo "==> Deployed tree:"
-    du -sh "${FLATPAK_DIR}"
-    echo "  apps:"
-    ls "${FLATPAK_DIR}/app/" 2>/dev/null | sed 's/^/    /' || true
-    echo "  runtimes:"
-    ls "${FLATPAK_DIR}/runtime/" 2>/dev/null | sed 's/^/    /' || true
+    stagedir="build/install-source-{{variant}}-staging"
+    outdir="build/install-source-{{variant}}"
+    rm -rf "$stagedir" "$outdir"
+    mkdir -p "$(dirname "$stagedir")"
+    # Build the bootc image first so the checkout always finds an artifact
+    # (no-op if already cached). build-iso is the entry point most callers
+    # reach this through, so a missing OCI cache should be self-healing.
+    just bst build oci/{{variant}}/image.bst
+    just bst artifact checkout --directory "$stagedir" oci/{{variant}}/image.bst
+    image_id=$(sudo podman pull -q "oci:$stagedir")
+    squash_tag="cosmic-build-meta/install-source-{{variant}}:latest"
+    printf 'FROM %s\n' "$image_id" | sudo podman build \
+        --pull=never \
+        --squash-all \
+        --security-opt label=type:unconfined_t \
+        -t "$squash_tag" \
+        -f - .
+    sudo podman save --format oci-dir -o "$outdir" "$squash_tag"
+    sudo chown -R "$(id -u):$(id -g)" "$outdir"
+    sudo podman rmi "$squash_tag" >/dev/null 2>&1 || true
+    sudo podman rmi "$image_id" >/dev/null 2>&1 || true
+    rm -rf "$stagedir"
+    echo "==> install-source staged at $outdir ($(du -sh "$outdir" | cut -f1))"
 
 # Build the Live ISO via BST (kind: script element wrapping
 # systemd-repart --offline) and checkout the .iso artifact into
@@ -289,16 +223,17 @@ prefetch-installer-flatpak:
 #
 # Output: build/iso/cosmic-<variant>-stable-amd64.iso
 #
+# Runs `prep-install-source` first to refresh the squashed bootc OCI
+# baked into the live root for offline install (see that recipe for
+# rationale).
+#
 # `bst artifact checkout --hardlinks` hardlinks files out of CAS into
 # the staging directory, so a 4+ GB ISO appears in milliseconds without
 # a copy. Reflink-on-btrfs is BST's internal optimisation; the user-
 # facing flag is --hardlinks regardless of underlying filesystem.
 [group('image')]
 build-iso variant="cosmic":
-    # Auto-prefetch the installer Flatpak tree if missing -- the
-    # installer-prebake.bst element imports it and BST will fail at
-    # source-tracking time without the directory present.
-    [ -d build/installer-prebake/var/lib/flatpak/app ] || just prefetch-installer-flatpak
+    just prep-install-source {{variant}}
     just bst build installer/live-image-{{variant}}.bst
     mkdir -p build/iso
     rm -rf "build/iso/{{variant}}.staging"
@@ -311,13 +246,13 @@ build-iso variant="cosmic":
     ls -lh "build/iso/{{variant}}-stable-amd64.iso"
 
 # Boot a built ISO in QEMU/UEFI for smoke-testing the live env +
-# tuna-installer flow. Requires KVM, edk2-ovmf, qemu-system-x86_64
+# cosmonaut-installer flow. Requires KVM, edk2-ovmf, qemu-system-x86_64
 # on the host. Use `just build-iso <variant>` first.
 #
 # Attaches the .iso as a virtio block device, not -cdrom. The image is
-# a hybrid GPT disk (FDSDK 25.08's systemd-repart predates --el-torito,
-# so there's no ISO9660 boot catalog), so UEFI has to see it as a hard
-# disk to find the ESP and chainload BOOTX64.EFI. Same trick as
+# a GPT disk image with an ESP (FDSDK 25.08's systemd-repart predates
+# --el-torito, so there's no ISO9660 boot catalog), so UEFI has to see
+# it as a hard disk to find the ESP and chainload BOOTX64.EFI. Same trick as
 # `boot-iso-headless`; same as `dd`-ing the image to a USB stick.
 #
 # Exposes systemd's debug shell (ttyS1, gated by systemd.debug_shell
@@ -342,6 +277,24 @@ boot-iso variant="cosmic":
     echo "==> Debug shell:    socat - UNIX-CONNECT:${DBGSHELL}"
     echo "==> QEMU monitor:   socat - UNIX-CONNECT:${MONITOR}"
     echo "==> Install target: {{install_target}} ({{install_target_size}} sparse) -> /dev/vdb"
+    # COSMIC_TPM=1 attaches an emulated TPM2 via swtpm, so the live env
+    # sees /dev/tpm0 and cosmonaut-installer's daemon's TPM2 probe
+    # returns true. Required for testing TPM2-LUKS install variants.
+    # Requires `swtpm` on the host. State persists in build/swtpm-state/
+    # so a re-boot of the same install target sees the same TPM history.
+    TPM_FLAGS=""
+    if [ "${COSMIC_TPM:-}" = "1" ]; then
+        TPM_DIR="build/swtpm-state-{{variant}}"
+        TPM_SOCK="build/swtpm-{{variant}}.sock"
+        mkdir -p "$TPM_DIR"
+        pkill -f "swtpm.*${TPM_SOCK}" 2>/dev/null || true
+        sleep 0.2
+        rm -f "$TPM_SOCK"
+        swtpm socket --tpm2 --tpmstate "dir=$TPM_DIR" \
+            --ctrl "type=unixio,path=$TPM_SOCK" --daemon
+        TPM_FLAGS="-chardev socket,id=chrtpm,path=${TPM_SOCK} -tpmdev emulator,id=tpm0,chardev=chrtpm -device tpm-crb,tpmdev=tpm0"
+        echo "==> swtpm: TPM2 emulator at $TPM_SOCK (state: $TPM_DIR)"
+    fi
     # Both -serial flags are mandatory: QEMU maps them in order to
     # ttyS0, ttyS1. Without an explicit ttyS0 sink the dbgshell socket
     # becomes ttyS0, which agetty (serial-getty@ttyS0, autoenabled by
@@ -350,6 +303,7 @@ boot-iso variant="cosmic":
     # connecting the socket lands you at a `cosmic login:` prompt with
     # no usable credentials. Sending ttyS0 to a file routes agetty's
     # garbage there and frees ttyS1 for systemd-debug-shell.
+    # shellcheck disable=SC2086
     qemu-system-x86_64 \
         -m 32768 -accel kvm -cpu host -smp 4 \
         -bios /usr/share/edk2/ovmf/OVMF_CODE.fd \
@@ -357,6 +311,7 @@ boot-iso variant="cosmic":
         -drive "file={{install_target}},if=virtio,format=raw" \
         -device virtio-net-pci,netdev=net0 \
         -netdev user,id=net0 \
+        $TPM_FLAGS \
         -serial "file:${LOG}" \
         -chardev "socket,id=dbgshell,path=${DBGSHELL},server=on,wait=off" \
         -serial chardev:dbgshell \
@@ -396,10 +351,26 @@ boot-iso-headless variant="cosmic":
     echo "==> Debug shell:    socat - UNIX-CONNECT:${DBGSHELL}"
     echo "==> QEMU monitor:   socat - UNIX-CONNECT:${MONITOR}"
     echo "==> Install target: {{install_target}} -> /dev/vdb"
+    # COSMIC_TPM=1 attaches an emulated TPM2 via swtpm. See boot-iso for
+    # the same hook + rationale.
+    TPM_FLAGS=""
+    if [ "${COSMIC_TPM:-}" = "1" ]; then
+        TPM_DIR="build/swtpm-state-{{variant}}"
+        TPM_SOCK="build/swtpm-{{variant}}.sock"
+        mkdir -p "$TPM_DIR"
+        pkill -f "swtpm.*${TPM_SOCK}" 2>/dev/null || true
+        sleep 0.2
+        rm -f "$TPM_SOCK"
+        swtpm socket --tpm2 --tpmstate "dir=$TPM_DIR" \
+            --ctrl "type=unixio,path=$TPM_SOCK" --daemon
+        TPM_FLAGS="-chardev socket,id=chrtpm,path=${TPM_SOCK} -tpmdev emulator,id=tpm0,chardev=chrtpm -device tpm-crb,tpmdev=tpm0"
+        echo "==> swtpm: TPM2 emulator at $TPM_SOCK (state: $TPM_DIR)"
+    fi
     # Attach the .iso as a virtio block device, not -cdrom -- hybrid
     # GPT disk (no ISO9660 boot catalog yet; systemd-repart in FDSDK
     # 25.08 predates --el-torito), so UEFI needs to see it as a hard
     # disk to find the ESP and chainload BOOTX64.EFI.
+    # shellcheck disable=SC2086
     qemu-system-x86_64 \
         -m 32768 -accel kvm -cpu host -smp 4 \
         -bios /usr/share/edk2/ovmf/OVMF_CODE.fd \
@@ -407,6 +378,7 @@ boot-iso-headless variant="cosmic":
         -drive "file={{install_target}},if=virtio,format=raw" \
         -device virtio-net-pci,netdev=net0 \
         -netdev user,id=net0 \
+        $TPM_FLAGS \
         -display none \
         -serial "file:${LOG}" \
         -chardev "socket,id=dbgshell,path=${DBGSHELL},server=on,wait=off" \
@@ -471,9 +443,16 @@ load-image:
 
 # Variant-aware load-image. Used by CI's matrix and by local-dev runs
 # that want to iterate on the cosmic-nvidia image without overwriting
-# the cosmic build's podman tag. The image is tagged
-# `{{image_name}}:{{image_tag}}` -- caller sets COSMIC_IMAGE_TAG to the
-# full variant-suffixed tag (e.g. cosmic-nightly, cosmic-nvidia-nightly).
+# the cosmic build's podman tag.
+#
+# Tag scheme: the base `cosmic` variant maps to COSMIC_IMAGE_TAG as-is
+# (default :nightly, matching `just build`). Other `cosmic-*` variants
+# prefix an unqualified tag with the stripped variant name, but preserve
+# tags that are already variant-prefixed. Examples:
+#   cosmic + nightly                 -> :nightly
+#   cosmic-nvidia + nightly          -> :nvidia-nightly
+#   cosmic-nvidia + nvidia-nightly   -> :nvidia-nightly
+#   cosmic-nvidia + cosmic-nvidia-*  -> :cosmic-nvidia-*
 [group('image')]
 load-image-variant variant="cosmic":
     #!/usr/bin/env bash
@@ -483,13 +462,32 @@ load-image-variant variant="cosmic":
     mkdir -p "$(dirname ${stagedir})"
     just bst artifact checkout --directory "${stagedir}" oci/{{variant}}/image.bst
     image_id=$(sudo podman pull -q "oci:${stagedir}")
+    case "{{variant}}" in
+        cosmic)
+            tag="{{image_tag}}"
+            ;;
+        cosmic-*)
+            suffix="$(echo '{{variant}}' | sed 's/^cosmic-//')"
+            case "{{image_tag}}" in
+                "{{variant}}"|"{{variant}}-"*|"${suffix}"|"${suffix}-"*) tag="{{image_tag}}" ;;
+                *) tag="${suffix}-{{image_tag}}" ;;
+            esac
+            ;;
+        *)
+            case "{{image_tag}}" in
+                "{{variant}}"|"{{variant}}-"*) tag="{{image_tag}}" ;;
+                *) tag="{{variant}}-{{image_tag}}" ;;
+            esac
+            ;;
+    esac
     printf 'FROM %s\n' "${image_id}" | sudo podman build \
         --pull=never \
         --squash-all \
         --security-opt label=type:unconfined_t \
-        -t "{{image_name}}:{{image_tag}}" \
+        -t "{{image_name}}:${tag}" \
         -f - .
     sudo podman rmi "${image_id}" >/dev/null 2>&1 || true
+    echo "Loaded {{image_name}}:${tag}"
 
 # Run `bootc <args>` inside the loaded image, with host container
 # storage and /dev exposed (privileged; required for `install to-disk`).
@@ -526,53 +524,30 @@ generate-bootable-image:
     # `-f` to the mkfs invocation. Sparse fallocate is cheap.
     sudo rm -f "{{bootable_image}}"
     fallocate -l "{{bootable_size}}" "{{bootable_image}}"
-    # Kargs:
-    #   console=ttyS0         -- kernel + systemd output goes to serial0
-    #                            only. boot-vm pipes this through `tee
-    #                            build/console.log` so the full log is
-    #                            available on the host. Intentionally NO
-    #                            `console=tty0` -- without it, the kernel
-    #                            doesn't write to the GTK display, so
-    #                            cosmic-comp paints over a clean black
-    #                            VT instead of competing with scrolling
-    #                            boot text.
-    #   quiet loglevel=3      -- silence kernel printk below WARN. The
-    #                            ones we'd actually want to see in a hang
-    #                            still go to ttyS0 because dmesg keeps
-    #                            the full ringbuffer regardless.
-    #   systemd.show_status=false rd.udev.log_level=3
-    #                         -- silence systemd's per-unit start lines
-    #                            and udev's coldplug spam (both go to
-    #                            tty0 by default, even without
-    #                            console=tty0).
-    #   vt.global_cursor_default=0
-    #                         -- hide the blinking text cursor on tty0
-    #                            during the brief window before
-    #                            cosmic-comp takes over the display.
-    #   systemd.debug_shell=ttyS1
-    #                         -- always-on emergency root shell on
-    #                            serial1 (UNIX socket), reachable even
-    #                            when graphical session is broken.
-    #   systemd.log_target=kmsg systemd.log_color=0
-    #                         -- systemd logs to the kernel ringbuffer
-    #                            (so they go out ttyS0 alongside kernel
-    #                            messages), no ANSI escapes that confuse
-    #                            `less` on the serial capture.
-    #   video=Virtual-1:{{vm_xres}}x{{vm_yres}}
-    #                         -- pin the virtio-gpu connector to a fixed
-    #                            mode at boot. Belt-and-suspenders with
-    #                            `-device virtio-vga-gl,xres=,yres=,edid=on`
-    #                            in `boot-vm`. Needed because cosmic-comp
-    #                            doesn't react to dynamic mode changes
-    #                            on an already-connected connector
-    #                            (smithay PR #1923, not yet picked up
-    #                            by cosmic-comp's pinned rev). Without
-    #                            this, the kernel's default preferred
-    #                            mode is 640x480; even 1280x800 clips
-    #                            cosmic-initial-setup's create-account
-    #                            page (avatar + 4 inputs + buttons need
-    #                            ~880px tall to render without dropping
-    #                            the password fields off the bottom).
+    # Kargs added here are QEMU-DEBUG-SPECIFIC: stuff we don't want on
+    # real-hardware installs of the COSMIC image. Universally-safe
+    # kargs (video=Virtual-1:..., quiet, loglevel=3, systemd.show_status=false,
+    # vt.global_cursor_default=0) live in
+    # files/oci/install-config/cosmic-kargs.toml -- bootc reads that
+    # automatically and merges the result into the BLS entries. So the
+    # deployed system from `generate-bootable-image` ends up with both
+    # the toml-baked kargs AND the ones added below.
+    #
+    #   console=ttyS0,115200n8 -- kernel + systemd output to serial0.
+    #     boot-vm pipes serial0 through `tee build/console.log` so the
+    #     full log is available on the host. Intentionally NO
+    #     `console=tty0` -- without it the kernel doesn't write to the
+    #     GTK display and cosmic-comp paints over a clean black VT.
+    #     QEMU-only: serial console on real hw would be a misconfig.
+    #   rd.udev.log_level=3   -- silence udev coldplug spam on the
+    #     console. udev still logs to journalctl regardless.
+    #   systemd.debug_shell=ttyS1 -- always-on emergency root shell on
+    #     serial1 (UNIX socket from boot-vm). Reachable even when
+    #     greetd is failing. Real hw would expose a passwordless root
+    #     shell via the serial port -- definitely QEMU-only.
+    #   systemd.log_target=kmsg systemd.log_color=0 -- systemd logs to
+    #     the kernel ringbuffer (so they go out ttyS0), no ANSI escapes
+    #     that confuse `less` on the serial capture.
     just bootc install to-disk --composefs-backend \
         --source-imgref "containers-storage:{{image_name}}:{{image_tag}}" \
         --target-imgref "{{image_name}}:{{image_tag}}" \
@@ -583,15 +558,10 @@ generate-bootable-image:
         --wipe \
         --bootloader systemd \
         --karg console=ttyS0,115200n8 \
-        --karg quiet \
-        --karg loglevel=3 \
-        --karg systemd.show_status=false \
         --karg rd.udev.log_level=3 \
-        --karg vt.global_cursor_default=0 \
         --karg systemd.debug_shell=ttyS1 \
         --karg systemd.log_target=kmsg \
-        --karg systemd.log_color=0 \
-        --karg video=Virtual-1:{{vm_xres}}x{{vm_yres}}
+        --karg systemd.log_color=0
 
 # Boot ${COSMIC_BOOTABLE_IMAGE} in QEMU with KVM + UEFI. The OVMF VARS
 # file is copied per-boot to build/OVMF_VARS.fd so the host's read-only

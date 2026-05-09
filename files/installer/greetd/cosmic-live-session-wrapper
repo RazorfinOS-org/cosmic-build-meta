@@ -6,17 +6,10 @@
 # from /etc/greetd/config.toml's [initial_session] in the Live env.
 #
 # After the session is up, the autostart .desktop in
-# /etc/xdg/autostart/ triggers tuna-installer (via flatpak run
-# org.bootcinstaller.Installer).
+# /etc/xdg/autostart/ triggers cosmonaut-installer (the libcosmic
+# install GUI shipped via installer/cosmonaut-installer.bst).
 
-# xdg-desktop-portal-cosmic gates on UseIn=COSMIC; without this export,
-# tuna-installer's portal calls (file chooser when picking ISO source,
-# etc.) timeout. Same rationale as the greeter wrapper.
-export XDG_CURRENT_DESKTOP=COSMIC
-export XDG_SESSION_TYPE=wayland
-
-# Tee the session log to the journal so failures-to-launch are visible
-# in `journalctl -u greetd` from the live env's debug shell (ttyS1 if
-# ever needed).
-exec /usr/bin/systemd-cat -t cosmic-live-session \
-    /usr/bin/start-cosmic
+# Keep the live session as close as possible to a normal COSMIC desktop
+# launch. greetd still provides the live-only autologin user; start-cosmic
+# provides the upstream session environment and starts cosmic-session.
+exec /usr/bin/start-cosmic

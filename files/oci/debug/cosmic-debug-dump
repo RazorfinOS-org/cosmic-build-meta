@@ -1,0 +1,342 @@
+#!/bin/bash
+# cosmic-debug-dump -- one-shot diagnostic for "cosmic-comp can't get DRM
+# master / desktop is at 1 fps" failures on the COSMIC bootc/live image.
+#
+# Run from a debug shell (systemd.debug_shell=tty3 or live env serial).
+# Writes the dump to a log file AND prints to stdout, so the user can
+# photo the screen or `cat` the log. Never fails -- each section is
+# wrapped so a missing command/file in a stripped env doesn't kill the
+# rest of the dump.
+#
+# Usage:
+#   cosmic-debug-dump                         # default: /tmp/cosmic-debug-<ts>.log
+#   cosmic-debug-dump /path/to/output.log     # explicit path (e.g. mounted USB)
+#   cosmic-debug-dump --upload                # also upload log to paste.rs
+#   cosmic-debug-dump --upload-url URL        # upload to another curl-compatible paste endpoint
+#   cosmic-debug-dump --no-vt-sample          # do not briefly switch to tty1 for active-session DRM state
+#
+# Upload note: paste uploads are public/unredacted. Use only for debug logs
+# you are comfortable sharing.
+#
+# Persistence:
+#   - Live ISO: /tmp AND /var/log are both tmpfs (systemd.volatile=overlay),
+#     so the default /tmp path is lost on reboot. To survive: pass a path
+#     under /run/media/<user>/<label>/ after mounting a USB stick, OR photo
+#     the screen.
+#   - Deployed install: /tmp is tmpfs but /var/log is persistent btrfs.
+#     This script ALSO drops a copy at /var/log/cosmic/cosmic-debug-<ts>.log
+#     if that directory is writable. The summary at the end prints every
+#     path the log actually landed at.
+#
+# The most important section is "DRM clients" -- it lists every fd open
+# on each DRM device and which one holds master. If fbcon/logind/session
+# state changes with VT activation, or cosmic-comp never appears where it
+# does on a known-good system, that is a key clue for the next branch.
+
+set +e
+
+TS="$(date +%Y%m%d-%H%M%S)"
+LOG=""
+UPLOAD="${COSMIC_DEBUG_UPLOAD:-0}"
+UPLOAD_URL="${COSMIC_DEBUG_UPLOAD_URL:-https://paste.rs}"
+VT1_SAMPLE="${COSMIC_DEBUG_VT1_SAMPLE:-1}"
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --upload)
+            UPLOAD=1
+            shift
+            ;;
+        --upload-url)
+            UPLOAD=1
+            UPLOAD_URL="$2"
+            shift 2
+            ;;
+        --no-vt-sample)
+            VT1_SAMPLE=0
+            shift
+            ;;
+        --help|-h)
+            sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'
+            exit 0
+            ;;
+        *)
+            if [ -z "$LOG" ]; then
+                LOG="$1"
+                shift
+            else
+                echo "Unknown extra argument: $1" >&2
+                exit 2
+            fi
+            ;;
+    esac
+done
+
+LOG="${LOG:-/tmp/cosmic-debug-${TS}.log}"
+exec > >(tee "$LOG") 2>&1
+
+section() { printf '\n===== %s =====\n' "$1"; }
+run()     { echo "\$ $*"; "$@" 2>&1; echo; }
+run_timeout() {
+    seconds="$1"
+    shift
+    echo "\$ timeout ${seconds}s $*"
+    if command -v timeout >/dev/null 2>&1; then
+        timeout "${seconds}s" "$@" 2>&1
+    else
+        "$@" 2>&1
+    fi
+    echo
+}
+
+ensure_debugfs() {
+    if ! mountpoint -q /sys/kernel/debug 2>/dev/null; then
+        mount -t debugfs debugfs /sys/kernel/debug 2>/dev/null || true
+    fi
+}
+
+dump_drm_debugfs() {
+    ensure_debugfs
+    for d in /sys/kernel/debug/dri/*; do
+        [ -d "$d" ] || continue
+        for f in "$d/clients" "$d/state" "$d/framebuffer" "$d/name"; do
+            if [ -r "$f" ]; then
+                echo "--- $f ---"
+                cat "$f" 2>&1 | head -80
+                echo
+            fi
+        done
+    done
+}
+
+dump_loginctl_sessions() {
+    run loginctl
+    loginctl --no-legend 2>/dev/null | while read -r sid _rest; do
+        [ -n "$sid" ] || continue
+        echo "--- loginctl show-session $sid ---"
+        loginctl show-session "$sid" 2>&1
+        echo
+    done
+    run loginctl seat-status seat0
+}
+
+dump_vt1_active_sample() {
+    if [ "$VT1_SAMPLE" != "1" ] && [ "$VT1_SAMPLE" != "true" ] && [ "$VT1_SAMPLE" != "yes" ]; then
+        echo "tty1 active-session sample disabled (--no-vt-sample or COSMIC_DEBUG_VT1_SAMPLE=0)."
+        return
+    fi
+    if ! command -v chvt >/dev/null 2>&1; then
+        echo "chvt not found; cannot collect tty1 active-session sample."
+        return
+    fi
+
+    orig_vt="$(fgconsole 2>/dev/null | tr -cd '0-9')"
+    active_before="$(cat /sys/class/tty/tty0/active 2>/dev/null || true)"
+    if [ -z "$orig_vt" ]; then
+        case "$active_before" in
+            tty[0-9]*) orig_vt="${active_before#tty}" ;;
+        esac
+    fi
+
+    if [ "$active_before" != "tty1" ]; then
+        if [ -z "$orig_vt" ]; then
+            echo "Cannot determine original VT from fgconsole/tty0; skipping automatic tty1 switch."
+            return
+        fi
+        echo "Switching from ${active_before:-unknown}/fgconsole=${orig_vt} to tty1 for active graphical-session DRM/logind sample..."
+        chvt 1 2>&1 || {
+            echo "chvt 1 failed; skipping tty1 active-session sample."
+            return
+        }
+        sleep "${COSMIC_DEBUG_VT1_DELAY:-8}"
+    else
+        echo "tty1 is already active; collecting active-session sample in place."
+    fi
+
+    echo "active after switch: $(cat /sys/class/tty/tty0/active 2>/dev/null || echo '<unavailable>')"
+    echo
+    echo "--- loginctl while tty1 is active ---"
+    dump_loginctl_sessions
+    echo
+    echo "--- /dev/dri ACL while tty1 is active ---"
+    if command -v getfacl >/dev/null 2>&1; then
+        getfacl -p /dev/dri/card* /dev/dri/renderD* 2>/dev/null || true
+    else
+        ls -la /dev/dri/ 2>&1 || true
+    fi
+    echo
+    echo "--- DRM clients/state while tty1 is active ---"
+    dump_drm_debugfs
+    echo
+    echo "--- cosmic-comp journal while tty1 is active ---"
+    journalctl -b _COMM=cosmic-comp --no-pager 2>&1 | tail -160
+
+    if [ "$active_before" != "tty1" ] && [ -n "$orig_vt" ]; then
+        echo
+        echo "Switching back to tty${orig_vt}..."
+        chvt "$orig_vt" 2>&1 || true
+        sleep 1
+        echo "active after return: $(cat /sys/class/tty/tty0/active 2>/dev/null || echo '<unavailable>')"
+    fi
+}
+
+section "uname / cmdline"
+run uname -a
+run cat /proc/cmdline
+
+section "VT state"
+echo "fgconsole: $(fgconsole 2>&1 || echo '<unavailable>')"
+echo "tty:       $(tty 2>&1 || echo '<unavailable>')"
+echo "active:    $(cat /sys/class/tty/tty0/active 2>&1 || echo '<unavailable>')"
+for f in /sys/class/vtconsole/vtcon*/name /sys/class/vtconsole/vtcon*/bind; do
+    [ -e "$f" ] && echo "$f: $(cat "$f" 2>&1)"
+done
+
+section "Processes (greetd / cosmic-* / start-cosmic / seatd / logind)"
+ps -eo pid,user,tty,stat,cmd 2>/dev/null \
+    | grep -E 'greetd|cosmic-comp|cosmic-greeter|cosmic-session|start-cosmic|systemd-cat|seatd|systemd-logind' \
+    | grep -v grep
+
+section "session process environments (libseat/session propagation)"
+ENV_RE='^(LIBSEAT|XDG_SESSION|XDG_CURRENT_DESKTOP|WAYLAND_DISPLAY|DISPLAY|USER|HOME|LANG|SHELL|DBUS_SESSION_BUS_ADDRESS|COSMIC_SESSION_SOCK|DCONF_PROFILE)='
+for p in /proc/[0-9]*; do
+    comm="$(cat "$p/comm" 2>/dev/null)"
+    cmd="$(tr '\0' ' ' < "$p/cmdline" 2>/dev/null)"
+    case "$comm:$cmd" in
+        *cosmic-comp*|*cosmic-session*|*start-cosmic*|*cosmic-live-session-wrapper*|*systemd-cat*) ;;
+        *) continue ;;
+    esac
+    echo "--- pid ${p#/proc/} comm=$comm cmd=$cmd ---"
+    tr '\0' '\n' < "$p/environ" 2>/dev/null \
+        | grep -E "$ENV_RE" \
+        || true
+    echo
+ done
+
+section "live wrapper on disk"
+run grep -nE 'LIBSEAT|XDG_SESSION|cosmic-session|cosmic-comp|start-cosmic|systemd-cat|cosmic-live-session-env' /usr/local/bin/cosmic-live-session-wrapper
+run grep -nE 'initial_session|default_session|command|user' /etc/greetd/config.toml
+run grep -nE '^(auth|account|password|session)|pam_systemd|system-auth|pam' /etc/pam.d/greetd /etc/pam.d/system-auth 2>/dev/null
+
+section "cosmic-live-session wrapper environment journal"
+journalctl -b -t cosmic-live-session-env --no-pager 2>&1 | tail -120
+
+section "/dev/dri contents + permissions"
+run ls -la /dev/dri/
+if command -v getfacl >/dev/null 2>&1; then
+    # Do not assume the primary KMS node is card0; Fedora/RPM Fusion often
+    # exposes the same NVIDIA GPU as card1 while the live image has card0.
+    run getfacl -p /dev/dri/card* /dev/dri/renderD* 2>/dev/null
+fi
+run ls -la /dev/nvidia* 2>/dev/null
+
+section "DRM clients (who holds master?)"
+# debugfs is often not mounted in the live environment; mount it
+# best-effort so DRM clients are not silently empty.
+dump_drm_debugfs
+
+section "Connector status"
+for c in /sys/class/drm/card*-*/status /sys/class/drm/card*-*/enabled; do
+    [ -e "$c" ] && echo "$c: $(cat "$c" 2>&1)"
+done
+
+section "Kernel modules"
+lsmod 2>&1 | head -1
+lsmod 2>&1 | grep -E '^(nvidia|nouveau|simpledrm|efifb|fbcon|drm|drm_kms_helper|drm_buddy|i915|amdgpu)' || true
+
+section "NVIDIA userspace state"
+run nvidia-smi
+run ls -l /usr/bin/nvidia-modprobe
+run ls -l /usr/lib/x86_64-linux-gnu/gbm/nvidia-drm_gbm.so /usr/lib/x86_64-linux-gnu/libnvidia-egl-gbm.so* /usr/lib/x86_64-linux-gnu/libnvidia-egl-wayland.so* 2>/dev/null
+run systemctl status nvidia-persistenced nvidia-device-nodes --no-pager -l
+ldconfig -p 2>&1 | grep -iE 'nvidia|libegl|libglx' | head -50
+
+section "NVIDIA udev / seat tags"
+for dev in /sys/bus/pci/devices/* /sys/class/drm/card*; do
+    [ -e "$dev" ] || continue
+    if udevadm info -q property -p "$dev" 2>/dev/null | grep -q 'ID_VENDOR_ID=10de\|DRIVER=nvidia\|TAGS=.*master-of-seat'; then
+        echo "--- $dev ---"
+        udevadm info -q property -p "$dev" 2>/dev/null | grep -E 'DEVNAME|DEVPATH|SUBSYSTEM|DRIVER|ID_VENDOR|ID_MODEL|TAGS|CURRENT_TAGS|ID_PATH|ID_FOR_SEAT|MASTER|SEAT'
+        echo
+    fi
+ done
+
+section "seatd / logind"
+run systemctl status seatd systemd-logind --no-pager -l
+run ls -la /run/seatd.sock
+
+section "greetd status"
+run systemctl status greetd --no-pager -l
+
+section "greetd unit journal"
+journalctl -b -u greetd --no-pager 2>&1 | tail -120
+
+section "cosmic-comp journal"
+journalctl -b _COMM=cosmic-comp --no-pager 2>&1 | tail -180
+
+section "cosmic-greeter journal"
+journalctl -b _COMM=cosmic-greeter --no-pager 2>&1 | tail -80
+
+section "cosmic-session journal"
+journalctl -b _COMM=cosmic-session --no-pager 2>&1 | tail -80
+
+section "Kernel journal: drm / nvidia / fbcon / simpledrm / master"
+journalctl -b -k --no-pager 2>&1 \
+    | grep -iE 'drm|nvidia|fbcon|simpledrm|efifb|master' \
+    | tail -120
+
+section "loginctl sessions"
+dump_loginctl_sessions
+
+section "tty1 active-session DRM/logind sample"
+dump_vt1_active_sample
+
+section "summary"
+echo "Primary log:    $LOG"
+echo "Size:           $(wc -c < "$LOG" 2>/dev/null || echo '?') bytes"
+
+# Try to drop a copy in /var/log/cosmic/ -- persistent on deployed installs
+# (btrfs root), still tmpfs on the live ISO (so the copy works but evaporates
+# on reboot, same as /tmp). Print the resulting path so the user knows
+# whether it's there.
+PERSIST="/var/log/cosmic/cosmic-debug-${TS}.log"
+if mkdir -p /var/log/cosmic 2>/dev/null && cp "$LOG" "$PERSIST" 2>/dev/null; then
+    echo "Also copied to: $PERSIST"
+else
+    echo "Also copied to: <skipped -- /var/log/cosmic not writable>"
+fi
+
+# Surface any mounted removable media so the user has a one-line cp to
+# get the log onto a USB stick before reboot eats /tmp. /run/media/<user>/
+# is where udisks2 / systemd-mount-style auto-mounters drop labels.
+echo
+echo "Writable removable mounts (cp the log here to survive reboot on Live):"
+found=0
+for d in /run/media/*/* /media/*/* /mnt/*; do
+    [ -d "$d" ] || continue
+    [ -w "$d" ] || continue
+    echo "  cp \"$LOG\" \"$d/\""
+    found=1
+done
+if [ "$found" -eq 0 ]; then
+    echo "  <none found -- mount a USB stick first, e.g.:"
+    echo "    mkdir -p /mnt/usb && mount /dev/sdX1 /mnt/usb"
+    echo "    cp \"$LOG\" /mnt/usb/ && sync && umount /mnt/usb>"
+fi
+
+if [ "$UPLOAD" = "1" ] || [ "$UPLOAD" = "true" ] || [ "$UPLOAD" = "yes" ]; then
+    section "paste upload"
+    echo "Upload target: $UPLOAD_URL"
+    echo "WARNING: this uploads the full, unredacted debug log to a public paste service."
+    if ! command -v curl >/dev/null 2>&1; then
+        echo "Upload skipped: curl not found"
+    else
+        PASTE_RESULT="$(curl -fsS --connect-timeout 10 --max-time 60 --data-binary "@$LOG" "$UPLOAD_URL" 2>&1)"
+        rc=$?
+        if [ "$rc" -eq 0 ]; then
+            echo "Paste URL: $PASTE_RESULT"
+        else
+            echo "Upload failed with exit $rc: $PASTE_RESULT"
+        fi
+    fi
+fi
