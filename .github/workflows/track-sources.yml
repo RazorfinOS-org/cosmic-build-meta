@@ -5,17 +5,18 @@ name: Track Sources
 # annotated tag pointing to the same commit. System76 routinely re-tags
 # unchanged COSMIC repos (cosmic-wallpapers, cosmic-idle, cosmic-panel,
 # cosmic-randr, cosmic-settings-daemon, pop-launcher have all done this
-# across the 1.0.7 -> 1.0.11 epoch series). The artifact is byte-
-# identical, but the .bst `ref:` field keeps the older `epoch-X.Y.Z-...`
-# describe string -- visible drift between elements of the same epoch.
+# across the 1.0.7 -> 1.0.12 epoch series). The artifact is byte-
+# identical, but bst's git_repo plugin only fetches the tracked branch,
+# so newly-published tags never reach the local mirror -- `git describe`
+# then picks an older tag (the most recent one the stale mirror knows
+# about, by tagger date), which makes the recorded `ref:` field appear
+# to regress (e.g. epoch-1.0.11 -> epoch-1.0.9 on the same commit).
 #
-# After this workflow opens its PR, manually scan for elements still
-# pinned to an older epoch tag than the rest of the tree. For each one,
-# verify the commit hash matches latest-tag's dereferenced commit
-# (`git ls-remote --tags <repo> | grep '\^{}$'`); if so, hand-edit the
-# `ref:` field to the new describe string. No rebuild -- BST keys
-# artifacts on commit hash, not the human-readable describe string.
-# A scripted version of this check would be a worthwhile follow-up.
+# Mitigations below:
+#   * cache key rotates per run so a fresh mirror is saved every time
+#   * post-restore step force-refreshes tags in every git_repo mirror
+#   * post-track step fails the run if any element's epoch version goes
+#     backwards on the same commit hash, surfacing a hand-fix prompt
 
 on:
   schedule:
@@ -42,12 +43,50 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/buildstream
-        key: bst-cache-${{ runner.arch }}
+        key: bst-cache-${{ runner.arch }}-${{ github.run_id }}
         restore-keys: |
-          bst-cache-${{ runner.arch }}
+          bst-cache-${{ runner.arch }}-
+
+    - name: Refresh tags in BST source mirrors
+      run: |
+        set -eu
+        mirrors_dir="$HOME/.cache/buildstream/sources/git_repo"
+        [ -d "$mirrors_dir" ] || { echo "no mirrors yet, skipping"; exit 0; }
+        for mirror in "$mirrors_dir"/*.git; do
+          [ -d "$mirror" ] || continue
+          echo "refreshing tags in $(basename "$mirror")"
+          git -C "$mirror" fetch --tags --force --prune --prune-tags origin \
+            '+refs/tags/*:refs/tags/*' || true
+        done
+
+    - name: Capture pre-track refs
+      run: |
+        mkdir -p /tmp/track-sources
+        grep -rhE '^  ref: epoch-' elements/core/ \
+          > /tmp/track-sources/before.txt || true
 
     - name: Track all COSMIC element sources
       run: BST_FLAGS="--no-interactive" just track-all
+
+    - name: Detect epoch regressions
+      run: |
+        set -eu
+        fail=0
+        while IFS= read -r line; do
+          hash=$(printf '%s' "$line" | sed -nE 's/.*-g([0-9a-f]{40}).*/\1/p')
+          new=$(printf '%s' "$line" | sed -nE 's/.*epoch-([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')
+          [ -n "$hash" ] && [ -n "$new" ] || continue
+          old=$(grep -F "$hash" /tmp/track-sources/before.txt 2>/dev/null \
+            | sed -nE 's/.*epoch-([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' \
+            | head -1)
+          [ -n "$old" ] || continue
+          highest=$(printf '%s\n%s\n' "$old" "$new" | sort -V | tail -1)
+          if [ "$highest" != "$new" ]; then
+            echo "::error::Epoch regression at commit $hash: epoch-$old -> epoch-$new (same commit, older tag picked -- hand-edit the ref)"
+            fail=1
+          fi
+        done < <(grep -rhE '^  ref: epoch-' elements/core/)
+        exit $fail
 
     - name: Check for changes
       id: check
@@ -96,9 +135,9 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/buildstream
-        key: bst-cache-${{ runner.arch }}
+        key: bst-cache-${{ runner.arch }}-${{ github.run_id }}
         restore-keys: |
-          bst-cache-${{ runner.arch }}
+          bst-cache-${{ runner.arch }}-
 
     - name: Track junction sources
       run: BST_FLAGS="--no-interactive" just track-junctions

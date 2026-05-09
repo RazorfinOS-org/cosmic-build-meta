@@ -15,6 +15,11 @@ aliases:
   # file out of an upstream repo without cloning the whole thing
   # (e.g. pop-robot.png from pop-os/default-settings).
   github-raw: https://raw.githubusercontent.com/
+  # Official rust-lang.org distribution endpoint. Used by the rust 1.93
+  # override under cosmic-deps/, which exists because COSMIC 1.0.12
+  # raised its MSRV to 1.93 while fdsdk 25.08.x still ships rustc 1.92
+  # (see elements/cosmic-deps/rust.bst).
+  rust-dist: https://static.rust-lang.org/dist/
 
   # Git repository aliases
   github: https://github.com/
