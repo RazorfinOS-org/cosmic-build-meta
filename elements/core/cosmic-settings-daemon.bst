@@ -23,7 +23,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings-daemon.git
   track: master
-  ref: epoch-1.0.11-0-g716da6d6af0b252e2f78aba2ad72ee19ae0241e0
+  ref: epoch-1.0.9-2-gfa82bdf9fe7b5f5bd6008f32f393efd5e7a71c47
 - kind: cargo2
   url: "crates:"
   ref:
@@ -157,7 +157,7 @@ sources:
     sha: 1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
-    repo: https://github.com/jackpot51/rust-atomicwrites
+    repo: github:jackpot51/rust-atomicwrites
     name: atomicwrites
     version: 0.4.2
   - kind: registry
@@ -244,6 +244,10 @@ sources:
     name: bytemuck_derive
     version: 1.10.2
     sha: f9abbd1bc6865053c427f7198e6af43bfdedc55ab791faed4fbd361d789575ff
+  - kind: registry
+    name: byteorder
+    version: 1.5.0
+    sha: 1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b
   - kind: registry
     name: byteorder-lite
     version: 0.1.0
@@ -358,9 +362,17 @@ sources:
     version: 0.23.2
     sha: c07782be35f9e1140080c6b96f0d44b739e2278479f64e02fdab4e32dfd8b081
   - kind: registry
+    name: core-graphics
+    version: 0.24.0
+    sha: fa95a34622365fa5bbf40b20b75dba8dfa8c94c734aea8ac9a5ca38af14316f1
+  - kind: registry
     name: core-graphics-types
     version: 0.1.3
     sha: 45390e6114f68f718cc7a830514a96f903cccd70d02a8f6d9f643ac4ba45afaf
+  - kind: registry
+    name: core-graphics-types
+    version: 0.2.0
+    sha: 3d44a101f213f6c4cdc1853d4b78aef6db6bdfa3468798cc1d9912f4735013eb
   - kind: registry
     name: core_maths
     version: 0.1.1
@@ -494,6 +506,26 @@ sources:
     version: 0.3.2
     sha: be1e0bca6c3637f992fc1cc7cbc52a78c1ef6db076dbf1059c4323d6a2048376
   - kind: registry
+    name: ddc
+    version: 0.2.2
+    sha: ba69f2c53e320fc4abad17cb02bbbf04d1a36f18e9907f347589ec5991b3c6c5
+  - kind: registry
+    name: ddc-hi
+    version: 0.4.1
+    sha: 9c6747b17c926a2aa34739b30f1a6cc726e3a7baf0e2f69a4c03a95cf5de94de
+  - kind: registry
+    name: ddc-i2c
+    version: 0.2.2
+    sha: 1ef18fac9fd5c11d0c7b85a80887b01f7361b49edb2b4627243928b90ce2691b
+  - kind: registry
+    name: ddc-macos
+    version: 0.2.2
+    sha: 28aca22e30b33daf41a5d269a19b00588adf5242ed5525d3818195de17a534dc
+  - kind: registry
+    name: ddc-winapi
+    version: 0.2.2
+    sha: 5b65693556bdf54c77e0c82db4951686e4f030e7eb1c643d1bc781de2a4bce35
+  - kind: registry
     name: deflate64
     version: 0.1.11
     sha: 807800ff3288b621186fe0a8f3392c4652068257302709c24efd918c3dffcdc2
@@ -569,9 +601,17 @@ sources:
     version: 0.6.1
     sha: 2d09ff881f92f118b11105ba5e34ff8f4adf27b30dae8f12e28c193af1c83176
   - kind: registry
+    name: dtoa
+    version: 0.4.8
+    sha: 56899898ce76aaf4a0f24d914c97ea6ed976d42fec6ad33fcbb0a1103e07b2b0
+  - kind: registry
     name: dyn-clone
     version: 1.0.20
     sha: d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555
+  - kind: registry
+    name: edid
+    version: 0.3.0
+    sha: 24ce75530893d834dcfe3bb67ce0e7dec489484e7cb4423ca31618af4bab24fe
   - kind: registry
     name: encoding_rs
     version: 0.8.35
@@ -913,6 +953,18 @@ sources:
     version: 0.8.4
     sha: 0f2cc0e0523d1fe6fc2c6f66e5038624ea8091b3e7748b5e8e0c84b1698db6c2
   - kind: registry
+    name: i2c
+    version: 0.1.0
+    sha: 60c7b7bdd7b3a985fdcf94a0d7d98e7a47fde8b7f22fb55ce1a91cc104a2ce9a
+  - kind: registry
+    name: i2c-linux
+    version: 0.1.2
+    sha: c0268a871aaa071221d6c2875ebedcf64710e59b0d87c68c8faf5e98b87dd2a4
+  - kind: registry
+    name: i2c-linux-sys
+    version: 0.2.1
+    sha: 55cd060ed0016621d3da4ed3a23b0158084de90d1f3a8e59f3d391aacd3bbcf8
+  - kind: registry
     name: iana-time-zone
     version: 0.1.65
     sha: e31bc9ad994ba00e440a8aa5c9ef0ec67d5cb5e5cb0cc7f8b744a35b389cc470
@@ -1068,6 +1120,10 @@ sources:
     version: 7.0.2
     sha: 078ea7b7c29a2b4df841a7f6ac8775ff6074020c6776d48491ce2268e068f972
   - kind: registry
+    name: io-kit-sys
+    version: 0.4.1
+    sha: 617ee6cf8e3f66f3b4ea67a4058564628cde41901316e19f559e14c7c72c5e7b
+  - kind: registry
     name: io-lifetimes
     version: 1.0.11
     sha: eae7b9aee968036d54dce06cebaefd919e4472e753296daccd6d344e3e2df0c2
@@ -1189,6 +1245,10 @@ sources:
     version: 0.1.1
     sha: d4a5ff6bcca6c4867b1c4fd4ef63e4db7436ef363e0ad7531d1558856bae64f4
   - kind: registry
+    name: linked-hash-map
+    version: 0.5.6
+    sha: 0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f
+  - kind: registry
     name: linux-raw-sys
     version: 0.12.1
     sha: 32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53
@@ -1258,9 +1318,29 @@ sources:
     version: 0.6.12
     sha: 29a16783dd1a47849b8c8133c9cd3eb2112cfbc6901670af3dba47c8bbfb07d3
   - kind: registry
+    name: mach2
+    version: 0.4.3
+    sha: d640282b302c0bb0a2a8e0233ead9035e3bed871f0b7e81fe4a1ec829765db44
+  - kind: registry
     name: malloc_buf
     version: 0.0.6
     sha: 62bb907fe88d54d8d9ce32a3cceab4218ed2f6b7d35617cafe9adf84e43919cb
+  - kind: registry
+    name: mccs
+    version: 0.1.3
+    sha: 6090d6b3ded42fed158b660a6b9cdaa1924f3eef6c6598e82a9ca9b70a1988cd
+  - kind: registry
+    name: mccs-caps
+    version: 0.1.3
+    sha: 8eb961d01a3bb07969cfa276be2ab88c31d0fefa77a872696832732d6e9ec094
+  - kind: registry
+    name: mccs-db
+    version: 0.1.3
+    sha: 3cdaa8fe19a1a1918becc1b8cbbbdc1058bc71411dff4de0a6ec6b5269f49d38
+  - kind: registry
+    name: memchr
+    version: 1.0.2
+    sha: 148fab2e51b4f1cfc66da2a7c32981d1d3c083a803978268bb11fe4b86925e7a
   - kind: registry
     name: memchr
     version: 2.8.0
@@ -1321,6 +1401,10 @@ sources:
     version: 0.31.2
     sha: 5d6d0705320c1e6ba1d912b5e37cf18071b6c2e9b7fa8215a1e8a7651966f5d3
   - kind: registry
+    name: nom
+    version: 3.2.1
+    sha: 05aec50c70fd288702bcd93284a8444607f3292dbdf2a30de5ea5dcdbe72287b
+  - kind: registry
     name: notify
     version: 8.2.0
     sha: 4d3d07927151ff8575b7087f245456e549fea62edf0ec4e565a5ee50c8402bc3
@@ -1344,6 +1428,14 @@ sources:
     name: num-traits
     version: 0.2.19
     sha: 071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841
+  - kind: registry
+    name: nvapi
+    version: 0.1.4
+    sha: 7c63de8cd8362e2c38d1a48dea6ae68e6293a8d8d22a52180d0f8dcc779b3158
+  - kind: registry
+    name: nvapi-sys
+    version: 0.1.3
+    sha: b29e9a9393c69ee856bfcf5f76ed1ef32d2c0dd6f58558fd43334278fc1e7ea7
   - kind: registry
     name: objc
     version: 0.2.7
@@ -1641,6 +1733,10 @@ sources:
     version: 0.12.28
     sha: eddd3ca559203180a307f12d114c268abf583f59b03cb906fd0b3ff8646c1147
   - kind: registry
+    name: resize-slice
+    version: 0.1.3
+    sha: 8a3cb2f74a9891e76958b9e0ccd269a25b466c3ae3bb3efd71db157248308c4a
+  - kind: registry
     name: resvg
     version: 0.45.1
     sha: a8928798c0a55e03c9ca6c4c6846f76377427d2c1e1f7e6de3c06ae57942df43
@@ -1792,6 +1888,10 @@ sources:
     name: serde_with_macros
     version: 3.18.0
     sha: d3db8978e608f1fe7357e211969fd9abdcae80bac1ba7a3369bb7eb6b404eb65
+  - kind: registry
+    name: serde_yaml
+    version: 0.7.5
+    sha: ef8099d3df28273c99a1728190c7a9f19d444c941044f64adf986bee7ec53051
   - kind: registry
     name: sha1
     version: 0.10.6
@@ -2084,6 +2184,10 @@ sources:
     sha: 562d481066bde0658276a35467c4af00bdc6ee726305698a55b86e61d7ad82bb
   - kind: registry
     name: udev
+    version: 0.2.0
+    sha: 47504d1a49b2ea1b133e7ddd1d9f0a83cf03feb9b440c2c470d06db4589cf301
+  - kind: registry
+    name: udev
     version: 0.9.3
     sha: af4e37e9ea4401fc841ff54b9ddfc9be1079b1e89434c1a6a865dd68980f7e9f
   - kind: registry
@@ -2147,6 +2251,10 @@ sources:
     version: 0.2.6
     sha: ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853
   - kind: registry
+    name: uninitialized
+    version: 0.0.2
+    sha: 74c1aa4511c38276c548406f0b1f5f8b793f000cfb51e18f278a102abd057e81
+  - kind: registry
     name: untrusted
     version: 0.9.0
     sha: 8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1
@@ -2183,6 +2291,10 @@ sources:
     name: version_check
     version: 0.9.5
     sha: 0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a
+  - kind: registry
+    name: void
+    version: 1.0.2
+    sha: 6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d
   - kind: registry
     name: walkdir
     version: 2.5.0
@@ -2311,6 +2423,10 @@ sources:
     name: wgpu-types
     version: 27.0.1
     sha: afdcf84c395990db737f2dd91628706cb31e86d72e53482320d368e52b5da5eb
+  - kind: registry
+    name: widestring
+    version: 1.2.1
+    sha: 72069c3113ab32ab29e5584db3c6ec55d416895e60715417b5b883a357c3e471
   - kind: registry
     name: winapi
     version: 0.3.9
@@ -2598,6 +2714,10 @@ sources:
     name: xmlwriter
     version: 0.1.0
     sha: ec7a2a501ed189703dba8b08142f057e887dfc4b2cc4db2d343ac6376ba3e0b9
+  - kind: registry
+    name: yaml-rust
+    version: 0.4.5
+    sha: 56c1936c4cc7a1c9ab21a1ebb602eb942ba868cbd44a99cb7cdc5892335e1c85
   - kind: registry
     name: yansi
     version: 1.0.1
