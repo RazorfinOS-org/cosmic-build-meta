@@ -7,6 +7,5 @@ kind: stack
 depends:
   - oci/cosmic-nvidia/stack.bst
   - installer/live-extras.bst
-  - installer/tuna-installer.bst
-  - installer/installer-prebake.bst
+  - installer/cosmonaut-installer.bst
   - installer/cosmic-images-json.bst

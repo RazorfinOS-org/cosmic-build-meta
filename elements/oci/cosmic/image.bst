@@ -52,7 +52,7 @@ config:
   # `systemctl preset-all` is what turns them into the actual
   # /etc/systemd/system/*.wants/ symlinks systemd consults at boot.
   # In particular, this is what enables greetd.service and masks
-  # getty@tty1 (per files/oci/systemd-presets/90-cosmic.preset).
+  # getty@tty1 + getty@tty2 (per files/oci/systemd-presets/90-cosmic.preset).
   - |
     systemctl --root=/layer preset-all
 

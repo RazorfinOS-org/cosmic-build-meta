@@ -1,31 +1,22 @@
-# Live env behaviour bits: sysuser, sudoers, autologin, autostart,
-# Flatpak bundle install, presets to flip everything on.
+# Live env behaviour bits: sysuser, autologin, polkit allow rule for
+# cosmonaut-installer, presets to flip everything on.
 #
 # Consumed by oci/cosmic-live/stack.bst and oci/cosmic-nvidia-live/stack.bst.
 # Not consumed by the regular oci/cosmic*/stack.bst -- the cosmic-live
-# user, passwordless sudo, and bundle-install service exist only in the
+# user, polkit live-only rule, and tmpfs mount unit exist only in the
 # Live ISO's filesystem.
 #
 # Designed to be the only COSMIC-specific Live extras element so
 # downstream consumers can replace just this single element to swap in
 # their own brand (different live username, different installer
 # configuration, etc.) without touching the toolkit (live-image.bst,
-# repart-config-iso.bst, tuna-installer.bst).
+# repart-config-iso.bst, cosmonaut-installer.bst).
 kind: manual
 
 sources:
 - kind: local
   path: files/installer/sysusers.d
   directory: sysusers.d
-- kind: local
-  path: files/installer/sudoers.d
-  directory: sudoers.d
-- kind: local
-  path: files/installer/autostart
-  directory: autostart
-- kind: local
-  path: files/installer/systemd
-  directory: systemd
 - kind: local
   path: files/installer/systemd-presets
   directory: systemd-presets
@@ -58,19 +49,13 @@ config:
   install-commands:
   # Live user account.
   - install -Dm644 sysusers.d/cosmic-live.conf "%{install-root}/usr/lib/sysusers.d/cosmic-live.conf"
-  # Passwordless sudo for cosmic-live (Live env only -- never lands in
-  # an installed system because oci/cosmic{,-nvidia}/stack.bst doesn't
-  # depend on this element).
-  - install -Dm440 sudoers.d/cosmic-live "%{install-root}/etc/sudoers.d/cosmic-live"
-  # tuna-installer auto-launch on the cosmic-live session.
-  - install -Dm644 autostart/org.bootcinstaller.Installer.desktop "%{install-root}/etc/xdg/autostart/org.bootcinstaller.Installer.desktop"
   # Greetd autologin override. Stage to a non-conflicting path: shipping
   # straight to /etc/greetd/config.toml collides with cosmic-greeter-config.bst
   # which writes the base (cosmic-greeter / cosmic-initial-setup) config to
   # the same path. BST 2.x's compose plugin does not give us last-writer-wins
-  # against that overlap -- the base config wins, the Live env then tries to
-  # launch cosmic-greeter on tty1, cosmic-comp fails (worst on NVIDIA where
-  # nvidia-drm hasn't bound yet), greetd hits StartLimitBurst, systemd logs
+  # against that overlap -- the base config wins, the Live env then runs the
+  # base default_session (cosmic-greeter on the base-config VT) instead of
+  # the live cosmic-live autologin, greetd hits StartLimitBurst, systemd logs
   # "Failed to start Greeter daemon" and the boot lands at a black screen.
   #
   # Fix: stash the live config under /usr/share/cosmic-live/ (no overlap),
@@ -86,10 +71,11 @@ config:
   # pre-populates outputs.ron from /usr/share/cosmic-vm-defaults so
   # cosmic-comp boots at 1680x1050 in QEMU instead of 640x480.
   - install -Dm644 tmpfiles/cosmic-live.conf "%{install-root}/usr/lib/tmpfiles.d/cosmic-live.conf"
-  # Polkit rule: passwordless pkexec for cosmic-live so tuna-installer's
-  # fisherman backend can escalate to root for `bootc install to-disk`
-  # without prompting for a password the live user doesn't have.
-  - install -Dm644 polkit/49-cosmic-live-installer.rules "%{install-root}/usr/share/polkit-1/rules.d/49-cosmic-live-installer.rules"
+  # Polkit rule: passwordless dev.cosmonaut.installer.{install,network}
+  # for cosmic-live so the cosmonaut-installer DBus daemon can run the
+  # install pipeline without prompting for a password the live user
+  # doesn't have.
+  - install -Dm644 polkit/49-cosmonaut-installer-live.rules "%{install-root}/usr/share/polkit-1/rules.d/49-cosmonaut-installer-live.rules"
   # Force-load filesystem crypto modules (crc32c) at boot so btrfs can
   # mount the install target -- FDSDK kernel ships an empty modules.alias
   # so request_module()-style auto-load fails. See file header for
@@ -110,12 +96,8 @@ config:
   # NetworkManager-initrd.service) and networkd has no matcher for
   # wired links. See the file header for the full rationale.
   - install -Dm644 networkd/10-cosmic-live-wired.network "%{install-root}/usr/lib/systemd/network/10-cosmic-live-wired.network"
-  # First-boot Flatpak bundle install (depends on flathub-remote-add.service
-  # already being there from cosmic-deps; we just add a second oneshot).
-  - install -Dm644 systemd/bootc-installer-flatpak-install.service "%{install-root}/usr/lib/systemd/system/bootc-installer-flatpak-install.service"
-  # Preset flipping the bundle-install service on. Numbered 92 to land
-  # after 91-flatpak.preset (which enables flathub-remote-add) so the
-  # ordering matches the systemd Requires= chain.
+  # Live-env preset toggles. Only the flatpak-preinstall.service disable
+  # remains here; the bundle-install service is gone with tuna-installer.
   - install -Dm644 systemd-presets/92-cosmic-live.preset "%{install-root}/usr/lib/systemd/system-preset/92-cosmic-live.preset"
 
 public:

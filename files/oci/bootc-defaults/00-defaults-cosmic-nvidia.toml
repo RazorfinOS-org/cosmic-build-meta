@@ -28,6 +28,7 @@ kargs = [
   "rd.driver.blacklist=nouveau",
   "modprobe.blacklist=nouveau",
   "nvidia-drm.modeset=1",
+  "nvidia-drm.fbdev=1",
   "initcall_blacklist=simpledrm_platform_driver_init",
 ]
 

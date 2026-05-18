@@ -55,6 +55,20 @@ config:
       rm -rf /layer/usr/etc
     fi
 
+  # Restore setuid on nvidia-modprobe. nvidia-drivers.bst installs with
+  # mode 4755 but the BST sandbox strips setuid on artifact unpack
+  # (single non-root build uid; can't preserve s-bit). fakecap
+  # (LD_PRELOAD'd here) records this chmod() call into FAKECAP_DB and
+  # build-oci replays the mode onto the OCI layer. Without this, the
+  # deployed bootc system has nvidia-modprobe at 0755 -> non-root
+  # callers can't escalate -> /dev/nvidia-modeset / nvidia-uvm /
+  # nvidia-caps may never be mknod'd. Fedora's RPM ships it 4755 from the spec
+  # %attr(4755,root,root); we have to set it explicitly.
+  - |
+    if [ -f /layer/usr/bin/nvidia-modprobe ]; then
+      chmod 4755 /layer/usr/bin/nvidia-modprobe
+    fi
+
   - |
     cd "%{install-root}"
     build-oci <<EOF

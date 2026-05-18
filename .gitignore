@@ -18,3 +18,9 @@ __pycache__/
 # Editor backups
 *~
 *.swp
+
+# Dev-mode symlinks to sibling repos consumed by `kind: local`. Pair
+# with the Justfile's EXTRA_MOUNTS hook to make them visible from the
+# BST container. Currently unused (cosmonaut-installer is consumed via
+# github:); kept as scaffolding for future sibling-repo development.
+dev/

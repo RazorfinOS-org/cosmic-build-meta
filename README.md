@@ -6,10 +6,10 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 
 ## Status
 
-- **104 local elements** (`elements/`), ~700 with freedesktop-sdk transitives. `just build` succeeds with 0 failures from a cold cache.
-- **Two image variants**: `cosmic` (Mesa, default) and `cosmic-nvidia` (NVIDIA proprietary driver, kernel modules + EGL-Wayland). Same BST graph; only the top-level image stack differs.
+- **109 local elements** (`elements/`), ~700 with freedesktop-sdk transitives. `just build` succeeds with 0 failures from a cold cache.
+- **Two image variants**: `cosmic` (Mesa, default) and `cosmic-nvidia` (NVIDIA proprietary driver, kernel modules, EGL/GBM userspace, device-node and logind/udev glue). Same BST graph; only the top-level image stack differs.
 - **Bootable image** (`bootable.raw`): boots into `cosmic-initial-setup` → `cosmic-greeter` → user session under QEMU + KVM + OVMF.
-- **Live ISO**: hybrid GPT image with autologin to a `cosmic-live` user, autostarts [tuna-installer](https://github.com/tuna-os/tuna-installer) (Flatpak'd bootc-installer GUI) for `bootc install to-disk`.
+- **Live ISO**: UEFI-bootable GPT disk image with autologin to a `cosmic-live` user, autostarts [cosmonaut-installer](https://github.com/razorfinos-org/cosmonaut-installer) — a native libcosmic GUI driving a privileged DBus daemon that installs from the OCI image baked into the ISO (`oci:/usr/lib/bootc/install-source/main`) against an opinionated profile (btrfs + composefs + systemd-boot, optional LUKS).
 - **CI**: GitHub Actions builds both variants weekly + on push to `main`, publishes to `ghcr.io/razorfinos-org/cosmic-build-meta:{cosmic,cosmic-nvidia}-{nightly,vX.Y.Z}` with keyless cosign signing and SLSA build-provenance attestations. ISOs are uploaded as workflow artifacts and (on tag pushes) attached to GitHub Releases.
 
 **Known caveats**
@@ -18,6 +18,7 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 - No artifact cache stood up yet — cold builds take hours, mostly Rust compile time. CI uses `actions/cache` keyed on the BST cache directory; no public artifact server.
 - Only x86_64 has been built end-to-end. aarch64 and riscv64 are wired in `project.conf` but untested.
 - First-login per-user setup wizard is suppressed (settings configured in OEM mode don't carry over).
+- Physical NVIDIA Live ISO performance/DRM handoff is still under active validation. Current images include the confirmed baseline fixes (NVIDIA userspace/device nodes, greetd PAM → logind session, debug tooling), but the remaining `cosmic-comp` KMS permission issue is being investigated separately.
 
 ## Quick start
 
@@ -27,7 +28,6 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 - [just](https://github.com/casey/just)
 - ~50 GB free disk space (image build); ~80 GB if you also build the Live ISO
 - For `boot-vm` / `boot-iso`: `qemu-system-x86_64`, OVMF firmware, KVM enabled
-- For `prefetch-installer-flatpak`: `flatpak` on the host (the prefetch runs `flatpak --user install` outside the BST sandbox)
 
 ### Bootable image (qemu-runnable raw disk)
 
@@ -37,10 +37,12 @@ just generate-bootable-image    # `bootc install to-disk` into a 30 GB sparse ra
 just boot-vm                    # QEMU + KVM + OVMF, GTK display
 ```
 
-For the NVIDIA variant, swap the first step:
+For the NVIDIA variant, build and load the variant-specific image tag:
 
 ```sh
-COSMIC_IMAGE_TAG=cosmic-nvidia-nightly just build-variant cosmic-nvidia
+just build-variant cosmic-nvidia     # loads ghcr.io/razorfinos-org/cosmic-build-meta:nvidia-nightly locally
+COSMIC_IMAGE_TAG=nvidia-nightly just generate-bootable-image
+just boot-vm
 ```
 
 `just build` is incremental — once warm, only changed elements rebuild.
@@ -48,14 +50,13 @@ COSMIC_IMAGE_TAG=cosmic-nvidia-nightly just build-variant cosmic-nvidia
 ### Live ISO (installer medium)
 
 ```sh
-just prefetch-installer-flatpak # one-time: pulls tuna-installer + GNOME 50 runtime to build/installer-prebake/
-just build-iso                  # produces build/iso/cosmic-stable-amd64.iso (~4-5 GB)
+just build-iso                  # produces build/iso/cosmic-stable-amd64.iso
 just boot-iso                   # boots the ISO with a sparse 60 GB virtio target attached as /dev/vdb
 ```
 
 Pass `cosmic-nvidia` to either recipe to build / boot the NVIDIA variant.
 
-The ISO is a **hybrid GPT disk** (FDSDK 25.08's systemd-repart predates `--el-torito`, so there's no ISO9660 boot catalog). Boot it as a virtio block device, not `-cdrom`; same trick applies if you `dd` it to a USB stick.
+The ISO artifact is really a **UEFI-bootable GPT disk image** with an `.iso` filename (FDSDK 25.08's systemd-repart predates `--el-torito`, so there's no ISO9660 boot catalog). Boot it as a virtio block device, not `-cdrom`; same image can be `dd`'d to a USB stick.
 
 ### Debugging the running VM / Live ISO
 
@@ -66,6 +67,7 @@ The ISO is a **hybrid GPT disk** (FDSDK 25.08's systemd-repart predates `--el-to
   ```
   Useful when the graphical session is broken and the journal is the only way in.
 - QEMU monitor: `Ctrl-A` then `C` in the `boot-vm` terminal, or `socat - UNIX-CONNECT:build/iso-qemu-<variant>.sock` for the ISO.
+- `cosmic-debug-dump` is installed in both bootc images and both Live ISOs. From a debug shell, run `cosmic-debug-dump --upload` to capture logind/session state, DRM clients, NVIDIA userspace/device nodes, and relevant journals.
 
 `just --list` shows every recipe.
 
@@ -81,11 +83,12 @@ The ISO is a **hybrid GPT disk** (FDSDK 25.08's systemd-repart predates `--el-to
 | `COSMIC_OVMF_CODE` / `COSMIC_OVMF_VARS` | `/usr/share/edk2/ovmf/OVMF_{CODE,VARS}.fd` | OVMF firmware paths. Override on Debian (`/usr/share/OVMF/…`) or Arch (`/usr/share/edk2-ovmf/x64/…`). |
 | `COSMIC_FILESYSTEM` | `btrfs` | Root filesystem for the bootable image (`btrfs` / `xfs` / `ext4`). |
 | `COSMIC_IMAGE_NAME` | `ghcr.io/razorfinos-org/cosmic-build-meta` | Local podman tag namespace for `just bootc` and `just generate-bootable-image`. Matches the `org.opencontainers.image.ref.name` annotation so `bootc upgrade` resolves the same ref post-install. |
-| `COSMIC_IMAGE_TAG` | `nightly` | Image tag. CI overrides per matrix variant (`cosmic-nightly`, `cosmic-nvidia-nightly`, …). |
+| `COSMIC_IMAGE_TAG` | `nightly` | Local image tag. `just build` loads `:nightly`; `just build-variant cosmic-nvidia` turns the unqualified default into `:nvidia-nightly`. If the value is already variant-prefixed (`nvidia-*` or `cosmic-nvidia-*`), it is preserved. CI uses full registry tags (`cosmic-nightly`, `cosmic-nvidia-nightly`, …). |
 | `COSMIC_BOOTABLE_IMAGE` | `build/bootable.raw` | Path of the sparse raw disk image. |
 | `COSMIC_BOOTABLE_SIZE` | `30G` | Size of the sparse fallocate. |
-| `COSMIC_INSTALL_TARGET` | `build/install-target.raw` | Sparse target disk attached as `/dev/vdb` to `boot-iso` so tuna-installer has somewhere to install onto. |
-| `COSMIC_INSTALL_TARGET_SIZE` | `60G` | Sparse size of the install target. tuna-installer rejects disks under 50 GB. |
+| `COSMIC_INSTALL_TARGET` | `build/install-target.raw` | Sparse target disk attached as `/dev/vdb` to `boot-iso` so cosmonaut-installer has somewhere to install onto. |
+| `COSMIC_INSTALL_TARGET_SIZE` | `60G` | Sparse size of the install target. |
+| `COSMIC_TPM` | unset | Set to `1` on `boot-iso` / `boot-iso-headless` to attach an emulated TPM2 via `swtpm`. State persists in `build/swtpm-state-<variant>/` across boots so TPM2-LUKS unseal works on reboot. Requires `swtpm` on the host. Use to test cosmonaut-installer's TPM2-LUKS install variants. |
 
 ## Using as a junction
 
@@ -136,7 +139,7 @@ depends:
 
 If you need cargo2-vendored elements (every `core/cosmic-*` is one), register the `cargo2` source plugin in your downstream `project.conf` the same way `cosmic-build-meta` does. If you only consume the pre-built `oci/cosmic/image.bst` artifact, you can skip that.
 
-The `installer/cosmic-images-json.bst` element exists specifically so downstream consumers can override the tuna-installer image picker without touching anything else under `installer/` — re-define the element in your project to ship your own catalog and `default_image`.
+The `installer/cosmic-images-json.bst` element exists specifically so downstream consumers can override the cosmonaut-installer image picker without touching anything else under `installer/` — re-define the element in your project to ship your own catalog and `default_image`.
 
 ## Project layout
 
@@ -147,13 +150,13 @@ elements/
   core-deps/                     Build deps not in FDSDK (greetd, just, libdisplay-info, oniguruma, …)
   cosmic-deps/                   Runtime system stack (base, fonts, networking, audio, bootc, …)
   cosmic-deps-nvidia/            NVIDIA driver stack (nvidia.ko build, userspace, EGL-Wayland, modprobe glue)
-  installer/                     Live ISO assembly: live-image (systemd-repart), live-extras (autologin / autostart),
-                                 tuna-installer Flatpak bundle, prebaked /var/lib/flatpak tree, images.json catalog
+  installer/                     Live ISO assembly: live-image (systemd-repart), live-extras (autologin / live-only
+                                 polkit), cosmonaut-installer (libcosmic GUI + DBus daemon), images.json catalog
   oci/                           Bootc/OCI image assembly chain
     cosmic/                      Default Mesa image (stack, filesystem, image, init-scripts)
     cosmic-nvidia/               NVIDIA variant image
-    cosmic-live/                 Live env squashfs source (cosmic stack + installer drop-ins)
-    cosmic-nvidia-live/          Live env for the NVIDIA variant
+    cosmic-live/                 Composed Live env root (cosmic stack + installer drop-ins)
+    cosmic-nvidia-live/          Composed Live env root for the NVIDIA variant
     integration/                 Branding, presets, bootc config, tuning drop-ins
   plugins/                       Junctions for buildstream-plugins{,-community}
 files/
@@ -166,6 +169,7 @@ plugins/
                                  Vendored from FDSDK (MIT, attribution preserved)
 include/
   aliases.yml                    URL aliases (github / github-media / github-raw / crates / pypi / …)
+  live-image-common.yml          Shared Live ISO sysroot-prep/repart scaffolding for both variants
 project.conf                     BST config: RUSTFLAGS, plugin registrations, manual element env
 Justfile                         Podman wrapper for bst commands + image / ISO / VM lifecycle recipes
 .github/workflows/               Matrix build (cosmic + cosmic-nvidia), GHCR push, cosign signing
@@ -178,11 +182,11 @@ docs/images/                     README screenshots
 
 **Bootc/OCI image**. `elements/oci/cosmic/{stack,filesystem,image,init-scripts}.bst` mirrors the `oci/gnomeos/` shape from gnome-build-meta. The final assembly squashes layers with `podman build --squash-all` (see `just load-image`) to work around bootc 1.15's splitstream EOF on multi-layer images.
 
-**NVIDIA variant**. `oci/cosmic-nvidia/stack.bst` depends on the full default stack and adds `cosmic-deps-nvidia/deps.bst`. The integration commands re-run `depmod` against the composed root so the NVIDIA modules (`nvidia`, `nvidia-modeset`, `nvidia-drm`) join the in-tree module dep graph. nouveau is blacklisted; `modeset=1` is set via modprobe drop-in.
+**NVIDIA variant**. `oci/cosmic-nvidia/stack.bst` depends on the full default stack and adds `cosmic-deps-nvidia/deps.bst`. The integration commands re-run `depmod` against the composed root so the NVIDIA modules (`nvidia`, `nvidia-modeset`, `nvidia-drm`, `nvidia-uvm`) join the in-tree module dep graph. nouveau is blacklisted; `nvidia-drm.modeset=1` and `fbdev=1` are set; NVIDIA PCI/DRM devices get Pop/Fedora-style `seat` / `master-of-seat` udev tags; `nvidia-modprobe` and a fallback systemd service create `/dev/nvidia*` auxiliary nodes.
 
-**Live ISO**. `installer/live-image-<variant>.bst` is a `kind: script` element wrapping `systemd-repart --offline` against `oci/<variant>-live/filesystem.bst` (the live env squashfs). The ISO is a hybrid GPT disk — there's no ISO9660 boot catalog because FDSDK 25.08's systemd-repart predates `--el-torito`. UEFI boots it as a normal disk via the ESP and chainloads `BOOTX64.EFI`.
+**Live ISO**. `installer/live-image-<variant>.bst` is a `kind: script` element wrapping `systemd-repart --offline` against `oci/<variant>-live/filesystem.bst` (the live env EROFS root). Both variants share `include/live-image-common.yml` for `/usr/etc` merging, sysusers/shadow synthesis, `depmod`, setuid restoration, and greetd wiring. The `.iso` artifact is a GPT disk image — there's no ISO9660 boot catalog because FDSDK 25.08's systemd-repart predates `--el-torito`. UEFI boots it as a normal disk via the ESP and chainloads `BOOTX64.EFI`.
 
-**tuna-installer wiring**. The Live env autologins as `cosmic-live`, autostarts the [tuna-installer](https://github.com/tuna-os/tuna-installer) Flatpak (a GUI front-end for `bootc install to-disk`). To avoid pulling ~1.5 GB of GNOME 50 runtime over the wire on first live boot, `installer-prebake.bst` BST-imports a pre-deployed `/var/lib/flatpak` tree built on the host by `just prefetch-installer-flatpak`. The picker reads its catalog from `/etc/bootc-installer/images.json` (`installer/cosmic-images-json.bst`) — a single-image catalog, so the picker self-skips and the user goes welcome → disk picker. The install pulls from `ngcr.io/razorfinos/cosmic:nightly` over the network; pre-baking the OCI image into the ISO is intentionally **not** done — bootc's unified-storage pull from a path-based `oci:` ref doesn't resolve to an image ID, and the registry pull halves the ISO size.
+**cosmonaut-installer wiring**. The Live env autologins as `cosmic-live`, autostarts [cosmonaut-installer](https://github.com/razorfinos-org/cosmonaut-installer) — a native libcosmic GUI that drives a privileged DBus daemon (`dev.cosmonaut.Installer1`) running as root. The daemon owns a Rust install engine that runs `bootc install to-filesystem` against an opinionated profile (btrfs + composefs + systemd-boot, optional LUKS via cryptsetup / TPM2). GUI never has root; polkit guards the privileged DBus methods, with a live-only allow-rule (`installer/live-extras.bst`) granting passwordless access to the `cosmic-live` user. The picker reads its catalog from `/etc/cosmonaut-installer/images.json` (`installer/cosmic-images-json.bst`) — a single-image catalog, so the picker self-skips and the user goes welcome → disk picker. Each Live ISO bakes its matching bootc OCI layout into `/usr/lib/bootc/install-source/main`; installs use `oci:/usr/lib/bootc/install-source/main` and work offline. Run `bootc upgrade` after install to move onto the published registry stream.
 
 **LFS overlays**. cosmic-wallpapers, cosmic-greeter, and cosmic-initial-setup ship media via Git LFS. We disable LFS smudge globally inside the BuildStream container (cargo2 vendoring otherwise breaks on synthetic crate trees), so each LFS-tracked file is layered back in via a `kind: remote` source pointing at `media.githubusercontent.com/media/…` — the `github-media:` URL alias. The `ref:` for each `kind: remote` is the LFS oid sha256, which equals the SHA256 of the file content — exactly what BST expects.
 
@@ -205,10 +209,8 @@ docs/images/                     README screenshots
 | cosmic-edit | `RUSTONIG_SYSTEM_LIBONIG=1` + `oniguruma.bst` build-dep | Use system oniguruma instead of bundled git submodule |
 | Sandbox tooling | `findutils.bst`, `sed.bst`, `make.bst` added per-element as needed | FDSDK runtime image is minimal |
 | Bootc image | `podman build --squash-all` after `bst artifact checkout` | bootc 1.15 splitstream EOF on multi-layer images |
-| Live ISO setuid bits | Explicit `chmod 4755` on `pkexec`/`sudo`/`su`/etc. in `live-image-*.bst` | BST's compose step strips setuid; the bootc image dodges via fakecap+build-oci, the live env packs straight to EROFS without it |
-| Live ISO `/etc/shadow` | Synthesise from `/etc/passwd` at image-build time | FDSDK sysusers leaves `/etc/shadow` empty; without entries, PAM AUTHINFO_UNAVAIL kills greetd |
-| tuna-installer image catalog | sed-patch the deployed `image.py` to read `/run/host/etc/bootc-installer/images.json` | The bundle declares `filesystems=host`, which mounts the host root at `/run/host/`; `/etc` is a Flatpak-reserved path so the in-sandbox `/etc/bootc-installer/` is empty |
-| tuna-installer unified storage | sed-patch deployed `processor.py` to default `unifiedStorage=False` | Default `True` makes bootc reference the image via `containers-storage:[overlay@…]<ref>` which never resolves to an image ID |
+| Live ISO setuid bits | Explicit `chmod 4755` on `pkexec`/`sudo`/`su`/etc. in `include/live-image-common.yml` | BST's compose step strips setuid; the bootc image dodges via fakecap+build-oci, the live env packs straight to EROFS without it |
+| Live ISO `/etc/shadow` | Synthesise from `/etc/passwd` at image-build time in `include/live-image-common.yml` | FDSDK sysusers leaves `/etc/shadow` empty; without entries, PAM AUTHINFO_UNAVAIL kills greetd |
 | QEMU display | `files/oci/cosmic-defaults/outputs.ron` preset pinning Virtual-1 to 1680×1050 + tmpfiles `C` copy into `~cosmic-{initial-setup,greeter}/.local/state/cosmic-comp/` | smithay PR #1923 unmerged in cosmic-comp; without it the compositor ignores virtio-gpu hot-plug mode changes |
 | First-login wizard re-run | Empty `/etc/skel/.config/cosmic-initial-setup-done` | accountsservice → useradd -m honours `/etc/skel`; the marker makes the autostart exit immediately |
 | Quiet boot | `quiet loglevel=3 systemd.show_status=false rd.udev.log_level=3 vt.global_cursor_default=0` kargs + drop `console=tty0` | Avoid kernel/systemd scroll competing with cosmic-comp on the GTK display |
@@ -242,4 +244,4 @@ The bootc/OCI pipeline is heavily inspired by [gnome-build-meta](https://gitlab.
 
 The cargo2 source plugin is forked from [buildstream-plugins-community](https://gitlab.com/buildstream/buildstream-plugins-community) with git-submodule support added locally.
 
-[tuna-installer](https://github.com/tuna-os/tuna-installer) provides the Live ISO's installer GUI; we ship it as a Flatpak bundle with two small runtime patches (image catalog path + bootc unified-storage default) applied at prefetch time.
+[cosmonaut-installer](https://github.com/razorfinos-org/cosmonaut-installer) provides the Live ISO's installer GUI: a libcosmic frontend driving a privileged Rust install engine over DBus. The engine's `bootc install to-filesystem` invocation is patterned on [tuna-os/fisherman](https://github.com/tuna-os/fisherman) (which we used via the tuna-installer Flatpak before — credit there for the recipe shape).

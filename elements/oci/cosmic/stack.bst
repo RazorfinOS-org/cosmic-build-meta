@@ -11,8 +11,10 @@ depends:
   # Branding + bootc/composefs config
   - oci/integration/os-release.bst
   - oci/integration/bootc-config.bst
+  - oci/integration/cosmic-install-config.bst
   - oci/integration/cosmic-presets.bst
   - oci/integration/cosmic-greeter-config.bst
+  - oci/integration/cosmic-debug-tools.bst
   - oci/integration/flatpak-config.bst
   - oci/integration/mime-defaults.bst
   - oci/integration/cosmic-tuning.bst
@@ -20,6 +22,23 @@ depends:
 
   # Kernel firmware + initramfs (kernel itself comes via cosmic-deps/deps.bst)
   - oci/initramfs.bst
+
+  # /etc/ld.so.conf + ld.so.cache regeneration at OCI compose time. FDSDK's
+  # integration/ldconfig.bst lays down a stock /etc/ld.so.conf and registers
+  # an integration-command that runs `ldconfig` against the composed root,
+  # so /etc/ld.so.cache reflects every staged shared library at the moment
+  # the OCI artifact is sealed -- including anything cosmic-deps-nvidia
+  # drops into /usr/lib/x86_64-linux-gnu/ (libGLX_nvidia, libEGL_nvidia,
+  # libnvidia-*). Without this, the cache file inherited from FDSDK's base
+  # is stale w.r.t. our additions; libglvnd's dlopen("libEGL_nvidia.so.0")
+  # fails, falls through to 50_mesa.json, and the entire desktop renders
+  # on llvmpipe at ~1 fps.
+  #
+  # Dakota / gnome-build-meta inherit this via FDSDK's oci/layers/minimal-
+  # stack.bst; we built our OCI chain from scratch and missed it. Pulling
+  # it in here covers BOTH the cosmic and cosmic-nvidia variants because
+  # oci/cosmic-nvidia/stack.bst depends on this stack.
+  - freedesktop-sdk.bst:integration/ldconfig.bst
 
 public:
   bst:

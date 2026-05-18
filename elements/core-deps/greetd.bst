@@ -305,6 +305,41 @@ config:
     # cosmic-greeter / cosmic-initial-setup with an initial_session
     # for first-boot user creation). Don't ship a default here --
     # would overlap that element.
+
+    # PAM service file. greetd calls pam_start("greetd", $username) for
+    # every session it opens -- including [initial_session] autologins.
+    # Upstream greetd does not ship a PAM file; distros (Arch, openSUSE,
+    # uBlue/Bluefin, ...) each provide their own. We don't either,
+    # which means PAM falls through to /etc/pam.d/other -- a pure
+    # pam_deny.so stack from FDSDK. Greetd is tolerant enough that the
+    # session command (cosmic-comp, cosmic-initial-setup, etc.) can still
+    # get exec'd, BUT the session phase never runs. In practice that
+    # means pam_systemd.so does not register a normal seat0 session for
+    # the live user, so COSMIC misses the Fedora/Pop-style logind device
+    # mediation path. That was one confirmed gap in the NVIDIA 1 FPS
+    # investigation and made DRM permission failures much harder to
+    # reason about.
+    #
+    # Shipping /etc/pam.d/greetd that includes FDSDK's system-auth (which
+    # contains `-session optional pam_systemd.so`) closes that gap: PAM
+    # session phase succeeds, pam_systemd registers the logind session,
+    # and libseat/logind have a valid session to mediate. This does not
+    # by itself prove every KMS/NVIDIA issue is fixed, but it restores
+    # the expected session plumbing before cosmic-comp starts.
+    #
+    # The autologin case (no password) is handled because we don't
+    # gate behind `auth requisite pam_unix.so` -- system-auth's auth
+    # stack tries pam_systemd_home (no-op for our local user), then
+    # pam_unix with nullok_secure which succeeds for users with no
+    # password set (like cosmic-live, cosmic-initial-setup). Real-login
+    # users (post-install) authenticate normally through the same stack.
+    install -Dm644 /dev/stdin "%{install-root}/etc/pam.d/greetd" <<'EOF'
+    #%PAM-1.0
+    auth      include   system-auth
+    account   include   system-auth
+    password  include   system-auth
+    session   include   system-auth
+    EOF
   strip-commands:
   - |
     %{strip-binaries}

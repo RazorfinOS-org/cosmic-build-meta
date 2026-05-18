@@ -1,28 +1,8 @@
-# NVIDIA proprietary driver -- userspace + open kernel modules.
+# NVIDIA proprietary driver: userspace + open kernel modules from the
+# self-extracting .run installer. Hardware support is Turing+ only.
 #
-# Single element, single source: NVIDIA's self-extracting .run installer.
-# It bundles BOTH the closed-source userspace runtime AND the (MIT/GPLv2)
-# open-source kernel modules under kernel-open/. Building from the .run's
-# kernel-open is what GNOME does and what NVIDIA's release engineering
-# actually validates -- the upstream github.com/NVIDIA/open-gpu-kernel-modules
-# tag at the same version is the raw source tree, not bit-for-bit identical
-# with what ships in the .run, and trips on more kernel-API breakage.
-#
-# Hardware support (kernel-modules side): Turing+ only (GTX 16xx,
-# RTX 20xx/30xx/40xx/50xx, datacenter A/H/L/B). Pascal and earlier
-# need the closed-source kernel module which we don't package.
-#
-# License: NVIDIA's SLA permits redistribution of the userspace
-# libraries provided the EULA travels with them. Installed to
-# /usr/share/doc/nvidia/LICENSE.
-#
-# Version pinned to NVIDIA's "Production Branch" channel.
-#
-# To bump:
-#   1. Latest at https://www.nvidia.com/en-us/drivers/unix/
-#   2. Update url + ref + filename + nvidia-version below.
-#      Compute sha256:
-#        curl -sSL https://download.nvidia.com/XFree86/Linux-x86_64/<VER>/NVIDIA-Linux-x86_64-<VER>.run | sha256sum
+# The EULA is installed to /usr/share/doc/nvidia/LICENSE. To bump, update
+# nvidia-version, URL, filename, and SHA256 from NVIDIA's Unix driver page.
 kind: manual
 
 build-depends:
@@ -36,13 +16,9 @@ build-depends:
 - freedesktop-sdk.bst:components/gawk.bst
 - freedesktop-sdk.bst:components/findutils.bst
 - freedesktop-sdk.bst:components/linux.bst
-# Kernel's objtool (run by `LD [M]`) is dynamically linked against
-# libxxhash.so.0; without this the module link fails with
-# "error while loading shared libraries: libxxhash.so.0".
+# Kernel objtool dependency.
 - freedesktop-sdk.bst:components/xxhash.bst
-# Tools the .run installer's makeself wrapper shells out to during
-# self-extraction. List is generous; missing tools fail mid-extract
-# with cryptic errors.
+# Tools used while extracting the .run payload.
 - freedesktop-sdk.bst:components/grep.bst
 - freedesktop-sdk.bst:components/tar.bst
 - freedesktop-sdk.bst:components/gzip.bst
@@ -71,18 +47,10 @@ variables:
 config:
   build-commands:
   - |
-    # NOT using `set -e -o pipefail` here: NVIDIA's makeself wrapper
-    # uses `tail -c | xz -dc | tar xfp -`. If anything in the pipeline
-    # exits before tail finishes flushing (normal), tail SIGPIPEs and
-    # the whole shell terminates with exit 143, masking the real error.
+    # Avoid pipefail here: the makeself/tar pipeline can SIGPIPE normally.
     set -u
     chmod +x NVIDIA-Linux-x86_64-%{nvidia-version}.run
-    # Bypass NVIDIA's makeself wrapper. The wrapper does curses-y
-    # prompting / progress / sanity-check stuff that misbehaves under
-    # BST's stripped sandbox (no tty, restricted /proc -- the wrapper
-    # SIGTERMs itself or its parent on unexpected signals -> exit 143).
-    # We don't need any of it: the .run is just a shell prologue +
-    # compressed tarball, and makeself exposes the payload offset.
+    # Bypass the interactive makeself wrapper; extract its tar payload directly.
     SKIP=$(grep -a -m1 -n '^skip=' NVIDIA-Linux-x86_64-%{nvidia-version}.run | head -1 | cut -d: -f1)
     if [ -z "$SKIP" ]; then
         echo "FATAL: couldn't locate makeself skip marker in .run" >&2
@@ -115,11 +83,7 @@ config:
     fi
     echo "Extracted $(ls extracted | wc -l) top-level entries"
   - |
-    # Build the open kernel modules from the .run's bundled source.
-    # This is the path NVIDIA's release engineering validates against
-    # current kernels -- using the github tag instead trips on
-    # del_timer_sync, hrtimer_init, swiotlb_map_sg_attrs etc. on
-    # kernel 6.16+.
+    # Build the .run-bundled open modules; this matches NVIDIA/GNOME packaging.
     set -euo pipefail
     KVER=$(ls /usr/lib/modules | head -n1)
     if [ -z "$KVER" ] || [ ! -d "/usr/lib/modules/$KVER/build" ]; then
@@ -127,19 +91,14 @@ config:
         exit 1
     fi
     cd extracted/kernel-open
-    # GCC 14+ (FDSDK 25.08) promotes -Wincompatible-pointer-types to
-    # a hard error by default; NVIDIA's source still has a couple of
-    # benign mismatches. Demote to warning so the build proceeds.
+    # NVIDIA 595 has benign pointer-type warnings that GCC 14 treats as errors.
     echo 'EXTRA_CFLAGS += -Wno-error=incompatible-pointer-types' >> Kbuild
     echo "Building NVIDIA kernel modules against $KVER"
     make -j${BST_BUILD_THREADS:-1} KERNEL_UNAME="$KVER"
 
   install-commands:
   - |
-    # Kernel modules. modules_install lays out
-    # /usr/lib/modules/<kver>/kernel/drivers/video/nvidia*.ko etc.
-    # depmod is intentionally NOT run here; it must run against the
-    # composed root, which happens at OCI integration time.
+    # Kernel modules; depmod runs later against the composed root.
     set -euo pipefail
     KVER=$(ls /usr/lib/modules | head -n1)
     cd extracted/kernel-open
@@ -150,85 +109,116 @@ config:
     set -euo pipefail
     cd extracted
     LIBDIR="%{install-root}/usr/lib/%{abi}"
-    install -d "$LIBDIR" "$LIBDIR/vdpau"
+    BINDIR="%{install-root}/usr/bin"
+    install -d "$LIBDIR" "$LIBDIR/vdpau" "$BINDIR"
 
-    # Userspace runtime libraries -- the subset every NVIDIA-on-Linux
-    # desktop actually loads. Excludes: 32-bit shims, X11-specific
-    # plugins, optional tools we don't ship by default.
-    for lib in \
-        libcuda.so.%{nvidia-version} \
-        libnvcuvid.so.%{nvidia-version} \
-        libnvidia-allocator.so.%{nvidia-version} \
-        libnvidia-cfg.so.%{nvidia-version} \
-        libnvidia-eglcore.so.%{nvidia-version} \
-        libnvidia-encode.so.%{nvidia-version} \
-        libnvidia-fbc.so.%{nvidia-version} \
-        libnvidia-glcore.so.%{nvidia-version} \
-        libnvidia-glsi.so.%{nvidia-version} \
-        libnvidia-glvkspirv.so.%{nvidia-version} \
-        libnvidia-ml.so.%{nvidia-version} \
-        libnvidia-opticalflow.so.%{nvidia-version} \
-        libnvidia-ptxjitcompiler.so.%{nvidia-version} \
-        libnvidia-rtcore.so.%{nvidia-version} \
-        libnvidia-tls.so.%{nvidia-version} \
-        libnvoptix.so.%{nvidia-version} \
-        libEGL_nvidia.so.%{nvidia-version} \
-        libGLESv1_CM_nvidia.so.%{nvidia-version} \
-        libGLESv2_nvidia.so.%{nvidia-version} \
-        libGLX_nvidia.so.%{nvidia-version} \
-    ; do
-        if [ -f "$lib" ]; then
-            install -Dm755 "$lib" "$LIBDIR/$lib"
-        fi
-    done
+    # Install userspace libraries by glob so .run layout changes do not
+    # silently drop the EGL/GLVND stack. Keep 64-bit runtime libs only;
+    # include bundled egl-wayland v1 and exclude the unused v2 bridge.
+    find . -maxdepth 4 -type f \
+        \( -name 'libcuda.so.*' \
+        -o -name 'libnvcuvid.so.*' \
+        -o -name 'libnvidia-*.so.*' \
+        -o -name 'libnvoptix.so.*' \
+        -o -name 'libEGL_nvidia.so.*' \
+        -o -name 'libGLESv1_CM_nvidia.so.*' \
+        -o -name 'libGLESv2_nvidia.so.*' \
+        -o -name 'libGLX_nvidia.so.*' \) \
+        ! -path '*/32/*' \
+        ! -name 'libnvidia-egl-wayland2.so*' \
+        -exec install -Dm755 -t "$LIBDIR" {} +
 
-    # libnvidia-egl-* and libnvidia-vulkan-* use NVIDIA-internal
-    # versioning that doesn't track the driver version -- copy by glob.
-    for pat in \
-        'libnvidia-egl-wayland.so.*' \
-        'libnvidia-egl-gbm.so.*' \
-        'libnvidia-egl-xlib.so.*' \
-        'libnvidia-egl-xcb.so.*' \
-        'libnvidia-vulkan-producer.so.*' \
-        'libnvidia-pkcs11*.so.*' \
-        'libnvidia-nvvm.so.*' \
-    ; do
-        for f in $pat; do
-            [ -f "$f" ] && install -Dm755 "$f" "$LIBDIR/$f" || true
-        done
-    done
-
-    # SONAME symlinks. NVIDIA's installer creates these post-extract;
-    # mimic by walking installed libs and stripping the version.
-    for lib in "$LIBDIR"/lib*.so.%{nvidia-version}; do
+    # Recreate SONAME links that NVIDIA's installer would normally add,
+    # including non-driver-versioned EGL/GBM platform libraries.
+    for lib in "$LIBDIR"/lib*.so*; do
         [ -f "$lib" ] || continue
         base=$(basename "$lib")
-        soname=${base%.%{nvidia-version}}        # libfoo.so
-        major_link=${soname}.1                    # libfoo.so.1
-        ln -sf "$base" "$LIBDIR/$soname"
-        ln -sf "$base" "$LIBDIR/$major_link"
+        soname=$(objdump -p "$lib" 2>/dev/null | sed '/ *SONAME */{s///;q};d')
+        if [ -n "$soname" ] && [ ! -e "$LIBDIR/$soname" ]; then
+            ln -sf "$base" "$LIBDIR/$soname"
+        fi
+
+        # Best-effort devel-style link for driver-versioned blobs.
+        case "$base" in
+            *.so.%{nvidia-version})
+                stem=${base%.%{nvidia-version}}
+                [ -e "$LIBDIR/$stem" ] || ln -sf "$base" "$LIBDIR/$stem"
+                ;;
+        esac
     done
     # libcuda's SONAME is libcuda.so.1.
     [ -e "$LIBDIR/libcuda.so.1" ] || ln -sf "libcuda.so.%{nvidia-version}" "$LIBDIR/libcuda.so.1"
 
-    # Vulkan ICD config.
-    if [ -f nvidia_icd.json ]; then
-        install -Dm644 nvidia_icd.json \
-            "%{install-root}/usr/share/vulkan/icd.d/nvidia_icd.json"
+    # GBM backend entry point used by libgbm/egl consumers.
+    install -d "$LIBDIR/gbm"
+    ln -sf ../libnvidia-allocator.so.1 "$LIBDIR/gbm/nvidia-drm_gbm.so"
+
+    # Keep the binary set narrow. nvidia-modprobe is installed separately
+    # with setuid so non-root NVIDIA userspace can create auxiliary nodes.
+    # The OCI image replays this via fakecap; the Live ISO restores setuid
+    # in include/live-image-common.yml.
+    for bin in nvidia-smi nvidia-debugdump \
+               nvidia-persistenced nvidia-cuda-mps-control \
+               nvidia-cuda-mps-server nvidia-bug-report.sh; do
+        path=$(find . -maxdepth 4 -type f -name "$bin" | head -1)
+        if [ -n "$path" ]; then
+            install -Dm755 "$path" "$BINDIR/$bin"
+        fi
+    done
+    # nvidia-modprobe gets the setuid bit.
+    path=$(find . -maxdepth 4 -type f -name nvidia-modprobe | head -1)
+    if [ -n "$path" ]; then
+        install -Dm4755 "$path" "$BINDIR/nvidia-modprobe"
     fi
 
-    # GLVND configs. egl_external_platform.d makes the EGL loader pick
-    # NVIDIA's wayland + gbm platforms.
+    # Persistence daemon, matching common Fedora/RPM Fusion style packaging.
+    install -d "%{install-root}/usr/lib/systemd/system" \
+               "%{install-root}/usr/lib/sysusers.d" \
+               "%{install-root}/usr/lib/systemd/system-preset"
+    cat > "%{install-root}/usr/lib/sysusers.d/nvidia-persistenced.conf" <<'EOF'
+    u nvidia-persistenced - "NVIDIA Persistence Daemon" /var/lib/nvidia-persistenced /usr/sbin/nologin
+    EOF
+    cat > "%{install-root}/usr/lib/systemd/system/nvidia-persistenced.service" <<'EOF'
+    [Unit]
+    Description=NVIDIA Persistence Daemon
+
+    [Service]
+    Type=forking
+    PIDFile=/run/nvidia-persistenced/nvidia-persistenced.pid
+    Restart=always
+    ExecStart=/usr/bin/nvidia-persistenced
+    User=nvidia-persistenced
+    Group=nvidia-persistenced
+    RuntimeDirectory=nvidia-persistenced
+    TimeoutSec=300
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+    cat > "%{install-root}/usr/lib/systemd/system-preset/90-nvidia.preset" <<'EOF'
+    enable nvidia-persistenced.service
+    EOF
+
+    # ICD / GLVND / EGL platform JSONs. Match by basename so we don't
+    # care whether the .run keeps these at top level or nests them.
+    for f in nvidia_icd.json; do
+        path=$(find . -maxdepth 3 -type f -name "$f" | head -1)
+        [ -n "$path" ] && install -Dm644 "$path" \
+            "%{install-root}/usr/share/vulkan/icd.d/$f" || true
+    done
     for f in nvidia_layers.json; do
-        [ -f "$f" ] && install -Dm644 "$f" \
+        path=$(find . -maxdepth 3 -type f -name "$f" | head -1)
+        [ -n "$path" ] && install -Dm644 "$path" \
             "%{install-root}/usr/share/vulkan/implicit_layer.d/$f" || true
     done
     for f in 10_nvidia.json; do
-        [ -f "$f" ] && install -Dm644 "$f" \
+        path=$(find . -maxdepth 3 -type f -name "$f" | head -1)
+        [ -n "$path" ] && install -Dm644 "$path" \
             "%{install-root}/usr/share/glvnd/egl_vendor.d/$f" || true
     done
     for f in 10_nvidia_wayland.json 15_nvidia_gbm.json; do
-        [ -f "$f" ] && install -Dm644 "$f" \
+        path=$(find . -maxdepth 3 -type f -name "$f" | head -1)
+        [ -n "$path" ] && install -Dm644 "$path" \
             "%{install-root}/usr/share/egl/egl_external_platform.d/$f" || true
     done
 
@@ -246,4 +236,34 @@ config:
     if [ -f LICENSE ]; then
         install -Dm644 LICENSE \
             "%{install-root}/usr/share/doc/nvidia/LICENSE"
+    fi
+
+    # Paranoia: ensure the NVIDIA libdir is on the dynamic linker path.
+    install -d "%{install-root}/etc/ld.so.conf.d"
+    printf '/usr/lib/%s\n' "%{abi}" > "%{install-root}/etc/ld.so.conf.d/00-nvidia.conf"
+
+    # Build-time sanity checks for the load-bearing userspace pieces.
+    if [ ! -f "$LIBDIR/libGLX_nvidia.so.%{nvidia-version}" ]; then
+        echo "FATAL: libGLX_nvidia.so.%{nvidia-version} missing from $LIBDIR after install" >&2
+        echo "  -> .run layout likely changed; userspace find pattern needs an update" >&2
+        echo "Top-level entries in extracted/:" >&2
+        ls . | head -40 >&2
+        echo "All libGLX*/libEGL* found:" >&2
+        find . -maxdepth 4 -type f \( -name 'libGLX*' -o -name 'libEGL*' \) >&2
+        exit 1
+    fi
+    if [ ! -x "$BINDIR/nvidia-smi" ]; then
+        echo "FATAL: nvidia-smi missing from $BINDIR after install" >&2
+        find . -maxdepth 4 -type f -name 'nvidia-smi' >&2 || true
+        exit 1
+    fi
+    if [ ! -e "$LIBDIR/libnvidia-egl-gbm.so.1" ]; then
+        echo "FATAL: libnvidia-egl-gbm.so.1 SONAME symlink missing from $LIBDIR" >&2
+        find "$LIBDIR" -maxdepth 1 -name 'libnvidia-egl-gbm.so*' -ls >&2 || true
+        exit 1
+    fi
+    if [ ! -e "$LIBDIR/gbm/nvidia-drm_gbm.so" ]; then
+        echo "FATAL: GBM backend symlink missing from $LIBDIR/gbm" >&2
+        find "$LIBDIR" -maxdepth 2 -name '*gbm*' -ls >&2 || true
+        exit 1
     fi

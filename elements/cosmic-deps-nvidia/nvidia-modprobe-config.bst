@@ -1,17 +1,7 @@
-# Kernel-module configuration for NVIDIA on a Wayland-first desktop.
-#
-# Two settings matter:
-#   - nvidia-drm.modeset=1     KMS support; mandatory for Wayland on NVIDIA.
-#                              Without it, any Wayland compositor sees a
-#                              DRM device with no working modesetting and
-#                              fails to bring up the display.
-#   - nvidia-drm.fbdev=1       Provides /dev/fb0 backed by nvidia-drm so
-#                              early-boot framebuffer (plymouth, kernel
-#                              messages) renders correctly. Was added in
-#                              driver 545.x; safe on 595.x.
-#
-# Also disables the (deprecated, X11-only) nvidia-fbc legacy framebuffer
-# plugin which spams dmesg warnings on modern kernels.
+# NVIDIA module, udev, and bootc karg defaults for Wayland/COSMIC.
+# Mirrors the common Fedora/Pop baseline: nvidia-drm KMS+fbdev enabled,
+# nouveau blocked, NVIDIA devices tagged for logind/libseat, and auxiliary
+# /dev/nvidia* nodes created early.
 kind: manual
 
 depends:
@@ -25,61 +15,85 @@ config:
   - |
     install -d "%{install-root}/etc/modprobe.d"
     cat > "%{install-root}/etc/modprobe.d/nvidia.conf" <<'EOF'
-    # Required for Wayland (cosmic-comp). Modeset must be enabled at
-    # module load time; setting it after the fact has no effect.
+    # KMS/fbdev must be enabled when nvidia-drm loads.
     options nvidia-drm modeset=1 fbdev=1
 
-    # Enable the open kernel modules' GSP firmware path (Turing+).
-    # 595.x defaults this to 1 already; explicit for clarity.
+    # Open kernel-module defaults for supported Turing+ GPUs.
     options nvidia NVreg_OpenRmEnableUnsupportedGpus=0
     options nvidia NVreg_EnableGpuFirmware=1
+
+    # Preserve video memory across suspend/resume, matching Pop packaging.
+    options nvidia NVreg_PreserveVideoMemoryAllocations=1
+    # Must not point at tmpfs.
+    options nvidia NVreg_TemporaryFilePath=/var/NVreg_TemporaryFilePath
     EOF
 
-    # Make the modules load early enough that they grab the framebuffer
-    # before any other DRM driver tries.
+    # Seat tags mirror Pop's 71-nvidia.rules so logind/libseat see the
+    # NVIDIA PCI/DRM devices as display hardware.
+    install -d "%{install-root}/usr/lib/udev/rules.d"
+    cat > "%{install-root}/usr/lib/udev/rules.d/71-nvidia.rules" <<'EOF'
+    # Seat tags for VGA and Optimus-style 3D controller classes.
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", TAG+="seat", TAG+="master-of-seat"
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030200", TAG+="seat", TAG+="master-of-seat"
+    ACTION=="add|change", SUBSYSTEM=="drm", KERNEL=="card*", DRIVERS=="nvidia", TAG+="seat", TAG+="master-of-seat"
+
+    # Create auxiliary /dev/nvidia* nodes on both module and PCI bind events.
+    ACTION=="add|bind", KERNEL=="nvidia", RUN+="/usr/bin/nvidia-modprobe"
+    ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x03[0-9]*", RUN+="/usr/bin/nvidia-modprobe -c 0"
+    ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x03[0-9]*", RUN+="/usr/bin/nvidia-modprobe -m"
+    ACTION=="add|bind", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x03[0-9]*", RUN+="/usr/bin/nvidia-modprobe -u"
+
+    # Best-effort late-bind fallback (eGPU, unusual hotplug paths).
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", RUN+="/usr/sbin/modprobe nvidia"
+    EOF
+
+    # Rootfs module-load fallback.
     install -d "%{install-root}/etc/modules-load.d"
     cat > "%{install-root}/etc/modules-load.d/nvidia.conf" <<'EOF'
-    # Order matters: nvidia first, then nvidia-modeset (depends on nvidia),
-    # then nvidia-drm (depends on nvidia-modeset).
+    # Dependency order matters.
     nvidia
     nvidia-modeset
     nvidia-drm
     nvidia-uvm
     EOF
 
-    # Block nouveau -- it must not load if NVIDIA proprietary is present,
-    # otherwise both drivers race for /dev/dri/card0 and the system
-    # boots into VESA fallback or a black screen.
+    # Root-run fallback for auxiliary device nodes.
+    install -d "%{install-root}/usr/lib/systemd/system" \
+               "%{install-root}/usr/lib/systemd/system-preset"
+    cat > "%{install-root}/usr/lib/systemd/system/nvidia-device-nodes.service" <<'EOF'
+    [Unit]
+    Description=Create NVIDIA device nodes
+    DefaultDependencies=no
+    After=systemd-modules-load.service systemd-udev-trigger.service
+    Before=sysinit.target display-manager.service nvidia-persistenced.service
+
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/bin/sh -c 'modprobe nvidia || true; modprobe nvidia-modeset || true; modprobe nvidia-drm || true; modprobe nvidia-uvm || true; /usr/bin/nvidia-modprobe -c 0 || true; /usr/bin/nvidia-modprobe -m || true; /usr/bin/nvidia-modprobe -u || true; ls -l /dev/nvidia* /dev/nvidia-caps/* 2>/dev/null || true'
+
+    [Install]
+    WantedBy=sysinit.target
+    EOF
+    cat > "%{install-root}/usr/lib/systemd/system-preset/89-nvidia-device-nodes.preset" <<'EOF'
+    enable nvidia-device-nodes.service
+    EOF
+
+    # Block nouveau anywhere the rootfs modprobe config is visible.
     cat > "%{install-root}/etc/modprobe.d/blacklist-nouveau.conf" <<'EOF'
     blacklist nouveau
     options nouveau modeset=0
     EOF
 
-    # Kernel cmdline for the installed bootc system. bootc reads files
-    # in /usr/lib/bootc/kargs.d/ at install/upgrade time and writes the
-    # kargs into the systemd-boot entry it generates.
-    #
-    # Why each one (mirrors uBlue/Bazzite's NVIDIA + Wayland baseline):
-    #   - rd.driver.blacklist=nouveau / modprobe.blacklist=nouveau
-    #     /etc/modprobe.d/blacklist-nouveau.conf isn't visible in the
-    #     initramfs, so without these the initramfs autoloads nouveau
-    #     before the rootfs blacklist applies; nouveau then claims the
-    #     DRM device and nvidia-drm fails to bind.
-    #   - nvidia-drm.modeset=1
-    #     Belt-and-braces with the modprobe.d option. If nvidia-drm gets
-    #     pulled in by udev before /etc/modprobe.d/nvidia.conf is read,
-    #     modeset stays off and any Wayland compositor (cosmic-comp)
-    #     refuses to acquire DRM master.
-    #   - initcall_blacklist=simpledrm_platform_driver_init
-    #     simpledrm binds to the EFI framebuffer very early; on some
-    #     hardware nvidia-drm refuses to take over, leaving cosmic-comp
-    #     without a working /dev/dri/card0.
+    # Installed-system kargs. bootc copies these into generated boot entries;
+    # they cover initramfs-time nouveau blocking, nvidia-drm KMS, and simpledrm
+    # handoff issues seen on some NVIDIA systems.
     install -d "%{install-root}/usr/lib/bootc/kargs.d"
     cat > "%{install-root}/usr/lib/bootc/kargs.d/00-nvidia.toml" <<'EOF'
     kargs = [
         "rd.driver.blacklist=nouveau",
         "modprobe.blacklist=nouveau",
         "nvidia-drm.modeset=1",
+        "nvidia-drm.fbdev=1",
         "initcall_blacklist=simpledrm_platform_driver_init",
     ]
     EOF

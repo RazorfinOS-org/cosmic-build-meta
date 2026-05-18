@@ -2,14 +2,6 @@
 # oci/cosmic-nvidia-live (where systemctl preset-all runs at image
 # assembly via installer/live-image-*.bst).
 
-# Disable the on-boot flatpak install service: live-image-*.bst now
-# pre-bakes the bundle into the EROFS sysroot at build time, so
-# /var/lib/flatpak/app/org.bootcinstaller.Installer already exists at
-# first boot. The unit's ConditionPathExists=! would skip it anyway,
-# but disabling the symlink avoids the "(condition failed)" noise in
-# `systemctl --failed` output.
-disable bootc-installer-flatpak-install.service
-
 # Disable the OS-wide flatpak preinstall service for the live env.
 # flatpak-preinstall.service runs `flatpak preinstall` to materialise
 # everything in /usr/share/flatpak/preinstall.d/ -- in our case that's
