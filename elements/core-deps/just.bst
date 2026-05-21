@@ -19,7 +19,7 @@ sources:
 - kind: git_repo
   url: github:casey/just.git
   track: "1.*"
-  ref: 1.50.0-0-g05c630394ac4d0df1cb21f4466fa718434c69363
+  ref: 1.51.0-0-gf92413bb045a058b35206d590c8f3ae147ea68aa
 - kind: cargo2
   url: "crates:"
   ref:
@@ -77,8 +77,8 @@ sources:
     sha: c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3
   - kind: registry
     name: blake3
-    version: 1.8.4
-    sha: 4d2d5991425dfd0785aed03aedcf0b321d61975c9b5b3689c774a2610ae0b51e
+    version: 1.8.5
+    sha: 0aa83c34e62843d924f905e0f5c866eb1dd6545fc4d719e803d9ba6030371fce
   - kind: registry
     name: block-buffer
     version: 0.10.4
@@ -105,8 +105,8 @@ sources:
     sha: e629a66d692cb9ff1a1c664e41771b3dcaf961985a9774c0eb0bd1b51cf60a48
   - kind: registry
     name: cc
-    version: 1.2.60
-    sha: 43c5703da9466b66a946814e1adf53ea2c90f10063b86290cc9eb67ce3478a20
+    version: 1.2.62
+    sha: a1dce859f0832a7d088c4f1119888ab94ef4b5d6795d1ce05afb7fe159d79f98
   - kind: registry
     name: cfg-if
     version: 1.0.4
@@ -133,8 +133,8 @@ sources:
     sha: 714a53001bf66416adb0e2ef5ac857140e7dc3a0c48fb28b2f10762fc4b5069f
   - kind: registry
     name: clap_complete
-    version: 4.6.2
-    sha: 3ff7a1dccbdd8b078c2bdebff47e404615151534d5043da397ec50286816f9cb
+    version: 4.6.4
+    sha: e3e962dae2b1e5007fe9e3db363ddc43a8bf25546d279f7a8a4401204690e80c
   - kind: registry
     name: clap_derive
     version: 4.6.1
@@ -212,10 +212,6 @@ sources:
     version: 0.15.7
     sha: 1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b
   - kind: registry
-    name: edit-distance
-    version: 2.2.2
-    sha: 324d428080b707bac399325341bd61af5ded1b30f33b7c949792ca464733c2d5
-  - kind: registry
     name: equivalent
     version: 1.0.2
     sha: 877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f
@@ -240,6 +236,18 @@ sources:
     version: 0.1.5
     sha: d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2
   - kind: registry
+    name: futures-core
+    version: 0.3.32
+    sha: 7e3450815272ef58cec6d564423f6e755e25379b217b0bc688e295ba24df6b1d
+  - kind: registry
+    name: futures-task
+    version: 0.3.32
+    sha: 037711b3d59c33004d3856fbdc83b99d4ff37a24768fa1be9ce3538a1cde4393
+  - kind: registry
+    name: futures-util
+    version: 0.3.32
+    sha: 389ca41296e6190b48053de0321d02a77f32f8a5d2461dd38762c0593805c6d6
+  - kind: registry
     name: generic-array
     version: 0.14.7
     sha: 85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a
@@ -261,8 +269,8 @@ sources:
     sha: 9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1
   - kind: registry
     name: hashbrown
-    version: 0.17.0
-    sha: 4f467dd6dccf739c208452f8014c75c18bb8301b050ad1cfb27153803edb0f51
+    version: 0.17.1
+    sha: ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a
   - kind: registry
     name: heck
     version: 0.5.0
@@ -301,8 +309,8 @@ sources:
     sha: 8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682
   - kind: registry
     name: js-sys
-    version: 0.3.95
-    sha: 2964e92d1d9dc3364cae4d718d93f227e3abb088e747d92e0395bfdedf1c12ca
+    version: 0.3.98
+    sha: 67df7112613f8bfd9150013a0314e196f4800d3201ae742489d999db2f979f08
   - kind: registry
     name: leb128fmt
     version: 0.1.0
@@ -313,8 +321,8 @@ sources:
     sha: 441225017b106b9f902e97947a6d31e44ebcf274b91bdbfb51e5c477fcd468e5
   - kind: registry
     name: libc
-    version: 0.2.185
-    sha: 52ff2c0fe9bc6cb6b14a0592c2ff4fa9ceb83eea9db979b0487cd054946a2b8f
+    version: 0.2.186
+    sha: 68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66
   - kind: registry
     name: libredox
     version: 0.1.16
@@ -375,6 +383,10 @@ sources:
     name: percent-encoding
     version: 2.3.2
     sha: 9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220
+  - kind: registry
+    name: pin-project-lite
+    version: 0.2.17
+    sha: a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd
   - kind: registry
     name: pretty_assertions
     version: 1.4.1
@@ -496,6 +508,10 @@ sources:
     version: 3.1.0
     sha: 04d93e861ede2e497b47833469b8ec9d5c07fa4c78ce7a00f6eb7dd8168b4b3f
   - kind: registry
+    name: slab
+    version: 0.4.12
+    sha: 0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5
+  - kind: registry
     name: snafu
     version: 0.9.0
     sha: d1d4bced6a69f90b2056c03dcff2c4737f98d6fb9e0853493996e1d253ca29c6
@@ -527,10 +543,6 @@ sources:
     name: tabled_derive
     version: 0.10.0
     sha: 52d9946811baad81710ec921809e2af67ad77719418673b2a3794932d57b7538
-  - kind: registry
-    name: target
-    version: 2.1.0
-    sha: 1e8f05f774b2db35bdad5a8237a90be1102669f8ea013fea9777b366d34ab145
   - kind: registry
     name: tempfile
     version: 3.27.0
@@ -609,20 +621,20 @@ sources:
     sha: 5428f8bf88ea5ddc08faddef2ac4a67e390b88186c703ce6dbd955e1c145aca5
   - kind: registry
     name: wasm-bindgen
-    version: 0.2.118
-    sha: 0bf938a0bacb0469e83c1e148908bd7d5a6010354cf4fb73279b7447422e3a89
+    version: 0.2.121
+    sha: 49ace1d07c165b0864824eee619580c4689389afa9dc9ed3a4c75040d82e6790
   - kind: registry
     name: wasm-bindgen-macro
-    version: 0.2.118
-    sha: eeff24f84126c0ec2db7a449f0c2ec963c6a49efe0698c4242929da037ca28ed
+    version: 0.2.121
+    sha: 8e68e6f4afd367a562002c05637acb8578ff2dea1943df76afb9e83d177c8578
   - kind: registry
     name: wasm-bindgen-macro-support
-    version: 0.2.118
-    sha: 9d08065faf983b2b80a79fd87d8254c409281cf7de75fc4b773019824196c904
+    version: 0.2.121
+    sha: d95a9ec35c64b2a7cb35d3fead40c4238d0940c86d107136999567a4703259f2
   - kind: registry
     name: wasm-bindgen-shared
-    version: 0.2.118
-    sha: 5fd04d9e306f1907bd13c6361b5c6bfc7b3b3c095ed3f8a9246390f8dbdee129
+    version: 0.2.121
+    sha: c4e0100b01e9f0d03189a92b96772a1fb998639d981193d7dbab487302513441
   - kind: registry
     name: wasm-encoder
     version: 0.244.0
