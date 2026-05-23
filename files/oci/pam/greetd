@@ -2,7 +2,15 @@
 # PAM stack for greetd. Mirrors what Pop!_OS / Arch ship: defer
 # everything to system-auth so password policies / shadow / PAM
 # modules stay consistent with `login` and `sshd`.
+#
+# system-auth does not import /etc/locale.conf for greetd-launched
+# sessions. cosmic-greeter/cosmic-text read LANG/LC_* from the process
+# environment and fall back to en-US when unset, even though
+# systemd-localed has the selected locale. Import the machine locale so
+# first-boot choices made by cosmic-initial-setup reach the greeter and
+# the subsequent COSMIC session.
 auth      include  system-auth
 account   include  system-auth
 password  include  system-auth
+session   optional pam_env.so readenv=1 envfile=/etc/locale.conf
 session   include  system-auth

@@ -338,6 +338,10 @@ config:
     auth      include   system-auth
     account   include   system-auth
     password  include   system-auth
+    # system-auth does not import /etc/locale.conf for greetd-launched
+    # sessions. Import the machine locale so cosmic-greeter/cosmic-text
+    # see LANG/LC_* and don't fall back to en-US.
+    session   optional  pam_env.so readenv=1 envfile=/etc/locale.conf
     session   include   system-auth
     EOF
   strip-commands:
