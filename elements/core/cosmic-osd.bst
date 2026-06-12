@@ -20,7 +20,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-osd.git
   track: master
-  ref: epoch-1.0.13-1-g8bbf09700a21541c6005ae085cb16291ce0f35ea
+  ref: epoch-1.0.15-0-g28af81d1a7479b4e9edddb2fcf8c93f2074bad6b
 - kind: cargo2
   url: "crates:"
   ref:
@@ -506,7 +506,7 @@ sources:
     name: cosmic-settings-daemon
     version: 0.1.0
   - kind: git
-    commit: 78644a32e3741f8f80e9b8ce65c3550c85f9c1f8
+    commit: 81912bed6cdebe2719e29e6bd1453e7b977acb0e
     repo: github:pop-os/cosmic-settings
     name: cosmic-settings-daemon-subscription
     version: 1.0.7

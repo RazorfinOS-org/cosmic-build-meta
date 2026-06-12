@@ -33,7 +33,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-comp.git
   track: master
-  ref: epoch-1.0.13-14-g8450e89de4542766d49061d57876186adc6e8a69
+  ref: epoch-1.0.15-0-g2f7c34f29ae8d1d5b7d147bdb69ae443bd630e98
 - kind: cargo2
   url: "crates:"
   ref:
@@ -2031,10 +2031,10 @@ sources:
     version: 1.15.1
     sha: 67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03
   - kind: git
-    commit: 774f2ab010e080a2f79176d0e12eb63d5e09d680
+    commit: 85f83ab61711e725aa1f3481df4f4dc5370e925b
     repo: github:smithay/smithay.git
     query:
-      rev: 774f2ab
+      rev: 85f83ab
     name: smithay
     version: 0.7.0
   - kind: registry

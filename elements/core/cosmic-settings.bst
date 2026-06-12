@@ -25,7 +25,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings.git
   track: master
-  ref: epoch-1.0.13-8-gf19da761296a28ea97d6dadc2971de0bf2c0ad85
+  ref: epoch-1.0.15-3-g8cdf308db5e02de11599477aca41474242dbcd71
 - kind: cargo2
   url: "crates:"
   ref:
@@ -87,7 +87,7 @@ sources:
     name: accesskit_winit
     version: 0.30.0
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: accounts-zbus
     version: 0.1.0
@@ -384,7 +384,7 @@ sources:
     version: 0.7.0
     sha: 32fa6a061124e37baba002e496d203e23ba3d7b73750be82dbfbc92913048a5b
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: bluez-zbus
     version: 0.1.0
@@ -641,12 +641,12 @@ sources:
     name: cosmic-config-derive
     version: 1.0.0
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: cosmic-dbus-a11y
     version: 0.1.0
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: cosmic-dbus-networkmanager
     version: 0.1.0
@@ -661,10 +661,10 @@ sources:
     name: cosmic-idle-config
     version: 0.1.0
   - kind: git
-    commit: 673f3758920a7b20d307d356d586deef714df6b0
+    commit: 8fc81e8857e46c018ea21ab985aaf30ac853c007
     repo: github:pop-os/cosmic-mime-apps
     name: cosmic-mime-apps
-    version: 0.1.0
+    version: 0.2.0
   - kind: git
     commit: d518c7d25ef96f1a9696aa8cce008656bf66ece4
     repo: github:pop-os/cosmic-panel
@@ -693,7 +693,7 @@ sources:
     name: cosmic-settings-config
     version: 0.1.0
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: cosmic-settings-daemon
     version: 0.1.0
@@ -1145,10 +1145,6 @@ sources:
     version: 0.3.4
     sha: 899def5c37c4fd7b2664648c28120ecec138e4d395b459e5ca34f9cce2dd77fd
   - kind: registry
-    name: getrandom
-    version: 0.4.2
-    sha: 0de51e6874e94e7bf76d726fc5d13ba782deca734ff60d5bb2fb2607c7406555
-  - kind: registry
     name: gettext-rs
     version: 0.7.7
     sha: 5d5857dc1b7f0fee86961de833f434e29494d72af102ce5355738c0664222bdf
@@ -1273,7 +1269,7 @@ sources:
     version: 1.1.1
     sha: f558a64ac9af88b5ba400d99b579451af0d39c6d360980045b91aac966d705e2
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: hostname1-zbus
     version: 0.1.0
@@ -1490,10 +1486,6 @@ sources:
     name: icu_time_data
     version: 2.2.0
     sha: 6f2f8aeca682d874a5247084aa4fb7d1cef9ba45d889c21209a8818dcaaa0ec9
-  - kind: registry
-    name: id-arena
-    version: 2.3.0
-    sha: 3d3067d79b975e8844ca9eb072e16b31c3c1c36928edf9c6789548c524d0d954
   - kind: registry
     name: ident_case
     version: 1.0.1
@@ -1743,10 +1735,6 @@ sources:
     version: 1.5.0
     sha: bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe
   - kind: registry
-    name: leb128fmt
-    version: 0.1.0
-    sha: 09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2
-  - kind: registry
     name: lebe
     version: 0.5.3
     sha: 7a79a3332a6609480d7d0c9eab957bca6b455b91bb84e66d19f5ff66294b85b8
@@ -1824,7 +1812,7 @@ sources:
     version: 1.0.0
     sha: 11d3d7f243d5c5a8b9bb5d6dd2b1602c0cb0b9db1621bafc7ed66e35ff9fe092
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: locale1
     version: 0.1.0
@@ -1969,7 +1957,7 @@ sources:
     version: 0.30.1
     sha: 74523f3a35e05aba87a1d978330aef40f67b0304ac79c1c00b294c9830543db6
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: nm-secret-agent-manager
     version: 0.1.0
@@ -2326,10 +2314,6 @@ sources:
     version: 0.3.1
     sha: e8cf8e6a8aa66ce33f63993ffc4ea4271eb5b0530a9002db8455ea6050c77bfa
   - kind: registry
-    name: prettyplease
-    version: 0.2.37
-    sha: 479ca8adacdd7ce8f1fb39ce9ecccbfe93a3f1344b3d0d97f20bc0196208f62b
-  - kind: registry
     name: proc-macro-crate
     version: 3.5.0
     sha: e67ba7e9b2b56446f1d419b1d807906278ffa1a658a8a5d8a39dcb1f5a78614f
@@ -2401,10 +2385,6 @@ sources:
     name: r-efi
     version: 5.3.0
     sha: 69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f
-  - kind: registry
-    name: r-efi
-    version: 6.0.0
-    sha: f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf
   - kind: registry
     name: rand
     version: 0.8.5
@@ -2860,7 +2840,7 @@ sources:
     version: 0.2.27
     sha: 2e70e4c5a0e0a8a4823ad65dfe1a6930e4f4d756dcd9dd7939022b5e8c501215
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: timedate-zbus
     version: 0.1.0
@@ -3032,12 +3012,8 @@ sources:
     name: unicode-width
     version: 0.2.2
     sha: b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254
-  - kind: registry
-    name: unicode-xid
-    version: 0.2.6
-    sha: ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853
   - kind: git
-    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    commit: eed01dd3609e90e3c8cd043656734c500956c793
     repo: github:pop-os/dbus-settings-bindings
     name: upower_dbus
     version: 0.3.2
@@ -3098,10 +3074,6 @@ sources:
     version: 1.0.2+wasi-0.2.9
     sha: 9517f9239f02c069db75e65f174b3da828fe5f5b945c4dd26bd25d89c03ebcf5
   - kind: registry
-    name: wasip3
-    version: 0.4.0+wasi-0.3.0-rc-2026-01-06
-    sha: 5428f8bf88ea5ddc08faddef2ac4a67e390b88186c703ce6dbd955e1c145aca5
-  - kind: registry
     name: wasm-bindgen
     version: 0.2.118
     sha: 0bf938a0bacb0469e83c1e148908bd7d5a6010354cf4fb73279b7447422e3a89
@@ -3121,18 +3093,6 @@ sources:
     name: wasm-bindgen-shared
     version: 0.2.118
     sha: 5fd04d9e306f1907bd13c6361b5c6bfc7b3b3c095ed3f8a9246390f8dbdee129
-  - kind: registry
-    name: wasm-encoder
-    version: 0.244.0
-    sha: 990065f2fe63003fe337b932cfb5e3b80e0b4d0f5ff650e6985b1048f62c8319
-  - kind: registry
-    name: wasm-metadata
-    version: 0.244.0
-    sha: bb0e353e6a2fbdc176932bbaab493762eb1255a7900fe0fea1a2f96c296cc909
-  - kind: registry
-    name: wasmparser
-    version: 0.244.0
-    sha: 47b807c72e1bac69382b3a6fb3dbe8ea4c0ed87ff5629b8685ae6b9a611028fe
   - kind: registry
     name: wasmtimer
     version: 0.4.3
@@ -3545,26 +3505,6 @@ sources:
     name: wit-bindgen
     version: 0.51.0
     sha: d7249219f66ced02969388cf2bb044a09756a083d0fab1e566056b04d9fbcaa5
-  - kind: registry
-    name: wit-bindgen-core
-    version: 0.51.0
-    sha: ea61de684c3ea68cb082b7a88508a8b27fcc8b797d738bfc99a82facf1d752dc
-  - kind: registry
-    name: wit-bindgen-rust
-    version: 0.51.0
-    sha: b7c566e0f4b284dd6561c786d9cb0142da491f46a9fbed79ea69cdad5db17f21
-  - kind: registry
-    name: wit-bindgen-rust-macro
-    version: 0.51.0
-    sha: 0c0f9bfd77e6a48eccf51359e3ae77140a7f50b1e2ebfe62422d8afdaffab17a
-  - kind: registry
-    name: wit-component
-    version: 0.244.0
-    sha: 9d66ea20e9553b30172b5e831994e35fbde2d165325bec84fc43dbf6f4eb9cb2
-  - kind: registry
-    name: wit-parser
-    version: 0.244.0
-    sha: ecc8ac4bc1dc3381b7f59c34f00b67e18f910c2c0f50015669dde7def656a736
   - kind: registry
     name: write16
     version: 1.0.0

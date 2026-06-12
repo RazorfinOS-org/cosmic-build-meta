@@ -20,7 +20,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-panel.git
   track: master
-  ref: epoch-1.0.13-3-g26fee6c0c310620e8b3ce3e5fbab432248a88195
+  ref: epoch-1.0.15-1-g6119bb106255b2cd51cd281919662de3b6d8b433
 - kind: cargo2
   url: "crates:"
   ref:
@@ -2008,10 +2008,6 @@ sources:
     name: windows-sys
     version: 0.52.0
     sha: 282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d
-  - kind: registry
-    name: windows-sys
-    version: 0.59.0
-    sha: 1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b
   - kind: registry
     name: windows-sys
     version: 0.60.2

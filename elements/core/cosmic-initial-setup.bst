@@ -19,7 +19,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-initial-setup.git
   track: master
-  ref: epoch-1.0.13-0-g24a9b1ee0d115e7ccc0d1448d9596dd209112108
+  ref: epoch-1.0.15-0-g8eabeaf64804dd74ef2da7803b42f21ed1b498e2
 
 # Several files in res/ are Git LFS objects upstream; the git_repo
 # plugin only fetches the LFS *pointers* (~130 bytes each) because we
