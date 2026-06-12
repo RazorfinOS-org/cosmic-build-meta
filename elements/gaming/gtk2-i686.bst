@@ -5,7 +5,7 @@ kind: manual
 
 sources:
 - kind: remote
-  url: https://deb.debian.org/debian/pool/main/g/gtk+2.0/libgtk2.0-0_2.24.33-2+deb12u1_i386.deb
+  url: debian:pool/main/g/gtk+2.0/libgtk2.0-0_2.24.33-2+deb12u1_i386.deb
   ref: 59b4a428b6f5b76a7e1038a209fc4d8aee7ddf58dfbcf2159cd524f99fabd9c2
   filename: libgtk2.0-0_2.24.33-2+deb12u1_i386.deb
 

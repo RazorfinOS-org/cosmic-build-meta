@@ -19,6 +19,8 @@ aliases:
   steam-static: https://cdn.fastly.steamstatic.com/
   # NVIDIA Linux driver .run packages.
   nvidia-xfree86: https://download.nvidia.com/XFree86/
+  # Debian package pool (i386 .debs for Steam 32-bit compatibility libs).
+  debian: https://deb.debian.org/debian/
   # Git repository aliases
   github: https://github.com/
   gitlab: https://gitlab.com/

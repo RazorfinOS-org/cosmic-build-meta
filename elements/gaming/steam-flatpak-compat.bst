@@ -12,7 +12,10 @@ build-depends:
 
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
-- cosmic-deps/flatpak.bst
+# The wrapper only needs `flatpak` at runtime. Reference it through the
+# junction (which CBM overrides to its vendored 1.17 build) so this
+# element has no dependency outside gaming/ + freedesktop-sdk.
+- freedesktop-sdk.bst:components/flatpak.bst
 
 variables:
   strip-binaries: ''
