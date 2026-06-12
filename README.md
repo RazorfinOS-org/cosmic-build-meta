@@ -6,8 +6,9 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 
 ## Status
 
-- **109 local elements** (`elements/`), ~700 with freedesktop-sdk transitives. `just build` succeeds with 0 failures from a cold cache.
+- **126 local elements** (`elements/`), ~700 with freedesktop-sdk transitives. `just build` succeeds with 0 failures from a cold cache.
 - **Two image variants**: `cosmic` (Mesa, default) and `cosmic-nvidia` (NVIDIA proprietary driver, kernel modules, EGL/GBM userspace, device-node and logind/udev glue). Same BST graph; only the top-level image stack differs.
+- **Gaming layer** inspired by Bazzite/OpenGamingCollective: native Steam launcher/bootstrap, native gamescope + OGC game-mode session, host GameMode, Steam/controller udev rules, SDL controller DB, native MangoHud/vkBasalt, InputPlumber, Vulkan discovery glue, SDL/audio/input compatibility libraries, and first-boot Flathub preinstalls for Lutris, Heroic, Bottles, ProtonPlus, Protontricks, and GOverlay.
 - **Bootable image** (`bootable.raw`): boots into `cosmic-initial-setup` → `cosmic-greeter` → user session under QEMU + KVM + OVMF.
 - **Live ISO**: UEFI-bootable GPT disk image with autologin to a `cosmic-live` user, autostarts [cosmonaut-installer](https://github.com/razorfinos-org/cosmonaut-installer) — a native libcosmic GUI driving a privileged DBus daemon that installs from the OCI image baked into the ISO (`oci:/usr/lib/bootc/install-source/main`) against an opinionated profile (btrfs + composefs + systemd-boot, optional LUKS).
 - **CI**: GitHub Actions builds both variants weekly + on push to `main`, publishes to `ghcr.io/razorfinos-org/cosmic-build-meta:{cosmic,cosmic-nvidia}-{nightly,vX.Y.Z}` with keyless cosign signing and SLSA build-provenance attestations. ISOs are uploaded as workflow artifacts and (on tag pushes) attached to GitHub Releases.
@@ -136,6 +137,8 @@ depends:
 | `core/public-stacks/cosmic-session.bst` | Compositor, session, shell, greeter, icons, wallpapers |
 | `core/public-stacks/cosmic-apps.bst` | Files, Edit, Terminal, Store, Settings, Player, Notifications, OSD |
 | `core/public-stacks/cosmic-full.bst` | Session + apps |
+| `gaming/public-stacks/gaming-core.bst` | Host gaming support: native Steam launcher/bootstrap, native gamescope + OGC game-mode session, GameMode, Steam/controller udev rules, SDL controller DB, MangoHud/vkBasalt, InputPlumber, Vulkan discovery glue, SDL/audio/input compatibility libraries |
+| `gaming/public-stacks/gaming-full.bst` | `gaming-core` + curated Flathub preinstalls for Lutris/Heroic/Bottles/Proton tools/GOverlay |
 
 If you need cargo2-vendored elements (every `core/cosmic-*` is one), register the `cargo2` source plugin in your downstream `project.conf` the same way `cosmic-build-meta` does. If you only consume the pre-built `oci/cosmic/image.bst` artifact, you can skip that.
 
@@ -150,6 +153,9 @@ elements/
   core-deps/                     Build deps not in FDSDK (greetd, just, libdisplay-info, oniguruma, …)
   cosmic-deps/                   Runtime system stack (base, fonts, networking, audio, bootc, …)
   cosmic-deps-nvidia/            NVIDIA driver stack (nvidia.ko build, userspace, EGL-Wayland, modprobe glue)
+  gaming/                        Bazzite/OGC-inspired gaming layer: native Steam, native gamescope + OGC session,
+                                 GameMode, controller rules/data, MangoHud/vkBasalt, InputPlumber, Vulkan glue,
+                                 host compatibility libs, non-Steam gaming Flatpak preinstall declarations
   installer/                     Live ISO assembly: live-image (systemd-repart), live-extras (autologin / live-only
                                  polkit), cosmonaut-installer (libcosmic GUI + DBus daemon), images.json catalog
   oci/                           Bootc/OCI image assembly chain

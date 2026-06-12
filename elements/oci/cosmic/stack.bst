@@ -8,6 +8,12 @@ depends:
   # System + COSMIC binary aggregate
   - cosmic-deps/deps.bst
 
+  # Gaming host support + curated non-Steam launcher/tool Flatpak preinstalls.
+  # This is the Bazzite-inspired layer: native Steam, gamescope game mode,
+  # GameMode, Steam controller rules, SDL controller DB, Vulkan discovery glue,
+  # native compatibility libs, and first-boot Flathub installs for Lutris/Heroic/etc.
+  - gaming/deps.bst
+
   # Branding + bootc/composefs config
   - oci/integration/os-release.bst
   - oci/integration/bootc-config.bst

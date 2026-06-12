@@ -4,10 +4,10 @@
 
 # Disable the OS-wide flatpak preinstall service for the live env.
 # flatpak-preinstall.service runs `flatpak preinstall` to materialise
-# everything in /usr/share/flatpak/preinstall.d/ -- in our case that's
-# Firefox + GNOME Platform 50, which together need ~1 GB free in
-# /var/lib/flatpak. The live env's overlay tmpfs is too small (~2 GB
-# total, ~1 GB after the boot-time fill) and the install fails
-# anyway. Firefox in a 30-minute live session is dead weight; the
-# *installed* system handles the preinstall on its own.
+# everything in /usr/share/flatpak/preinstall.d/ -- Firefox plus the
+# curated non-Steam gaming set (Lutris/Heroic/Bottles/Proton tools/GOverlay)
+# would need many GB under /var/lib/flatpak. The live env's overlay tmpfs
+# is intentionally small, and these apps are dead weight in a 30-minute
+# installer session; the *installed* system handles the preinstall on its
+# own.
 disable flatpak-preinstall.service

@@ -15,6 +15,8 @@ aliases:
   # file out of an upstream repo without cloning the whole thing
   # (e.g. pop-robot.png from pop-os/default-settings).
   github-raw: https://raw.githubusercontent.com/
+  # Valve's Steam launcher/bootstrap package.
+  steam-static: https://cdn.fastly.steamstatic.com/
   # NVIDIA Linux driver .run packages.
   nvidia-xfree86: https://download.nvidia.com/XFree86/
   # Git repository aliases
