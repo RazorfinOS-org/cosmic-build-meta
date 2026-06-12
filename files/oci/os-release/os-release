@@ -1,5 +1,6 @@
 NAME="COSMIC"
 ID=cosmic
+VERSION_ID=25.08
 ID_LIKE="freedesktop-sdk"
 VARIANT="COSMIC base"
 VARIANT_ID=cosmic-base
