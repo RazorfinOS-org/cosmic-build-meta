@@ -34,14 +34,14 @@ depends:
 
 sources:
 - kind: remote
-  url: https://download.nvidia.com/XFree86/Linux-x86_64/595.71.05/NVIDIA-Linux-x86_64-595.71.05.run
-  # SHA256 of the 422 MB .run. NVIDIA does not publish a sidecar; computed
-  # locally and committed. Cross-checked against gnome-build-meta MR 4648.
-  ref: 36203b8960b7e49c8a42f6ba1f5863cde34a05e93d2b24b798af06dd846f6b82
-  filename: NVIDIA-Linux-x86_64-595.71.05.run
+  url: nvidia-xfree86:Linux-x86_64/610.43.02/NVIDIA-Linux-x86_64-610.43.02.run
+  # SHA256 of the 462 MB .run. NVIDIA does not publish a sidecar; computed
+  # locally and committed.
+  ref: 3034a054bb4cdf7752ff8dc272564cb105513804bff53538945901b16ca77463
+  filename: NVIDIA-Linux-x86_64-610.43.02.run
 
 variables:
-  nvidia-version: '595.71.05'
+  nvidia-version: '610.43.02'
   strip-binaries: ''
 
 config:
@@ -91,7 +91,7 @@ config:
         exit 1
     fi
     cd extracted/kernel-open
-    # NVIDIA 595 has benign pointer-type warnings that GCC 14 treats as errors.
+    # Recent NVIDIA open modules can emit benign warnings that GCC 14 treats as errors.
     echo 'EXTRA_CFLAGS += -Wno-error=incompatible-pointer-types' >> Kbuild
     echo "Building NVIDIA kernel modules against $KVER"
     make -j${BST_BUILD_THREADS:-1} KERNEL_UNAME="$KVER"
