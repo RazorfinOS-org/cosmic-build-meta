@@ -31,9 +31,11 @@ sources:
   ref: v3.5.1-0-g1a575a8e99b4ae629b9b16543a3a04d148632ba9
 
 # pop-robot.png lives in pop-os/default-settings, not in icon-theme.
-# Pinned to the master_noble branch (Pop!_OS 24.04 default-settings).
+# Pin the raw file URL to the commit that last touched the blob; Pop's
+# moving distro branches have dropped/renamed this path before, which
+# breaks BuildStream fetches even though the content we need is stable.
 - kind: remote
-  url: github-raw:pop-os/default-settings/master_noble/usr/share/pixmaps/faces/pop-robot.png
+  url: github-raw:pop-os/default-settings/77e14a2847fada0e979b1bb519e4f291b7bb3246/usr/share/pixmaps/faces/pop-robot.png
   ref: 6cf89d2a245ebd16b14c8db9b1495f2448261d4a86b92ba53f0bfd5eef0622fa
   filename: pop-robot.png
   directory: pop-faces

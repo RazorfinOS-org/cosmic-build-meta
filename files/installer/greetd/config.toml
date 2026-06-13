@@ -4,7 +4,7 @@
 # elements/oci/cosmic-live/* overwrites the base by re-installing this
 # file at /etc/greetd/config.toml. The cosmic-greeter session disappears;
 # the live env autologins as cosmic-live straight into a COSMIC session,
-# and tuna-installer auto-launches via the autostart .desktop entry.
+# and cosmonaut-installer auto-launches via its autostart .desktop entry.
 [terminal]
 vt = 1
 
