@@ -15,7 +15,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-applibrary.git
   track: master
-  ref: epoch-1.0.15-0-gaaf0c4e919aaf2a680ca47f1cf8c17686605b303
+  ref: epoch-1.1.0-0-g8b0f3bb30328c6de8b956cd31486d7f452217037
 - kind: cargo2
   url: "crates:"
   ref:
@@ -473,7 +473,7 @@ sources:
     name: cosmic-config-derive
     version: 1.0.0
   - kind: git
-    commit: 9c562fe3ecf03241a46a60c0078cd6ea10bd75ce
+    commit: ab4c57b8e416c6af9297cb04d101889896fd9a92
     repo: github:pop-os/freedesktop-icons
     name: cosmic-freedesktop-icons
     version: 0.4.0
