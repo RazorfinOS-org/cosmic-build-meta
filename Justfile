@@ -216,6 +216,39 @@ prep-install-source variant="cosmic":
     rm -rf "$stagedir"
     echo "==> install-source staged at $outdir ($(du -sh "$outdir" | cut -f1))"
 
+# Stage the offline-install OCI bake from a published container image
+# instead of rebuilding oci/<variant>/image.bst locally. This is intended
+# for CI ISO dispatch runs: the main workflow publishes the squashed bootc
+# image, then this recipe pulls it and writes build/install-source-<variant>/
+# for oci/<variant>/install-source.bst to import into the live ISO.
+#
+# The pulled image is squashed again defensively so custom image refs with
+# multiple layers still work with bootc 1.x's splitstream limitations.
+[group('image')]
+prep-install-source-from-image variant="cosmic" image_ref="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ref="{{image_ref}}"
+    if [ -z "$ref" ]; then
+        ref="{{image_name}}:{{variant}}-nightly"
+    fi
+    outdir="build/install-source-{{variant}}"
+    rm -rf "$outdir"
+    mkdir -p "$(dirname "$outdir")"
+    image_id=$(sudo podman pull -q "$ref")
+    squash_tag="cosmic-build-meta/install-source-{{variant}}:from-image"
+    printf 'FROM %s\n' "$image_id" | sudo podman build \
+        --pull=never \
+        --squash-all \
+        --security-opt label=type:unconfined_t \
+        -t "$squash_tag" \
+        -f - .
+    sudo podman save --format oci-dir -o "$outdir" "$squash_tag"
+    sudo chown -R "$(id -u):$(id -g)" "$outdir"
+    sudo podman rmi "$squash_tag" >/dev/null 2>&1 || true
+    sudo podman rmi "$image_id" >/dev/null 2>&1 || true
+    echo "==> install-source staged from $ref at $outdir ($(du -sh "$outdir" | cut -f1))"
+
 # Build the Live ISO via BST (kind: script element wrapping
 # systemd-repart --offline) and checkout the .iso artifact into
 # build/iso/ via reflink. Variant defaults to "cosmic"; pass
@@ -234,6 +267,15 @@ prep-install-source variant="cosmic":
 [group('image')]
 build-iso variant="cosmic":
     just prep-install-source {{variant}}
+    just build-iso-from-prepared-source {{variant}}
+
+# Build the Live ISO using an already-populated
+# build/install-source-<variant>/ directory. Use this after
+# `prep-install-source-from-image` to avoid rebuilding the bootc OCI image
+# in ISO-only CI dispatch runs.
+[group('image')]
+build-iso-from-prepared-source variant="cosmic":
+    test -d "build/install-source-{{variant}}"
     just bst build installer/live-image-{{variant}}.bst
     mkdir -p build/iso
     rm -rf "build/iso/{{variant}}.staging"
