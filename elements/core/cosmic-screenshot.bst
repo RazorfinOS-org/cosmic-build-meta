@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-screenshot.git
   track: master
-  ref: epoch-1.1.0-0-gd6ef210e981d045fec5022416b85edd0afc03e16
+  ref: epoch-1.2.0-0-gd6ef210e981d045fec5022416b85edd0afc03e16
 - kind: cargo2
   url: "crates:"
   ref:
