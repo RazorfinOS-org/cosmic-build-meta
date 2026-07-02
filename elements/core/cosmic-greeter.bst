@@ -25,7 +25,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-greeter.git
   track: master
-  ref: epoch-1.1.0-2-g953478f801eb0c67062b6e1d540c6d6bf5edc992
+  ref: epoch-1.2.0-0-g953478f801eb0c67062b6e1d540c6d6bf5edc992
 
 # res/background.jpg is a Git LFS object (~3.7 MB) -- the orion-nebula
 # image used as the greeter's `fallback_background` via include_bytes!

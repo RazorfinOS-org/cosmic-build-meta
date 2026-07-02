@@ -33,7 +33,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-comp.git
   track: master
-  ref: epoch-1.1.0-0-gaac1e19f08a016ade349569fbf8c0305761de20b
+  ref: epoch-1.2.0-4-gf5e0ba1594e428954f2a1647b03564be1afaec4a
 - kind: cargo2
   url: "crates:"
   ref:
@@ -224,8 +224,8 @@ sources:
     sha: 3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71
   - kind: registry
     name: block2
-    version: 0.5.1
-    sha: 2c132eebf10f5cad5289222520a4a058514204aed6d791f1cf4fe8088b82d15f
+    version: 0.6.2
+    sha: cdeb9d870516001442e364c5220d3574d2da8dc765554b4a617230d33fa58ef5
   - kind: registry
     name: blocking
     version: 1.6.2
@@ -268,16 +268,8 @@ sources:
     sha: 1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33
   - kind: registry
     name: calloop
-    version: 0.13.0
-    sha: b99da2f8558ca23c71f4fd15dc57c906239752dd27ff3c00a1d56b685b7cbfec
-  - kind: registry
-    name: calloop
     version: 0.14.4
     sha: 4dbf9978365bac10f54d1d4b04f7ce4427e51f71d61f2fe15e3fed5166474df7
-  - kind: registry
-    name: calloop-wayland-source
-    version: 0.3.0
-    sha: 95a66a987056935f7efce4ab5668920b5d0dac4a7c99991a67395f13702ddd20
   - kind: registry
     name: calloop-wayland-source
     version: 0.4.1
@@ -538,9 +530,9 @@ sources:
     version: 0.5.0
     sha: e01a3366d27ee9890022452ee61b2b63a67e6f13f58900b651ff5665f0bb1fab
   - kind: registry
-    name: dispatch
-    version: 0.2.0
-    sha: bd0c93bb4b0c6d9b77f4435b0ae98c24d17f1c45b2ff844c6151a07256ca923b
+    name: dispatch2
+    version: 0.3.1
+    sha: 1e0e367e4e7da84520dedcac1901e4da967309406d1e51017ae1abfb97adbd38
   - kind: registry
     name: displaydoc
     version: 0.2.5
@@ -1163,6 +1155,10 @@ sources:
     version: 6.5.0
     sha: 81a29e7b50079ff44549f68c0becb1c73d7f6de2a4ea952da77966daf3d4761e
   - kind: registry
+    name: keyboard-types
+    version: 0.8.3
+    sha: 0fbe853b403ae61a04233030ae8a79d94975281ed9770a1f9e246732b534b28d
+  - kind: registry
     name: keyframe
     version: 1.1.1
     sha: 60708bf7981518d09095d6f5673ce5cf6a64f1e0d9708b554f670e6d9d2bd9a9
@@ -1471,73 +1467,37 @@ sources:
     version: 0.1.1
     sha: 1add1b659e36c9607c7aab864a76c7a4c2760cd0cd2e120f3fb8b952c7e22bf9
   - kind: registry
-    name: objc-sys
-    version: 0.3.5
-    sha: cdb91bdd390c7ce1a8607f35f3ca7151b65afc0ff5ff3b34fa350f7d7c7e4310
-  - kind: registry
     name: objc2
-    version: 0.5.2
-    sha: 46a785d4eeff09c14c487497c162e92766fbb3e4059a71840cecc03d9a50b804
+    version: 0.6.4
+    sha: 3a12a8ed07aefc768292f076dc3ac8c48f3781c8f2d5851dd3d98950e8c5a89f
   - kind: registry
     name: objc2-app-kit
-    version: 0.2.2
-    sha: e4e89ad9e3d7d297152b17d39ed92cd50ca8063a89a9fa569046d41568891eff
+    version: 0.3.2
+    sha: d49e936b501e5c5bf01fda3a9452ff86dc3ea98ad5f283e1455153142d97518c
   - kind: registry
-    name: objc2-cloud-kit
-    version: 0.2.2
-    sha: 74dd3b56391c7a0596a295029734d3c1c5e7e510a4cb30245f8221ccea96b009
+    name: objc2-core-foundation
+    version: 0.3.2
+    sha: 2a180dd8642fa45cdb7dd721cd4c11b1cadd4929ce112ebd8b9f5803cc79d536
   - kind: registry
-    name: objc2-contacts
-    version: 0.2.2
-    sha: a5ff520e9c33812fd374d8deecef01d4a840e7b41862d849513de77e44aa4889
+    name: objc2-core-graphics
+    version: 0.3.2
+    sha: e022c9d066895efa1345f8e33e584b9f958da2fd4cd116792e15e07e4720a807
   - kind: registry
-    name: objc2-core-data
-    version: 0.2.2
-    sha: 617fbf49e071c178c0b24c080767db52958f716d9eabdf0890523aeae54773ef
-  - kind: registry
-    name: objc2-core-image
-    version: 0.2.2
-    sha: 55260963a527c99f1819c4f8e3b47fe04f9650694ef348ffd2227e8196d34c80
-  - kind: registry
-    name: objc2-core-location
-    version: 0.2.2
-    sha: 000cfee34e683244f284252ee206a27953279d370e309649dc3ee317b37e5781
+    name: objc2-core-video
+    version: 0.3.2
+    sha: d425caf1df73233f29fd8a5c3e5edbc30d2d4307870f802d18f00d83dc5141a6
   - kind: registry
     name: objc2-encode
     version: 4.1.0
     sha: ef25abbcd74fb2609453eb695bd2f860d389e457f67dc17cafc8b8cbc89d0c33
   - kind: registry
     name: objc2-foundation
-    version: 0.2.2
-    sha: 0ee638a5da3799329310ad4cfa62fbf045d5f56e3ef5ba4149e7452dcf89d5a8
-  - kind: registry
-    name: objc2-link-presentation
-    version: 0.2.2
-    sha: a1a1ae721c5e35be65f01a03b6d2ac13a54cb4fa70d8a5da293d7b0020261398
-  - kind: registry
-    name: objc2-metal
-    version: 0.2.2
-    sha: dd0cba1276f6023976a406a14ffa85e1fdd19df6b0f737b063b95f6c8c7aadd6
-  - kind: registry
-    name: objc2-quartz-core
-    version: 0.2.2
-    sha: e42bee7bff906b14b167da2bac5efe6b6a07e6f7c0a21a7308d40c960242dc7a
-  - kind: registry
-    name: objc2-symbols
-    version: 0.2.2
-    sha: 0a684efe3dec1b305badae1a28f6555f6ddd3bb2c2267896782858d5a78404dc
+    version: 0.3.2
+    sha: e3e0adef53c21f888deb4fa59fc59f7eb17404926ee8a6f59f5df0fd7f9f3272
   - kind: registry
     name: objc2-ui-kit
-    version: 0.2.2
-    sha: b8bb46798b20cd6b91cbd113524c490f1686f4c4e8f49502431415f3512e2b6f
-  - kind: registry
-    name: objc2-uniform-type-identifiers
-    version: 0.2.2
-    sha: 44fa5f9748dbfe1ca6c0b79ad20725a11eca7c2218bceb4b005cb1be26273bfe
-  - kind: registry
-    name: objc2-user-notifications
-    version: 0.2.2
-    sha: 76cfcbf642358e8689af64cee815d139339f3ed8ad05103ed5eaf73db8d84cb3
+    version: 0.3.2
+    sha: d87d638e33c06f577498cbcc50491496a3ed4246998a7fbba7ccb98b1e7eab22
   - kind: registry
     name: objc_id
     version: 0.1.1
@@ -1808,10 +1768,6 @@ sources:
     sha: 7b634fabf032fab15307ffd272149b622260f55974d9fad689292a5d33df02e5
   - kind: registry
     name: redox_syscall
-    version: 0.4.1
-    sha: 4722d768eff46b75989dd134e5c353f0d6296e5aaa3132e776cbdb56be7731aa
-  - kind: registry
-    name: redox_syscall
     version: 0.5.18
     sha: ed2bf2547551a7053d6fdfafda3f938979645c44812fbfcda098faae3f1a362d
   - kind: registry
@@ -1842,6 +1798,10 @@ sources:
     name: regex-syntax
     version: 0.8.10
     sha: dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a
+  - kind: registry
+    name: reis
+    version: 0.7.0
+    sha: 81f3fedd2777cde52c1be5e572efbec485eac7b801c47820eda388d4f13b9c4b
   - kind: registry
     name: renderdoc-sys
     version: 1.1.0
@@ -2031,16 +1991,12 @@ sources:
     version: 1.15.1
     sha: 67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03
   - kind: git
-    commit: 85f83ab61711e725aa1f3481df4f4dc5370e925b
+    commit: 8eb4076cad8705c56f5e3bac8577b83576b6ce76
     repo: github:smithay/smithay.git
     query:
-      rev: 85f83ab
+      rev: 8eb4076
     name: smithay
     version: 0.7.0
-  - kind: registry
-    name: smithay-client-toolkit
-    version: 0.19.2
-    sha: 3457dea1f0eb631b4034d61d4d8c32074caa6cd1ab2d59f2327bd8461e2c0016
   - kind: registry
     name: smithay-client-toolkit
     version: 0.20.0
@@ -2056,10 +2012,6 @@ sources:
     name: smithay-egui
     version: 0.2.0
     sha: 6794c95b83518f9f91ae8c2faee52302d521c0d541d016b4ed632374041d9c42
-  - kind: registry
-    name: smol_str
-    version: 0.2.2
-    sha: dd538fb6910ac1099850255cf94a94df6551fbdd602454387d0adb2d1ca6dead
   - kind: registry
     name: smol_str
     version: 0.3.5
@@ -2720,8 +2672,48 @@ sources:
     sha: d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650
   - kind: registry
     name: winit
-    version: 0.30.12
-    sha: c66d4b9ed69c4009f6321f762d6e61ad8a2389cd431b97cb1e146812e9e6c732
+    version: 0.31.0-beta.2
+    sha: 2879d2854d1a43e48f67322d4bd097afcb6eb8f8f775c8de0260a71aea1df1aa
+  - kind: registry
+    name: winit-android
+    version: 0.31.0-beta.2
+    sha: 51d9c0d2cd93efec3a9f9ad819cfaf0834782403af7c0d248c784ec0c61761df
+  - kind: registry
+    name: winit-appkit
+    version: 0.31.0-beta.2
+    sha: 21310ca07851a49c348e0c2cc768e36b52ca65afda2c2354d78ed4b90074d8aa
+  - kind: registry
+    name: winit-common
+    version: 0.31.0-beta.2
+    sha: 45375fbac4cbb77260d83a30b1f9d8105880dbac99a9ae97f56656694680ff69
+  - kind: registry
+    name: winit-core
+    version: 0.31.0-beta.2
+    sha: e4f0ccd7abb43740e2c6124ac7cae7d865ecec74eec63783e8922577ac232583
+  - kind: registry
+    name: winit-orbital
+    version: 0.31.0-beta.2
+    sha: 51ea1fb262e7209f265f12bd0cc792c399b14355675e65531e9c8a87db287d46
+  - kind: registry
+    name: winit-uikit
+    version: 0.31.0-beta.2
+    sha: 680a356e798837d8eb274d4556e83bceaf81698194e31aafc5cfb8a9f2fab643
+  - kind: registry
+    name: winit-wayland
+    version: 0.31.0-beta.2
+    sha: 8ce5afb2ba07da603f84b722c95f9f9396d2cedae3944fb6c0cda4a6f88de545
+  - kind: registry
+    name: winit-web
+    version: 0.31.0-beta.2
+    sha: 8c2490a953fb776fbbd5e295d54f1c3847f4f15b6c3929ec53c09acda6487a92
+  - kind: registry
+    name: winit-win32
+    version: 0.31.0-beta.2
+    sha: 644ea78af0e858aa3b092e5d1c67c41995a98220c81813f1353b28bc8bb91eaa
+  - kind: registry
+    name: winit-x11
+    version: 0.31.0-beta.2
+    sha: aa5b600756534c7041aa93cd0d244d44b09fca1b89e202bd1cd80dd9f3636c46
   - kind: registry
     name: winnow
     version: 0.6.24

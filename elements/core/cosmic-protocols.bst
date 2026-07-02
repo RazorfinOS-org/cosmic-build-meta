@@ -13,7 +13,7 @@ sources:
   url: github:pop-os/cosmic-protocols.git
   track: main
 
-  ref: 0d0b0b573fe4836ede4c237dadd365033cd28296
+  ref: 32283d76a8d0342da74c4cc022a533c52dcf378f
 variables:
   make-args: >-
     PREFIX="%{prefix}"
