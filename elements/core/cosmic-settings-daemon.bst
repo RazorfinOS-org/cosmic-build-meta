@@ -11,12 +11,17 @@ build-depends:
 - freedesktop-sdk.bst:components/libpulse.bst
 - freedesktop-sdk.bst:components/fontconfig.bst
 - freedesktop-sdk.bst:components/geoclue.bst
+# epoch-1.2.0 pulled in libspa-sys (pipewire): its build.rs pkg-configs
+# libpipewire-0.3, and the compiled binary links libpipewire-0.3.so at
+# runtime -- so pipewire is needed in both build and runtime closures.
+- freedesktop-sdk.bst:components/pipewire.bst
 
 depends:
 - freedesktop-sdk.bst:components/dbus.bst
 - freedesktop-sdk.bst:components/systemd.bst
 - freedesktop-sdk.bst:components/libinput.bst
 - freedesktop-sdk.bst:components/fontconfig.bst
+- freedesktop-sdk.bst:components/pipewire.bst
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 sources:
