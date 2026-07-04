@@ -37,18 +37,34 @@ env:
 
 jobs:
   build_and_push:
-    name: Build & Push ${{ matrix.variant }}
+    name: Build & Push ${{ matrix.image }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
 
     strategy:
       fail-fast: false
       matrix:
-        # Two image variants ship from this repo: the open-source GPU
-        # variant (cosmic) and the NVIDIA proprietary one (cosmic-nvidia).
-        # Both build from the same BST graph; only the image element +
-        # bootc-defaults differ.
-        variant: [cosmic, cosmic-nvidia]
+        # Four image variants ship from this repo: the open-source GPU
+        # variant (cosmic), the NVIDIA proprietary one (cosmic-nvidia),
+        # and the gaming flavour of each. The gaming axis is a BST
+        # project option (`-o gaming true` via COSMIC_GAMING) on the
+        # same element paths: it adds gaming/deps.bst to the stack and
+        # swaps the kernel for the OGC build (core-deps/linux-ogc.bst).
+        # `image` is the effective identity used for tags, cache keys,
+        # and log artifacts.
+        include:
+          - variant: cosmic
+            gaming: "false"
+            image: cosmic
+          - variant: cosmic-nvidia
+            gaming: "false"
+            image: cosmic-nvidia
+          - variant: cosmic
+            gaming: "true"
+            image: cosmic-gaming
+          - variant: cosmic-nvidia
+            gaming: "true"
+            image: cosmic-nvidia-gaming
 
     # Skip image rebuild on most PRs to save runner minutes; only run on:
     #   - non-PR events (push/cron/workflow_dispatch)
@@ -87,14 +103,15 @@ jobs:
 
       - name: Determine image tags
         id: tags
-        # Tags are variant-prefixed (cosmic-nightly, cosmic-nvidia-nightly)
-        # so both variants coexist in the same registry repo. PR builds get
-        # a single :{variant}-pr-N tag; tag-push events get :{variant}-{ref}
-        # plus :{variant}-stable; everything else gets :{variant}-nightly +
-        # :{variant}-nightly.YYYYMMDD.
+        # Tags are image-prefixed (cosmic-nightly, cosmic-nvidia-nightly,
+        # cosmic-gaming-nightly, cosmic-nvidia-gaming-nightly) so all
+        # variants coexist in the same registry repo. PR builds get
+        # a single :{image}-pr-N tag; tag-push events get :{image}-{ref}
+        # plus :{image}-stable; everything else gets :{image}-nightly +
+        # :{image}-nightly.YYYYMMDD.
         run: |
           DATE=$(date -u +%Y%m%d)
-          V="${{ matrix.variant }}"
+          V="${{ matrix.image }}"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "primary_tag=${V}-pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
             echo "additional_tags=" >> "$GITHUB_OUTPUT"
@@ -111,26 +128,31 @@ jobs:
         # BuildStream/buildbox-casd has no OCI registry support -- artifact
         # caches speak Bazel Remote CAS gRPC, not OCI distribution-spec.
         # Until we stand up a real bst-artifact-server, rely on
-        # actions/cache for ~/.cache/buildstream. Per-variant key so the
-        # two matrix jobs don't fight over the same cache; stable restore-
-        # key allows reuse across runs; new key per run writes back fresh
-        # state. Cap is 10 GB per repo on github-hosted.
+        # actions/cache for ~/.cache/buildstream. Per-image key so the
+        # matrix jobs don't fight over the same cache; the gaming jobs
+        # fall back to their non-gaming sibling's cache (identical graph
+        # except the kernel-dependent subtree), then to any arch cache;
+        # new key per run writes back fresh state. Cap is 10 GB per repo
+        # on github-hosted.
         uses: actions/cache@v4
         with:
           path: ~/.cache/buildstream
-          key: bst-cache-${{ runner.arch }}-${{ matrix.variant }}-${{ github.run_id }}
+          key: bst-cache-${{ runner.arch }}-${{ matrix.image }}-${{ github.run_id }}
           restore-keys: |
+            bst-cache-${{ runner.arch }}-${{ matrix.image }}-
             bst-cache-${{ runner.arch }}-${{ matrix.variant }}-
             bst-cache-${{ runner.arch }}-
 
-      - name: Build OCI image (${{ matrix.variant }})
+      - name: Build OCI image (${{ matrix.image }})
         # `just build-variant <v>` = `bst build oci/<v>/image.bst` then
         # `just load-image-variant <v>` (podman build --squash-all to
         # flatten layers for bootc 1.15 compatibility). COSMIC_IMAGE_TAG
-        # gets the full variant-prefixed tag so the local podman tag
-        # matches what we push to GHCR.
+        # gets the full image-prefixed tag so the local podman tag
+        # matches what we push to GHCR. COSMIC_GAMING routes into
+        # `bst -o gaming <bool>` via the Justfile.
         env:
           COSMIC_IMAGE_TAG: ${{ steps.tags.outputs.primary_tag }}
+          COSMIC_GAMING: ${{ matrix.gaming }}
           BST_FLAGS: '--no-interactive --on-error=continue'
         run: just build-variant ${{ matrix.variant }}
 
@@ -190,6 +212,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-logs-${{ matrix.variant }}
+          name: build-logs-${{ matrix.image }}
           path: ~/.cache/buildstream/logs/
           retention-days: 7

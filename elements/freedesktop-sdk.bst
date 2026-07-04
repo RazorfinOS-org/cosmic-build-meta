@@ -28,3 +28,14 @@ config:
   overrides:
     components/flatpak.bst: cosmic-deps/flatpak.bst
     components/flatpak-minimal.bst: cosmic-deps/flatpak.bst
+    # Gaming variant swaps the kernel for the Open Gaming Collective
+    # build. Routing it through the junction override (instead of a
+    # parallel element tree) means every consumer of components/linux.bst
+    # -- cosmic-deps/base.bst, oci/initramfs.bst, and critically
+    # cosmic-deps-nvidia/nvidia-drivers.bst which compiles the NVIDIA
+    # modules against the kernel build tree -- resolves to the OGC
+    # kernel automatically, so module/kernel co-versioning holds by
+    # construction in the nvidia+gaming combination.
+    (?):
+    - gaming == true:
+        components/linux.bst: core-deps/linux-ogc.bst

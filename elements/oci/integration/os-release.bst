@@ -19,3 +19,14 @@ config:
   - install -Dm644 os-release "%{install-root}/usr/lib/os-release"
   - mkdir -p "%{install-root}/etc"
   - ln -sf "../usr/lib/os-release" "%{install-root}/etc/os-release"
+
+(?):
+- gaming == true:
+    config:
+      install-commands:
+        (>):
+        - |
+          sed -i \
+            -e 's/^VARIANT=.*/VARIANT="COSMIC gaming"/' \
+            -e 's/^VARIANT_ID=.*/VARIANT_ID=cosmic-gaming/' \
+            "%{install-root}/usr/lib/os-release"
