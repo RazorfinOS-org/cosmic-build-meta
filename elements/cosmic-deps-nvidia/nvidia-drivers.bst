@@ -149,9 +149,17 @@ config:
     # libcuda's SONAME is libcuda.so.1.
     [ -e "$LIBDIR/libcuda.so.1" ] || ln -sf "libcuda.so.%{nvidia-version}" "$LIBDIR/libcuda.so.1"
 
-    # GBM backend entry point used by libgbm/egl consumers.
-    install -d "$LIBDIR/gbm"
+    # GBM backend entry point used by libgbm/egl consumers. FDSDK's
+    # libgbm only searches the flatpak GL-extension dirs (GL/default/lib
+    # and GL/lib/gbm -> GL/default/lib/gbm) plus $GBM_BACKENDS_PATH;
+    # /usr/lib/%{abi}/gbm is never read. The GL/default path is the one
+    # that actually loads at runtime -- without it cosmic-comp silently
+    # falls back to llvmpipe. Keep the plain gbm/ dir too for
+    # GBM_BACKENDS_PATH overrides and debugging.
+    install -d "$LIBDIR/gbm" "$LIBDIR/GL/default/lib/gbm"
     ln -sf ../libnvidia-allocator.so.1 "$LIBDIR/gbm/nvidia-drm_gbm.so"
+    ln -sf ../../../../libnvidia-allocator.so.1 \
+        "$LIBDIR/GL/default/lib/gbm/nvidia-drm_gbm.so"
 
     # Keep the binary set narrow. nvidia-modprobe is installed separately
     # with setuid so non-root NVIDIA userspace can create auxiliary nodes.
@@ -211,10 +219,23 @@ config:
         [ -n "$path" ] && install -Dm644 "$path" \
             "%{install-root}/usr/share/vulkan/implicit_layer.d/$f" || true
     done
+    # FDSDK's glvnd only searches /etc/glvnd/egl_vendor.d and the GL
+    # extension dirs (GL/glvnd/egl_vendor.d -> GL/default/share/...);
+    # /usr/share/glvnd/egl_vendor.d is never read. Keep the canonical
+    # /usr/share copy and expose it via /etc so libEGL actually finds
+    # the NVIDIA vendor -- without this cosmic-comp renders on llvmpipe.
     for f in 10_nvidia.json; do
         path=$(find . -maxdepth 3 -type f -name "$f" | head -1)
-        [ -n "$path" ] && install -Dm644 "$path" \
-            "%{install-root}/usr/share/glvnd/egl_vendor.d/$f" || true
+        if [ -n "$path" ]; then
+            install -Dm644 "$path" \
+                "%{install-root}/usr/share/glvnd/egl_vendor.d/$f"
+            install -d "%{install-root}/etc/glvnd/egl_vendor.d"
+            # Relative link: an absolute target would resolve against
+            # the build sandbox's root (dangling there), tripping the
+            # existence check below.
+            ln -sf "../../../usr/share/glvnd/egl_vendor.d/$f" \
+                "%{install-root}/etc/glvnd/egl_vendor.d/$f"
+        fi
     done
     for f in 10_nvidia_wayland.json 15_nvidia_gbm.json; do
         path=$(find . -maxdepth 3 -type f -name "$f" | head -1)
@@ -265,5 +286,17 @@ config:
     if [ ! -e "$LIBDIR/gbm/nvidia-drm_gbm.so" ]; then
         echo "FATAL: GBM backend symlink missing from $LIBDIR/gbm" >&2
         find "$LIBDIR" -maxdepth 2 -name '*gbm*' -ls >&2 || true
+        exit 1
+    fi
+    # These two are what glvnd/libgbm actually load at runtime on FDSDK;
+    # missing either means silent llvmpipe fallback, not a build error.
+    if [ ! -e "$LIBDIR/GL/default/lib/gbm/nvidia-drm_gbm.so" ]; then
+        echo "FATAL: GBM backend symlink missing from $LIBDIR/GL/default/lib/gbm" >&2
+        exit 1
+    fi
+    if [ ! -e "%{install-root}/etc/glvnd/egl_vendor.d/10_nvidia.json" ]; then
+        echo "FATAL: 10_nvidia.json missing from /etc/glvnd/egl_vendor.d" >&2
+        echo "  -> .run layout likely changed; egl_vendor.d find pattern needs an update" >&2
+        find . -maxdepth 3 -type f -name '*_nvidia*.json' >&2 || true
         exit 1
     fi

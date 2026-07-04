@@ -9,11 +9,17 @@ default:
 # Architecture - default to host arch
 arch := env_var_or_default("BST_ARCH", `uname -m`)
 
+# Gaming variant: adds the gaming/ stack to the image and swaps the
+# kernel to the OGC build (see project.conf `gaming` option). Applies
+# to every bst invocation in this Justfile, so `COSMIC_GAMING=true
+# just build-variant cosmic-nvidia` builds the nvidia+gaming image.
+gaming := env_var_or_default("COSMIC_GAMING", "false")
+
 # Same bst2 container image CI uses -- pinned by SHA for reproducibility
 bst2_image := env_var_or_default("BST2_IMAGE", "registry.gitlab.com/freedesktop-sdk/infrastructure/freedesktop-sdk-docker-images/bst2:8fe67f04619da91755dc2bd923009e723678e24d")
 
 # Common BST options
-bst_opts := "--option arch " + arch
+bst_opts := "--option arch " + arch + " --option gaming " + gaming
 
 # Identity of the local podman image produced by `just load-image`.
 # Defaults match the `org.opencontainers.image.ref.name` annotation in
@@ -499,26 +505,33 @@ load-image:
 load-image-variant variant="cosmic":
     #!/usr/bin/env bash
     set -euo pipefail
-    stagedir="build/oci-image-{{variant}}"
+    # Effective image identity: gaming builds get a `<variant>-gaming`
+    # name so checkout dirs and default tags never collide with the
+    # non-gaming build of the same element path.
+    eff="{{variant}}"
+    if [ "{{gaming}}" = "true" ]; then
+        eff="{{variant}}-gaming"
+    fi
+    stagedir="build/oci-image-${eff}"
     rm -rf "${stagedir}"
     mkdir -p "$(dirname ${stagedir})"
     just bst artifact checkout --directory "${stagedir}" oci/{{variant}}/image.bst
     image_id=$(sudo podman pull -q "oci:${stagedir}")
-    case "{{variant}}" in
+    case "${eff}" in
         cosmic)
             tag="{{image_tag}}"
             ;;
         cosmic-*)
-            suffix="$(echo '{{variant}}' | sed 's/^cosmic-//')"
+            suffix="$(echo "${eff}" | sed 's/^cosmic-//')"
             case "{{image_tag}}" in
-                "{{variant}}"|"{{variant}}-"*|"${suffix}"|"${suffix}-"*) tag="{{image_tag}}" ;;
+                "${eff}"|"${eff}-"*|"${suffix}"|"${suffix}-"*) tag="{{image_tag}}" ;;
                 *) tag="${suffix}-{{image_tag}}" ;;
             esac
             ;;
         *)
             case "{{image_tag}}" in
-                "{{variant}}"|"{{variant}}-"*) tag="{{image_tag}}" ;;
-                *) tag="{{variant}}-{{image_tag}}" ;;
+                "${eff}"|"${eff}-"*) tag="{{image_tag}}" ;;
+                *) tag="${eff}-{{image_tag}}" ;;
             esac
             ;;
     esac

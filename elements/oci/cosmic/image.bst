@@ -32,6 +32,14 @@ environment:
 variables:
   # Stable seed -> reproducible UUIDs across rebuilds (matches gnome-build-meta).
   sysroot-seed: 96f41f54-8854-401d-851f-ca5bec6e613f
+  # Baked into org.opencontainers.image.ref.name below -- this is the
+  # `bootc upgrade` origin of installed systems, so the gaming variant
+  # must point at its own tag or gaming installs would upgrade back
+  # onto the non-gaming image.
+  image-ref-tag: cosmic-nightly
+  (?):
+  - gaming == true:
+      image-ref-tag: cosmic-gaming-nightly
 
 config:
   commands:
@@ -87,5 +95,5 @@ config:
           'org.opencontainers.image.url': 'https://github.com/razorfinos-org/cosmic-build-meta'
           'containers.bootc': '1'
       index-annotations:
-        'org.opencontainers.image.ref.name': 'ghcr.io/razorfinos-org/cosmic-build-meta:cosmic-nightly'
+        'org.opencontainers.image.ref.name': 'ghcr.io/razorfinos-org/cosmic-build-meta:%{image-ref-tag}'
     EOF

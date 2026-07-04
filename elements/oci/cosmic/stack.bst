@@ -8,12 +8,6 @@ depends:
   # System + COSMIC binary aggregate
   - cosmic-deps/deps.bst
 
-  # Gaming host support + curated non-Steam launcher/tool Flatpak preinstalls.
-  # This is the Bazzite-inspired layer: native Steam, gamescope game mode,
-  # GameMode, Steam controller rules, SDL controller DB, Vulkan discovery glue,
-  # native compatibility libs, and first-boot Flathub installs for Lutris/Heroic/etc.
-  - gaming/deps.bst
-
   # Branding + bootc/composefs config
   - oci/integration/os-release.bst
   - oci/integration/bootc-config.bst
@@ -45,6 +39,19 @@ depends:
   # it in here covers BOTH the cosmic and cosmic-nvidia variants because
   # oci/cosmic-nvidia/stack.bst depends on this stack.
   - freedesktop-sdk.bst:integration/ldconfig.bst
+
+# Gaming host support + curated non-Steam launcher/tool Flatpak preinstalls,
+# only in the gaming variant (`-o gaming true`). This is the Bazzite-inspired
+# layer: native Steam, gamescope game mode, GameMode, Steam controller rules,
+# SDL controller DB, Vulkan discovery glue, native compatibility libs, and
+# first-boot Flathub installs for Lutris/Heroic/etc. The same option also
+# swaps components/linux.bst for the OGC kernel via the junction override
+# in elements/freedesktop-sdk.bst.
+(?):
+- gaming == true:
+    depends:
+      (>):
+      - gaming/deps.bst
 
 public:
   bst:
