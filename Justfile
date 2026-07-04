@@ -31,6 +31,14 @@ image_tag := env_var_or_default("COSMIC_IMAGE_TAG", "nightly")
 # Filesystem for `bootc install to-disk` (btrfs|xfs|ext4).
 filesystem := env_var_or_default("COSMIC_FILESYSTEM", "btrfs")
 
+# chunkah (coreos/chunkah) content-based layer splitter, pinned by digest.
+# Used by `chunk-variant` to replace the single squashed layer with N
+# content-based layers so `bootc upgrade` pulls deltas, not the whole image.
+chunkah_image := env_var_or_default("COSMIC_CHUNKAH_IMAGE", "quay.io/coreos/chunkah:v0.6.0@sha256:ff8b8b466a942ec6000445d4001fc661e2fc5a952ad9ee29b4de9ab09d1d1708")
+# Max layers chunkah emits. Its default is 64; its own bootc guidance
+# recommends ~128 for bootable/large images; containers-storage caps at 500.
+chunk_max_layers := env_var_or_default("COSMIC_CHUNK_MAX_LAYERS", "128")
+
 # Sparse loopback file `generate-bootable-image` writes the install into.
 bootable_image := env_var_or_default("COSMIC_BOOTABLE_IMAGE", "build/bootable.raw")
 bootable_size := env_var_or_default("COSMIC_BOOTABLE_SIZE", "30G")
@@ -489,40 +497,37 @@ load-image:
         -f - .
     sudo podman rmi "${image_id}" >/dev/null 2>&1 || true
 
-# Variant-aware load-image. Used by CI's matrix and by local-dev runs
-# that want to iterate on the cosmic-nvidia image without overwriting
-# the cosmic build's podman tag.
+# Compute the effective image identity (`<variant>[-gaming]`) for the
+# current COSMIC_GAMING setting. `<variant>-gaming` keeps gaming checkout
+# dirs and podman tags from colliding with the non-gaming build of the
+# same element path.
+_effective-image variant="cosmic":
+    @if [ "{{gaming}}" = "true" ]; then echo "{{variant}}-gaming"; else echo "{{variant}}"; fi
+
+# Compute the podman/GHCR tag for a variant under the current
+# COSMIC_GAMING + COSMIC_IMAGE_TAG. Single source of truth shared by
+# load-image-variant (build) and push-variant (publish) so the two can
+# never drift.
 #
 # Tag scheme: the base `cosmic` variant maps to COSMIC_IMAGE_TAG as-is
-# (default :nightly, matching `just build`). Other `cosmic-*` variants
-# prefix an unqualified tag with the stripped variant name, but preserve
-# tags that are already variant-prefixed. Examples:
-#   cosmic + nightly                 -> :nightly
-#   cosmic-nvidia + nightly          -> :nvidia-nightly
-#   cosmic-nvidia + nvidia-nightly   -> :nvidia-nightly
-#   cosmic-nvidia + cosmic-nvidia-*  -> :cosmic-nvidia-*
-[group('image')]
-load-image-variant variant="cosmic":
+# (default :nightly, matching `just build`). Other `cosmic-*` identities
+# prefix an unqualified tag with the stripped name, but preserve tags
+# that are already prefixed. Examples:
+#   cosmic + nightly                        -> :nightly
+#   cosmic-nvidia + nightly                 -> :nvidia-nightly
+#   cosmic-nvidia + nvidia-nightly          -> :nvidia-nightly
+#   cosmic-nvidia + cosmic-nvidia-*         -> :cosmic-nvidia-*
+#   cosmic (gaming) + cosmic-gaming-nightly -> :cosmic-gaming-nightly
+_effective-tag variant="cosmic":
     #!/usr/bin/env bash
     set -euo pipefail
-    # Effective image identity: gaming builds get a `<variant>-gaming`
-    # name so checkout dirs and default tags never collide with the
-    # non-gaming build of the same element path.
-    eff="{{variant}}"
-    if [ "{{gaming}}" = "true" ]; then
-        eff="{{variant}}-gaming"
-    fi
-    stagedir="build/oci-image-${eff}"
-    rm -rf "${stagedir}"
-    mkdir -p "$(dirname ${stagedir})"
-    just bst artifact checkout --directory "${stagedir}" oci/{{variant}}/image.bst
-    image_id=$(sudo podman pull -q "oci:${stagedir}")
+    eff="$(just _effective-image {{variant}})"
     case "${eff}" in
         cosmic)
             tag="{{image_tag}}"
             ;;
         cosmic-*)
-            suffix="$(echo "${eff}" | sed 's/^cosmic-//')"
+            suffix="${eff#cosmic-}"
             case "{{image_tag}}" in
                 "${eff}"|"${eff}-"*|"${suffix}"|"${suffix}-"*) tag="{{image_tag}}" ;;
                 *) tag="${suffix}-{{image_tag}}" ;;
@@ -535,6 +540,22 @@ load-image-variant variant="cosmic":
             esac
             ;;
     esac
+    printf '%s\n' "${tag}"
+
+# Variant-aware load-image. Used by CI's matrix and by local-dev runs
+# that want to iterate on the cosmic-nvidia image without overwriting
+# the cosmic build's podman tag.
+[group('image')]
+load-image-variant variant="cosmic":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    eff="$(just _effective-image {{variant}})"
+    stagedir="build/oci-image-${eff}"
+    rm -rf "${stagedir}"
+    mkdir -p "$(dirname ${stagedir})"
+    just bst artifact checkout --directory "${stagedir}" oci/{{variant}}/image.bst
+    image_id=$(sudo podman pull -q "oci:${stagedir}")
+    tag="$(just _effective-tag {{variant}})"
     printf 'FROM %s\n' "${image_id}" | sudo podman build \
         --pull=never \
         --squash-all \
@@ -543,6 +564,138 @@ load-image-variant variant="cosmic":
         -f - .
     sudo podman rmi "${image_id}" >/dev/null 2>&1 || true
     echo "Loaded {{image_name}}:${tag}"
+
+# Push an already-built variant image to GHCR via skopeo.
+#
+# Interim substitute for the CI push while self-hosted runners are TBD:
+# build on a warm-cache machine with `just build-variant <v>`, then run
+# this. Reads the SQUASHED image from rootful podman storage (where
+# load-image-variant leaves it -- NOT the raw 3-layer `bst artifact
+# checkout`, which breaks bootc's splitstream) and copies it straight to
+# the registry. Honors COSMIC_GAMING + COSMIC_IMAGE_TAG through the same
+# tag scheme as build/load, so the GHCR tag matches the image's baked
+# `org.opencontainers.image.ref.name` (its `bootc upgrade` origin).
+#
+# Authenticate first (PAT with write:packages; rootful, since the image
+# lives in root's containers-storage):
+#   echo "$GHCR_PAT" | sudo skopeo login ghcr.io -u <user> --password-stdin
+#
+# NOTE: manual pushes are UNSIGNED -- no cosign signature or SLSA
+# provenance attestation, unlike the CI push.
+[group('image')]
+push-variant variant="cosmic":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tag="$(just _effective-tag {{variant}})"
+    ref="{{image_name}}:${tag}"
+    if ! sudo podman image exists "${ref}"; then
+        echo "error: ${ref} not in rootful podman storage." >&2
+        echo "  Run \`COSMIC_GAMING={{gaming}} COSMIC_IMAGE_TAG={{image_tag}} just build-variant {{variant}}\` first." >&2
+        exit 1
+    fi
+    echo "==> Pushing ${ref} -> GHCR (unsigned)"
+    sudo skopeo copy "containers-storage:${ref}" "docker://${ref}"
+    echo "==> Pushed ${ref}"
+
+# Rechunk an already-built variant image into content-based layers with
+# chunkah, replacing the single squashed layer so `bootc upgrade` pulls
+# deltas instead of the whole ~8 GB image. PROTOTYPE -- measure delta sizes
+# vs the squashed image (and boot-test) before adopting on the publish path.
+#
+# Flow (all rootful, since the image lives in root's containers-storage):
+#   1. mount a writable copy of the built image's rootfs
+#   2. assign chunkah components (files/chunkah/assign-components.sh) -- this
+#      image has no rpmdb, so we supply components by xattr for good splits
+#   3. chunkah build --max-layers N, preserving the OCI config/labels
+#      (containers.bootc=1 etc.) via CHUNKAH_CONFIG_STR
+#   4. load the chunked OCI back into podman storage under the SAME ref, so
+#      `just push-variant {{variant}}` ships it unchanged
+#   5. verify setuid (pkexec/sudo/nvidia-modprobe) survived the round-trip
+#
+# Honors COSMIC_GAMING + COSMIC_IMAGE_TAG like build/load/push. Set
+# COSMIC_CHUNK_MAX_LAYERS to sweep the layer count.
+[group('image')]
+chunk-variant variant="cosmic":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tag="$(just _effective-tag {{variant}})"
+    ref="{{image_name}}:${tag}"
+    if ! sudo podman image exists "${ref}"; then
+        echo "error: ${ref} not in rootful podman storage; run \`just build-variant {{variant}}\` first" >&2
+        exit 1
+    fi
+    outdir="build/chunked-$(just _effective-image {{variant}})"
+    rm -rf "${outdir}"; mkdir -p "${outdir}"
+
+    # Preserve the OCI config (labels incl. containers.bootc=1) across the
+    # split; chunkah drops base metadata otherwise.
+    config="$(sudo podman inspect "${ref}")"
+
+    # Writable rootfs so the component pre-pass can setfattr (image mounts
+    # are read-only). Force-clean the throwaway container on any exit.
+    cid="$(sudo podman create "${ref}")"
+    trap 'sudo podman rm -f "${cid}" >/dev/null 2>&1 || true' EXIT
+    rootfs="$(sudo podman mount "${cid}")"
+
+    echo "==> Assigning chunkah components"
+    sudo files/chunkah/assign-components.sh "${rootfs}"
+
+    echo "==> Running chunkah (max-layers {{chunk_max_layers}})"
+    sudo podman run --rm \
+        --security-opt label=disable \
+        -v "${rootfs}":/chunkah:ro \
+        -v "${PWD}/${outdir}":/out \
+        -e CHUNKAH_CONFIG_STR="${config}" \
+        {{chunkah_image}} \
+        build \
+            --max-layers {{chunk_max_layers}} \
+            --skip-special-files \
+            --annotation "org.opencontainers.image.ref.name=${ref}" \
+            --label "containers.bootc=1" \
+            --output oci:/out/img
+
+    sudo podman unmount "${cid}" >/dev/null
+    sudo podman rm "${cid}" >/dev/null
+    trap - EXIT
+    sudo chown -R "$(id -u):$(id -g)" "${outdir}"
+
+    echo "==> Loading chunked image into podman storage as ${ref}"
+    sudo skopeo copy "oci:${outdir}/img" "containers-storage:${ref}"
+
+    echo "==> Verifying setuid survived the round-trip"
+    vcid="$(sudo podman create "${ref}")"
+    vroot="$(sudo podman mount "${vcid}")"
+    sudo files/chunkah/check-setuid.sh "${vroot}" || \
+        { sudo podman rm -f "${vcid}" >/dev/null 2>&1 || true; exit 1; }
+    sudo podman unmount "${vcid}" >/dev/null; sudo podman rm "${vcid}" >/dev/null
+
+    layers="$(sudo podman inspect "${ref}" --format '{{ "{{ len .RootFS.Layers }}" }}')"
+    echo "==> ${ref} rechunked into ${layers} layers; publish with \`just push-variant {{variant}}\`"
+
+# Push every built variant image to GHCR: the four published identities
+# (cosmic, cosmic-nvidia, and the gaming flavour of each). Skips any not
+# present in podman storage so partial publishes work; build the ones you
+# want first with `just build-variant` (+ COSMIC_GAMING=true for gaming).
+# Set COSMIC_IMAGE_TAG to control the tag suffix (default per-variant
+# nightly forms matching CI). Authenticate as in `push-variant`.
+[group('image')]
+publish-all:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    pushed=0 skipped=0
+    for combo in "cosmic:false" "cosmic-nvidia:false" "cosmic:true" "cosmic-nvidia:true"; do
+        v="${combo%%:*}"; g="${combo##*:}"
+        tag="$(COSMIC_GAMING="$g" just _effective-tag "$v")"
+        ref="{{image_name}}:${tag}"
+        if sudo podman image exists "${ref}"; then
+            COSMIC_GAMING="$g" just push-variant "$v"
+            pushed=$((pushed + 1))
+        else
+            echo "==> Skipping ${ref} (not built)"
+            skipped=$((skipped + 1))
+        fi
+    done
+    echo "==> Done: ${pushed} pushed, ${skipped} skipped"
 
 # Run `bootc <args>` inside the loaded image, with host container
 # storage and /dev exposed (privileged; required for `install to-disk`).
