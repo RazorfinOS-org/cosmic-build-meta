@@ -31,3 +31,4 @@ depends:
   - cosmic-deps/storage.bst           # bootc, composefs, ostree, podman, mkfs.*, udisks2
   - cosmic-deps/power.bst             # upower, power-profiles-daemon
   - cosmic-deps/sandboxing.bst        # flatpak, bubblewrap, xdg-dbus-proxy
+  - cosmic-deps/extras.bst            # CLI tooling (glow/gum/fzf/fastfetch/distrobox/...), Homebrew, uutils/sudo-rs

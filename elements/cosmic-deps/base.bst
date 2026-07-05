@@ -76,6 +76,30 @@ depends:
   - freedesktop-sdk.bst:components/zip.bst
   - freedesktop-sdk.bst:components/bzip2.bst
 
+  # Core GNU userland. FDSDK's runtime-minimal is just bash + coreutils +
+  # glibc, so the rest of the POSIX/GNU toolkit only lands if something
+  # else happens to pull it as a *runtime* dep. Several essentials have
+  # ONLY build-stack referencers upstream and so never reached the image:
+  #   which      -- missing entirely (only buildsystem-autotools pulls it);
+  #                 bash-completion and countless scripts call it
+  #   findutils  -- find, xargs, locate; assumed by a huge share of scripts
+  #   gawk       -- awk; likewise assumed everywhere
+  #   diffutils  -- diff, cmp, sdiff
+  #   tar        -- unpack .tar.gz by hand; also required by Homebrew's
+  #                 first-boot brew-setup.service (see cosmic-deps/extras.bst)
+  # grep/sed/gzip currently arrive only transitively (via openssh/man-db);
+  # pull them explicitly so they don't vanish if those deps ever change.
+  - freedesktop-sdk.bst:components/which.bst
+  - freedesktop-sdk.bst:components/findutils.bst
+  - freedesktop-sdk.bst:components/gawk.bst
+  - freedesktop-sdk.bst:components/diffutils.bst
+  - freedesktop-sdk.bst:components/tar.bst
+  - freedesktop-sdk.bst:components/grep.bst
+  - freedesktop-sdk.bst:components/sed.bst
+  - freedesktop-sdk.bst:components/gzip.bst
+  # wget2 -- FDSDK ships wget2 (provides `wget`), companion to curl above.
+  - freedesktop-sdk.bst:components/wget2.bst
+
   # Runtime baseline + GPU stack
   - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
   - freedesktop-sdk.bst:vm/mesa-default.bst
