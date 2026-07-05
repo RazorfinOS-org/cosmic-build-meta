@@ -16,12 +16,23 @@ entry="$(getent passwd 1000)" || {
 user="${entry%%:*}"
 home="$(printf '%s' "$entry" | cut -d: -f6)"
 
+run_as_user() {
+    setpriv --reuid="$user" --regid="$(id -g "$user")" --init-groups \
+        env HOME="$home" USER="$user" LOGNAME="$user" \
+            HOMEBREW_NO_ANALYTICS=1 \
+            HOMEBREW_NO_ENV_HINTS=1 \
+        "$@"
+}
+
+# The seed Homebrew from the image tarball can lag the current formulae
+# API, which breaks some installs (ca-certificates fails with "undefined
+# method '[]' for nil"). Update brew first; non-fatal so a flaky update
+# doesn't block formulae that would still install.
+run_as_user "$BREW" update || echo "brew-preinstall: brew update failed; continuing"
+
 echo "brew-preinstall: installing ${BREWFILE} as ${user}"
 exec setpriv --reuid="$user" --regid="$(id -g "$user")" --init-groups \
     env HOME="$home" USER="$user" LOGNAME="$user" \
-        HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar \
-        HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew \
-        HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew \
         HOMEBREW_NO_ANALYTICS=1 \
         HOMEBREW_NO_ENV_HINTS=1 \
     "$BREW" bundle install --file="$BREWFILE"
