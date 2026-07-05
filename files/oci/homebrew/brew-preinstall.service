@@ -10,12 +10,15 @@ ConditionPathExists=/usr/share/cosmic/homebrew/Brewfile
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
+# No RemainAfterExit: the unit must return to inactive after the boot-time
+# run (which skips when no user exists yet) so brew-preinstall.path can
+# start it again once cosmic-initial-setup creates the account.
+#
 # No User=1000: on the very first boot the primary account doesn't exist yet
-# (cosmic-initial-setup creates it later) and systemd would fail the unit
-# with 217/USER. The helper resolves UID 1000 at runtime, skips until it
-# exists, and drops privileges itself (brew refuses to run as root).
-# `brew bundle install` is idempotent, so no run-once stamp is needed.
+# and systemd would fail the unit with 217/USER. The helper resolves UID
+# 1000 at runtime, skips until it exists, and drops privileges itself (brew
+# refuses to run as root). `brew bundle install` is idempotent, so no
+# run-once stamp is needed.
 ExecStart=/usr/libexec/cosmic/brew-preinstall
 
 [Install]

@@ -31,8 +31,17 @@ run_as_user() {
 run_as_user "$BREW" update || echo "brew-preinstall: brew update failed; continuing"
 
 echo "brew-preinstall: installing ${BREWFILE} as ${user}"
-exec setpriv --reuid="$user" --regid="$(id -g "$user")" --init-groups \
-    env HOME="$home" USER="$user" LOGNAME="$user" \
-        HOMEBREW_NO_ANALYTICS=1 \
-        HOMEBREW_NO_ENV_HINTS=1 \
-    "$BREW" bundle install --file="$BREWFILE"
+# Two attempts: Homebrew's bottle downloads flake occasionally (rb_sysopen
+# "No such file" on a partially-fetched bottle) and Type=oneshot units
+# cannot use Restart=. `brew bundle` is idempotent, so the retry only
+# redoes what failed.
+rc=0
+for attempt in 1 2; do
+    if run_as_user "$BREW" bundle install --file="$BREWFILE"; then
+        exit 0
+    fi
+    rc=$?
+    echo "brew-preinstall: attempt ${attempt} failed (rc=${rc})"
+    sleep 10
+done
+exit "$rc"
