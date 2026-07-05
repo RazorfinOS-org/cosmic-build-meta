@@ -1,0 +1,12 @@
+[Unit]
+Description=Run the Brewfile preinstall once the primary user exists
+# On a fresh install the boot-time service run skips (no UID-1000 account
+# yet). /etc/passwd changes when cosmic-initial-setup creates the account,
+# which triggers the service again -- so the Brewfile tools arrive in the
+# first session instead of after a reboot.
+
+[Path]
+PathChanged=/etc/passwd
+
+[Install]
+WantedBy=multi-user.target

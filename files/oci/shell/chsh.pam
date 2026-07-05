@@ -1,0 +1,9 @@
+#%PAM-1.0
+# FDSDK's shadow.bst removes /etc/pam.d/chsh, leaving chsh broken. Standard
+# stack (matches Fedora/Arch): root skips the prompt, users authenticate
+# via system-auth.
+auth       sufficient   pam_rootok.so
+auth       include      system-auth
+account    include      system-auth
+password   include      system-auth
+session    include      system-auth

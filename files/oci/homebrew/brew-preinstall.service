@@ -1,0 +1,25 @@
+[Unit]
+Description=Preinstall Homebrew packages from the system Brewfile
+Documentation=https://docs.brew.sh/Brew-Bundle-and-Brewfile
+# Ordered after brew-setup.service (ublue-os/brew) so the Homebrew payload
+# has been extracted; the conditions skip cleanly if it never was.
+After=network-online.target brew-setup.service
+Wants=network-online.target brew-setup.service
+ConditionPathIsSymbolicLink=/home/linuxbrew/.linuxbrew/bin/brew
+ConditionPathExists=/usr/share/cosmic/homebrew/Brewfile
+
+[Service]
+Type=oneshot
+# No RemainAfterExit: the unit must return to inactive after the boot-time
+# run (which skips when no user exists yet) so brew-preinstall.path can
+# start it again once cosmic-initial-setup creates the account.
+#
+# No User=1000: on the very first boot the primary account doesn't exist yet
+# and systemd would fail the unit with 217/USER. The helper resolves UID
+# 1000 at runtime, skips until it exists, and drops privileges itself (brew
+# refuses to run as root). `brew bundle install` is idempotent, so no
+# run-once stamp is needed.
+ExecStart=/usr/libexec/cosmic/brew-preinstall
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+# Enable the first-boot Brewfile preinstall. ublue-os/brew's own preset
+# (via cosmic-deps/brew.bst) already enables brew-setup and the
+# update/upgrade timers; this adds brew-preinstall.service on top.
+# Downstreams that want Homebrew without preinstalled packages can disable
+# it with a higher-numbered preset.
+enable brew-preinstall.service
+# Re-triggers the service when /etc/passwd changes, so a fresh install gets
+# the Brewfile tools in the first session (the boot-time run skips while the
+# primary account doesn't exist yet).
+enable brew-preinstall.path

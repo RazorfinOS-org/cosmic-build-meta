@@ -1,0 +1,7 @@
+# /etc/zprofile -- sourced by login zsh before /etc/zshrc.
+# zsh does not read /etc/profile or /etc/profile.d on its own; pull them in
+# under sh emulation so PATH and the Homebrew shellenv apply to login
+# shells. Matches what Arch/Debian ship.
+if [ -f /etc/profile ]; then
+  emulate sh -c '. /etc/profile'
+fi

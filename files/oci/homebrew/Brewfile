@@ -1,0 +1,30 @@
+# System Brewfile -- installed on first boot by brew-preinstall.service.
+# `brew bundle install` is idempotent: already-installed formulae are
+# skipped and user uninstalls aren't re-forced within a boot.
+#
+# Everything here downloads on a user's first boot, so keep the list small
+# and stick to prebuilt bottles.
+#
+# Tools that need shell init (zoxide, starship, ...) also need an
+# `eval "$(... init)"` line in the user's rc; installing them here alone
+# isn't enough.
+
+# Modern CLI defaults
+brew "eza"        # modern ls
+brew "fd"         # fast find alternative
+brew "ripgrep"    # fast recursive grep (rg)
+brew "bat"        # cat with syntax highlighting
+
+# Kept out of the image so brew keeps them current
+brew "fastfetch"  # system info
+brew "fzf"        # fuzzy finder
+brew "glow"       # terminal Markdown renderer
+brew "gum"        # shell-script UI toolkit
+brew "bpftop"     # eBPF program monitor
+
+# Opt-in examples (uncomment to preinstall)
+# brew "zoxide"     # smarter cd (needs shell init)
+# brew "starship"   # cross-shell prompt (needs shell init)
+# brew "tealdeer"   # fast tldr client
+# brew "zellij"     # terminal multiplexer
+# brew "gh"         # GitHub CLI

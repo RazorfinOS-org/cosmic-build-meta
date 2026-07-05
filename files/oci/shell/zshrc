@@ -1,0 +1,39 @@
+# /etc/zshrc -- global interactive zsh config, sourced before ~/.zshrc.
+# Kept small and dependency-free so it works before Homebrew is set up.
+
+# History
+HISTFILE="${HOME}/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=10000
+setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE SHARE_HISTORY EXTENDED_HISTORY
+
+# Shell options
+setopt AUTO_CD INTERACTIVE_COMMENTS
+setopt NO_BEEP
+
+# Emacs keybindings
+bindkey -e
+
+# Homebrew. Non-login interactive shells (e.g. cosmic-term) never read
+# /etc/zprofile, so hook brew here as well -- same as /etc/bashrc sourcing
+# /etc/profile.d for bash. brew.sh self-guards and appends to PATH.
+if [ -r /etc/profile.d/brew.sh ]; then
+  emulate sh -c 'source /etc/profile.d/brew.sh'
+fi
+
+# Completion (brew site-functions added ahead of compinit)
+if [ -d /home/linuxbrew/.linuxbrew/share/zsh/site-functions ]; then
+  fpath=(/home/linuxbrew/.linuxbrew/share/zsh/site-functions $fpath)
+fi
+autoload -Uz compinit && compinit -u
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
+# Prompt (no external deps)
+autoload -Uz colors && colors
+PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f %(!.#.$) '
+
+# Common aliases
+alias ll='ls -lah'
+alias la='ls -A'
+alias grep='grep --color=auto'

@@ -16,6 +16,7 @@ depends:
   - oci/integration/cosmic-greeter-config.bst
   - oci/integration/cosmic-debug-tools.bst
   - oci/integration/flatpak-config.bst
+  - oci/integration/shell-defaults.bst
   - oci/integration/mime-defaults.bst
   - oci/integration/cosmic-tuning.bst
   - oci/integration/extrafs.bst
