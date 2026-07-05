@@ -6,12 +6,12 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 
 ## Status
 
-- **131 local elements** (`elements/`), ~700 with freedesktop-sdk transitives. `just build` succeeds with 0 failures from a cold cache.
-- **Two image variants**: `cosmic` (Mesa, default) and `cosmic-nvidia` (NVIDIA proprietary 610.43.02 driver, open kernel modules, EGL/GBM userspace, device-node and logind/udev glue). Same BST graph; only the top-level image stack differs.
-- **Gaming layer** inspired by Bazzite/OpenGamingCollective: native Steam launcher/bootstrap, native gamescope + OGC game-mode session, host GameMode, Steam/controller udev rules, SDL controller DB, native MangoHud/vkBasalt, InputPlumber, Vulkan discovery glue, SDL/audio/input compatibility libraries, and first-boot Flathub preinstalls for Lutris, Heroic, Bottles, ProtonPlus, Protontricks, and GOverlay.
+- **132 local elements** (`elements/`), ~700 with freedesktop-sdk transitives. `just build` succeeds with 0 failures from a cold cache.
+- **Two GPU variants × an optional gaming axis** = four images. `cosmic` (Mesa, default) and `cosmic-nvidia` (NVIDIA proprietary 610.43.02 driver, open kernel modules, EGL/GBM userspace, device-node and logind/udev glue) build from the same BST graph; only the top-level image stack differs. The `gaming` project option (`-o gaming true`, or `COSMIC_GAMING=true` in the Justfile) layers the gaming stack onto either GPU variant, producing `cosmic-gaming` and `cosmic-nvidia-gaming`.
+- **Gaming variant** (opt-in) inspired by Bazzite/OpenGamingCollective: adds the gaming stack **and swaps the kernel** for the Open Gaming Collective build (sched_ext schedulers, ntsync, handheld enablement) via a freedesktop-sdk junction override of `components/linux.bst` → `core-deps/linux-ogc.bst`. The stack itself is native Steam launcher/bootstrap, native gamescope + OGC game-mode session, host GameMode, Steam/controller udev rules, SDL controller DB, native MangoHud/vkBasalt, InputPlumber, Vulkan discovery glue, SDL/audio/input compatibility libraries, and first-boot Flathub preinstalls for Lutris, Heroic, Bottles, ProtonPlus, Protontricks, and GOverlay. The default (non-gaming) image no longer ships Steam.
 - **Bootable image** (`bootable.raw`): boots into `cosmic-initial-setup` → `cosmic-greeter` → user session under QEMU + KVM + OVMF.
 - **Live ISO**: UEFI-bootable GPT disk image with autologin to a `cosmic-live` user, autostarts [cosmonaut-installer](https://github.com/razorfinos-org/cosmonaut-installer) — a native libcosmic GUI driving a privileged DBus daemon that installs from the OCI image baked into the ISO (`oci:/usr/lib/bootc/install-source/main`) against an opinionated profile (btrfs + composefs + systemd-boot, optional LUKS).
-- **CI**: GitHub Actions builds both variants weekly + on push to `main`, publishes to `ghcr.io/razorfinos-org/cosmic-build-meta:{cosmic,cosmic-nvidia}-{nightly,vX.Y.Z}` with keyless cosign signing and SLSA build-provenance attestations. ISOs are uploaded as workflow artifacts and (on tag pushes) attached to GitHub Releases.
+- **CI**: `build.yml` builds all four images (`{cosmic,cosmic-nvidia}{,-gaming}`) weekly + on push to `main`, publishes to `ghcr.io/razorfinos-org/cosmic-build-meta:<image>-{nightly,vX.Y.Z}` with keyless cosign signing and SLSA build-provenance attestations. Live ISOs are built by a separate `iso.yml` `workflow_dispatch` that bakes a published image into the ISO — kept out of the main build so image publishing isn't gated on the slower ISO assembly.
 
 **Known caveats**
 
@@ -20,6 +20,7 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 - Only x86_64 has been built end-to-end. aarch64 and riscv64 are wired in `project.conf` but untested.
 - First-login per-user setup wizard is suppressed (settings configured in OEM mode don't carry over).
 - Physical NVIDIA Live ISO performance/DRM handoff is still under active validation. Current images include the confirmed baseline fixes (NVIDIA userspace/device nodes, greetd PAM → logind session, debug tooling), but the remaining `cosmic-comp` KMS permission issue is being investigated separately.
+- The gaming variant (`-o gaming true`, including the OGC kernel swap) is wired but not yet build-tested end-to-end; the default and NVIDIA variants are the validated path.
 
 ## Quick start
 
@@ -45,6 +46,15 @@ just build-variant cosmic-nvidia     # loads ghcr.io/razorfinos-org/cosmic-build
 COSMIC_IMAGE_TAG=nvidia-nightly just generate-bootable-image
 just boot-vm
 ```
+
+For the gaming variant, set `COSMIC_GAMING=true` on any recipe. It applies to every `bst` invocation, so it composes with the GPU variant:
+
+```sh
+COSMIC_GAMING=true just build                                    # cosmic-gaming
+COSMIC_GAMING=true just build-variant cosmic-nvidia              # cosmic-nvidia-gaming
+```
+
+Gaming builds get a `-gaming`-suffixed local image name and tag so they never collide with the non-gaming build of the same element path.
 
 `just build` is incremental — once warm, only changed elements rebuild.
 
@@ -77,6 +87,7 @@ The ISO artifact is really a **UEFI-bootable GPT disk image** with an `.iso` fil
 | Env var | Default | Effect |
 |---|---|---|
 | `BST_ARCH` | host arch | BST `arch` option, passed as `--option arch` to every `bst` invocation. |
+| `COSMIC_GAMING` | `false` | Build the gaming variant. Passed as `--option gaming` to every `bst` invocation; adds `gaming/deps.bst` to the stack and swaps the kernel for the OGC build. Composes with the GPU variant and suffixes the local image name/tag with `-gaming`. |
 | `BST2_IMAGE` | pinned `bst2:8fe67f04…` | Container image used to run BST. Pinned by SHA for reproducibility; bump when upstream rolls a new tag. |
 | `COSMIC_VM_MEMORY` | `4G` | RAM passed to QEMU (`boot-vm` only; `boot-iso` is hard-coded to 32 GB to fit the live env's tmpfs root). |
 | `COSMIC_VM_CPUS` | `4` | vCPU count for `boot-vm`. |
@@ -150,12 +161,13 @@ The `installer/cosmic-images-json.bst` element exists specifically so downstream
 elements/
   freedesktop-sdk.bst            Junction to FDSDK 25.08
   core/                          COSMIC binaries (compositor, shell, apps, greeter)
-  core-deps/                     Build deps not in FDSDK (greetd, just, libdisplay-info, oniguruma, …)
+  core-deps/                     Build deps not in FDSDK (greetd, just, libdisplay-info, oniguruma, linux-ogc, …)
   cosmic-deps/                   Runtime system stack (base, fonts, networking, audio, bootc, …)
   cosmic-deps-nvidia/            NVIDIA driver stack (nvidia.ko build, userspace, EGL-Wayland, modprobe glue)
-  gaming/                        Bazzite/OGC-inspired gaming layer: native Steam, native gamescope + OGC session,
-                                 GameMode, controller rules/data, MangoHud/vkBasalt, InputPlumber, Vulkan glue,
-                                 host compatibility libs, non-Steam gaming Flatpak preinstall declarations
+  gaming/                        Opt-in gaming variant (`-o gaming true`): Bazzite/OGC-inspired layer — native Steam,
+                                 native gamescope + OGC session, GameMode, controller rules/data, MangoHud/vkBasalt,
+                                 InputPlumber, Vulkan glue, host compatibility libs, non-Steam gaming Flatpak preinstalls.
+                                 The option also swaps the kernel via the freedesktop-sdk.bst junction override.
   installer/                     Live ISO assembly: live-image (systemd-repart), live-extras (autologin / live-only
                                  polkit), cosmonaut-installer (libcosmic GUI + DBus daemon), images.json catalog
   oci/                           Bootc/OCI image assembly chain
@@ -168,6 +180,7 @@ elements/
 files/
   initramfs/                     Vendored generate-initramfs script tree + module set
   installer/                     Live env drop-ins: greetd autologin, networkd, sysusers, repart partitions, images.json
+  linux-ogc/                     Vendored FDSDK kernel config pass + OGC config fragments for core-deps/linux-ogc.bst
   oci/                           Branding, presets, greetd/PAM config + kiosk wrappers, tmpfiles, sysusers, tuning, debug tools
 plugins/
   local/sources/cargo2.py        cargo2 plugin with git-submodule support
@@ -178,7 +191,7 @@ include/
   live-image-common.yml          Shared Live ISO sysroot-prep/repart scaffolding for both variants
 project.conf                     BST config: RUSTFLAGS, plugin registrations, manual element env
 Justfile                         Podman wrapper for bst commands + image / ISO / VM lifecycle recipes
-.github/workflows/               Matrix build (cosmic + cosmic-nvidia), GHCR push, cosign signing
+.github/workflows/               build.yml (four-image matrix, GHCR push, cosign signing) + iso.yml (ISO dispatch)
 docs/images/                     README screenshots
 ```
 
@@ -189,6 +202,8 @@ docs/images/                     README screenshots
 **Bootc/OCI image**. `elements/oci/cosmic/{stack,filesystem,image,init-scripts}.bst` mirrors the `oci/gnomeos/` shape from gnome-build-meta. The final assembly squashes layers with `podman build --squash-all` (see `just load-image`) to work around bootc 1.15's splitstream EOF on multi-layer images.
 
 **NVIDIA variant**. `oci/cosmic-nvidia/stack.bst` depends on the full default stack and adds `cosmic-deps-nvidia/deps.bst`. The NVIDIA stack builds the 610.43.02 `.run` bundle's open kernel modules and proprietary userspace, including GLVND/EGL/GBM JSONs, SONAME links, the `gbm/nvidia-drm_gbm.so` backend symlink, `nvidia-smi`, `nvidia-modprobe`, GSP firmware, and `nvidia-persistenced`. The integration commands re-run `depmod` against the composed root so the NVIDIA modules (`nvidia`, `nvidia-modeset`, `nvidia-drm`, `nvidia-uvm`) join the in-tree module dep graph. nouveau is blacklisted; `nvidia-drm.modeset=1` and `fbdev=1` are set; NVIDIA PCI/DRM devices get Pop/Fedora-style `seat` / `master-of-seat` udev tags; `nvidia-modprobe` and a fallback systemd service create `/dev/nvidia*` auxiliary nodes.
+
+**Gaming variant**. The `gaming` project option (`-o gaming true`) is a single boolean threaded through the whole graph rather than a parallel element tree. Conditionally it (1) appends `gaming/deps.bst` to `oci/cosmic/stack.bst`, (2) rewrites `VARIANT`/`VARIANT_ID` in `os-release`, and (3) swaps `components/linux.bst` → `core-deps/linux-ogc.bst` via the `freedesktop-sdk.bst` junction override. Routing the kernel swap through the junction override means every consumer of `components/linux.bst` — `cosmic-deps/base.bst`, `oci/initramfs.bst`, and critically `cosmic-deps-nvidia/nvidia-drivers.bst`, which compiles the NVIDIA modules against the kernel build tree — resolves to the OGC kernel automatically, so module/kernel co-versioning holds by construction in the nvidia+gaming combination. `linux-ogc.bst` reproduces FDSDK's `components/linux.bst` artifact contract exactly (vmlinuz/config at `%{bootdir}`, modules + `build` symlink under `/usr/lib/modules/<kver>/`), swapping in OGC's stable-tree fork and its `ogc.config.set/unset` fragments (sched_ext schedulers, ntsync, BTF, handheld enablement). Because it's the same element paths, the gaming axis composes freely with the GPU axis to give four images.
 
 **Live ISO**. `installer/live-image-<variant>.bst` is a `kind: script` element wrapping `systemd-repart --offline` against `oci/<variant>-live/filesystem.bst` (the live env EROFS root). Both variants share `include/live-image-common.yml` for `/usr/etc` merging, sysusers/shadow synthesis, `depmod`, setuid restoration, and greetd wiring. The Live env has a real greetd PAM file (`/etc/pam.d/greetd`) so `pam_systemd` registers the autologin session with logind before COSMIC starts. The `.iso` artifact is a GPT disk image — there's no ISO9660 boot catalog because FDSDK 25.08's systemd-repart predates `--el-torito`. UEFI boots it as a normal disk via the ESP and chainloads `BOOTX64.EFI`.
 
@@ -230,9 +245,9 @@ docs/images/                     README screenshots
 
 ## CI & releases
 
-`.github/workflows/build.yml` builds both variants in a matrix on every push to `main`, weekly on Monday 08:00 UTC, and on `v*` tags. PRs build only when authored by the `auto/track-*` source-bump bot or labelled `build` (saves runner minutes). Each successful run publishes:
+`.github/workflows/build.yml` builds all four images (`cosmic`, `cosmic-nvidia`, `cosmic-gaming`, `cosmic-nvidia-gaming`) in a matrix on every push to `main`, weekly on Monday 08:00 UTC, and on `v*` tags. The gaming axis is a BST project option (`-o gaming true` via `COSMIC_GAMING`) on the same element paths, so the matrix just toggles `gaming` per row and derives an `image` identity used for tags, cache keys, and log artifacts. PRs build only when authored by the `auto/track-*` source-bump bot or labelled `build` (saves runner minutes). Each successful run publishes:
 
-- **OCI image** to `ghcr.io/razorfinos-org/cosmic-build-meta:<variant>-{nightly,vX.Y.Z}` (and `<variant>-pr-N` for PR builds), squashed with `podman build --squash-all`.
+- **OCI image** to `ghcr.io/razorfinos-org/cosmic-build-meta:<image>-{nightly,vX.Y.Z}` (and `<image>-pr-N` for PR builds), squashed with `podman build --squash-all`.
 - **Cosign signature** + certificate (keyless, OIDC-bound). Verify with:
   ```sh
   cosign verify ghcr.io/razorfinos-org/cosmic-build-meta:cosmic-nightly \
@@ -240,9 +255,10 @@ docs/images/                     README screenshots
       --certificate-oidc-issuer='https://token.actions.githubusercontent.com'
   ```
 - **SLSA build-provenance** attestation (Sigstore), verifiable via `cosign verify-attestation`.
-- **Live ISO** as a workflow artifact (and a GitHub Release asset on tag pushes), with `.sha256`, `.sig`, `.cert` sidecars from `cosign sign-blob`.
 
-The BST cache is shared across runs via `actions/cache`, keyed on `runner.arch` × variant × `run_id` with a per-variant fallback prefix.
+Live ISOs are built separately by `.github/workflows/iso.yml`, a `workflow_dispatch` that takes a variant (`cosmic` / `cosmic-nvidia` / `both`), a published image tag to bake in, and an optional release tag. It pulls the already-published bootc image, stages it as an offline install source (`just prep-install-source-from-image`), builds the ISO from that (`just build-iso-from-prepared-source`), and uploads it as a workflow artifact — plus a GitHub Release asset when a release tag is given — with `.sha256`, `.sig`, `.cert` sidecars from `cosign sign-blob`. Keeping ISO assembly out of `build.yml` means image publishing isn't blocked on it.
+
+The BST cache is shared across runs via `actions/cache`, keyed on `runner.arch` × image × `run_id` with a per-image fallback prefix.
 
 ## Credits
 
