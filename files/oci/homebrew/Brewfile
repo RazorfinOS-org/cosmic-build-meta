@@ -1,38 +1,30 @@
-# System Brewfile -- packages preinstalled from Homebrew on first boot by
-# brew-preinstall.service (installed via cosmic-deps/homebrew-preinstall.bst).
+# System Brewfile -- installed on first boot by brew-preinstall.service.
+# `brew bundle install` is idempotent: already-installed formulae are
+# skipped and user uninstalls aren't re-forced within a boot.
 #
-# This is the customization point: add `brew "<formula>"` / `cask "<name>"`
-# lines here. `brew bundle install` is idempotent, so anything already present
-# is skipped. Users can also uninstall these afterwards -- they won't be
-# force-reinstalled unless brew-preinstall.service re-runs on a later boot.
+# Everything here downloads on a user's first boot, so keep the list small
+# and stick to prebuilt bottles.
 #
-# TRADEOFF: every formula here is downloaded (as a prebuilt bottle) on the
-# user's first boot, so keep this list small and lightweight. Heavy or
-# source-built formulae make first boot slow and network-dependent. This is
-# why Bluefin ships Brewfiles under /usr/share/ublue-os/homebrew/ but does NOT
-# auto-run them -- we opt into auto-install here, so err on the side of few.
-#
-# Shell-init note: tools like zoxide/starship need an `eval "$(... init)"`
-# line in the user's shell rc to actually activate; installing the binary
-# here does not wire that up. Standalone binaries (eza, fd, ripgrep, ...)
-# work immediately.
+# Tools that need shell init (zoxide, starship, ...) also need an
+# `eval "$(... init)"` line in the user's rc; installing them here alone
+# isn't enough.
 
-# --- Lightweight, standalone modern CLI defaults (fast bottle installs) ---
-brew "eza"        # modern ls (icons, git-aware, tree)
-brew "fd"         # simple, fast find alternative
+# Modern CLI defaults
+brew "eza"        # modern ls
+brew "fd"         # fast find alternative
 brew "ripgrep"    # fast recursive grep (rg)
-brew "bat"        # cat with syntax highlighting + paging
+brew "bat"        # cat with syntax highlighting
 
-# --- Formerly baked into the image; moved here so brew keeps them fresh ---
-brew "fastfetch"  # fast system-info / "screenshot" tool
+# Kept out of the image so brew keeps them current
+brew "fastfetch"  # system info
 brew "fzf"        # fuzzy finder
-brew "glow"       # render Markdown in the terminal
-brew "gum"        # glamorous shell-script UI toolkit (charmbracelet)
-brew "bpftop"     # eBPF program monitor TUI
+brew "glow"       # terminal Markdown renderer
+brew "gum"        # shell-script UI toolkit
+brew "bpftop"     # eBPF program monitor
 
-# --- Opt-in examples (uncomment to preinstall) ---
-# brew "zoxide"     # smarter cd (needs shell init in ~/.bashrc)
+# Opt-in examples (uncomment to preinstall)
+# brew "zoxide"     # smarter cd (needs shell init)
 # brew "starship"   # cross-shell prompt (needs shell init)
-# brew "tealdeer"   # fast tldr client (tldr)
+# brew "tealdeer"   # fast tldr client
 # brew "zellij"     # terminal multiplexer
 # brew "gh"         # GitHub CLI

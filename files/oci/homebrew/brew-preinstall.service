@@ -1,10 +1,8 @@
 [Unit]
 Description=Preinstall Homebrew packages from the system Brewfile
 Documentation=https://docs.brew.sh/Brew-Bundle-and-Brewfile
-# brew-setup.service (from ublue-os/brew) extracts /usr/share/homebrew.tar.zst
-# into the writable /var/home/linuxbrew on first boot; we must run after it so
-# `brew` exists. The ConditionPathIsSymbolicLink guard means that if brew was
-# never set up we skip cleanly instead of failing.
+# Ordered after brew-setup.service (ublue-os/brew) so the Homebrew payload
+# has been extracted; the conditions skip cleanly if it never was.
 After=network-online.target brew-setup.service
 Wants=network-online.target brew-setup.service
 ConditionPathIsSymbolicLink=/home/linuxbrew/.linuxbrew/bin/brew
@@ -13,17 +11,11 @@ ConditionPathExists=/usr/share/cosmic/homebrew/Brewfile
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-# NOT User=1000: on the very first boot the primary account doesn't exist yet
-# (cosmic-initial-setup creates it after multi-user.target) and systemd would
-# fail the unit with 217/USER before ExecStart ever ran. The helper resolves
-# UID 1000 at runtime, drops privileges via setpriv, and exits 0 (to retry
-# next boot) when the user isn't there yet. brew itself refuses to run as
-# root, so the privilege drop is mandatory either way.
-#
-# `brew bundle install` is idempotent: it installs whatever is missing and
-# no-ops for already-installed formulae, so (like flatpak-preinstall.service)
-# we don't need a run-once stamp -- RemainAfterExit keeps it from re-running
-# within a boot, and a re-run after reboot is a cheap "all satisfied" check.
+# No User=1000: on the very first boot the primary account doesn't exist yet
+# (cosmic-initial-setup creates it later) and systemd would fail the unit
+# with 217/USER. The helper resolves UID 1000 at runtime, skips until it
+# exists, and drops privileges itself (brew refuses to run as root).
+# `brew bundle install` is idempotent, so no run-once stamp is needed.
 ExecStart=/usr/libexec/cosmic/brew-preinstall
 
 [Install]

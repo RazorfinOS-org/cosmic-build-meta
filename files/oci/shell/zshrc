@@ -1,6 +1,5 @@
-# /etc/zshrc -- global interactive zsh config (sourced for every user's
-# interactive shell before their ~/.zshrc). Kept intentionally small and
-# dependency-free so it works before Homebrew is set up.
+# /etc/zshrc -- global interactive zsh config, sourced before ~/.zshrc.
+# Kept small and dependency-free so it works before Homebrew is set up.
 
 # History
 HISTFILE="${HOME}/.zsh_history"
@@ -8,25 +7,21 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE SHARE_HISTORY EXTENDED_HISTORY
 
-# Sensible shell options
+# Shell options
 setopt AUTO_CD INTERACTIVE_COMMENTS
 setopt NO_BEEP
 
-# Emacs keybindings (default that most people expect)
+# Emacs keybindings
 bindkey -e
 
-# Homebrew. Interactive NON-login shells (what cosmic-term spawns) never read
-# /etc/zprofile -> /etc/profile, so hook brew here too -- this mirrors what
-# FDSDK's /etc/bashrc does for bash by sourcing /etc/profile.d/*.sh in every
-# interactive shell. brew.sh self-guards: it is a no-op until
-# brew-setup.service has extracted Homebrew into /var/home/linuxbrew on first
-# boot, and it appends brew to PATH (system binaries keep priority).
+# Homebrew. Non-login interactive shells (e.g. cosmic-term) never read
+# /etc/zprofile, so hook brew here as well -- same as /etc/bashrc sourcing
+# /etc/profile.d for bash. brew.sh self-guards and appends to PATH.
 if [ -r /etc/profile.d/brew.sh ]; then
   emulate sh -c 'source /etc/profile.d/brew.sh'
 fi
 
-# Completion (brew's site-functions added ahead of compinit so formula
-# completions are picked up once Homebrew exists)
+# Completion (brew site-functions added ahead of compinit)
 if [ -d /home/linuxbrew/.linuxbrew/share/zsh/site-functions ]; then
   fpath=(/home/linuxbrew/.linuxbrew/share/zsh/site-functions $fpath)
 fi
@@ -34,7 +29,7 @@ autoload -Uz compinit && compinit -u
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
-# Colored, git-agnostic two-line-ish prompt (no external deps)
+# Prompt (no external deps)
 autoload -Uz colors && colors
 PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f %(!.#.$) '
 

@@ -1,8 +1,6 @@
-# Z shell -- the image's default login shell (set via
-# oci/integration/shell-defaults.bst). FDSDK 25.08 doesn't package zsh, so
-# we build it from the official release tarball. ncurses lives at
-# bootstrap/ncurses.bst (not components/) and provides libtinfo + the
-# terminfo database zsh needs at runtime.
+# Z shell -- the image's default login shell (wired via
+# oci/integration/shell-defaults.bst). Not packaged by FDSDK 25.08; built
+# from the release tarball. ncurses comes from bootstrap/ncurses.bst.
 kind: autotools
 
 build-depends:
@@ -14,9 +12,9 @@ depends:
 - freedesktop-sdk.bst:bootstrap/ncurses.bst
 
 variables:
-  # Global rc dir = /etc (so /etc/zprofile, /etc/zshrc from shell-defaults
-  # are read). gdbm/pcre modules disabled to avoid extra deps FDSDK would
-  # otherwise need; neither is required for an interactive login shell.
+  # etcdir=/etc so the global zprofile/zshrc from shell-defaults are read.
+  # gdbm/pcre modules disabled: not needed for an interactive shell, and
+  # they would add deps FDSDK doesn't ship.
   conf-local: >-
     --enable-etcdir=%{sysconfdir}
     --enable-fndir=%{datadir}/zsh/functions

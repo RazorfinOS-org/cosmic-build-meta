@@ -1,22 +1,13 @@
-# Default login-shell wiring for the image.
-#
-# Makes zsh (cosmic-deps/zsh.bst) the default shell for accounts created by
-# cosmic-initial-setup, and gives it the global config it needs to behave
-# well out of the box:
-#   /etc/default/useradd -- SHELL=/usr/bin/zsh, so accountsservice's
-#                           `useradd -m` (no -s) picks zsh for the new user.
-#   /etc/shells          -- lists zsh so chsh / pkexec accept it.
-#   /etc/zprofile        -- sources /etc/profile so login zsh gets PATH +
-#                           the Homebrew shellenv from /etc/profile.d.
-#   /etc/zshrc           -- global interactive defaults (history, completion,
-#                           prompt, aliases).
-#   /etc/skel/.zshrc     -- copied into each new home; suppresses the
-#                           zsh-newuser-install first-run wizard.
-#   /etc/pam.d/chsh      -- FDSDK's shadow.bst deletes this, which breaks
-#                           `chsh`; restore it so users can switch shells.
-#
-# bash stays fully functional as a fallback (chsh back to /usr/bin/bash) and
-# for the greeter / initial-setup / live system accounts, which pin bash.
+# Default login-shell wiring: zsh (cosmic-deps/zsh.bst) for accounts created
+# by cosmic-initial-setup, with bash kept as the fallback and for system
+# accounts.
+#   /etc/default/useradd -- SHELL=/usr/bin/zsh; accountsservice's
+#                           `useradd -m` (no -s) picks it up
+#   /etc/shells          -- lists zsh so chsh / pkexec accept it
+#   /etc/zprofile        -- sources /etc/profile (PATH, Homebrew shellenv)
+#   /etc/zshrc           -- global interactive defaults
+#   /etc/skel/.zshrc     -- suppresses the zsh-newuser-install wizard
+#   /etc/pam.d/chsh      -- restored (FDSDK's shadow.bst deletes it)
 kind: manual
 
 sources:
@@ -32,8 +23,8 @@ variables:
 
 public:
   bst:
-    # FDSDK's shadow may ship a default /etc/default/useradd and/or
-    # /etc/shells; declare the overlap so ours wins cleanly at compose.
+    # FDSDK's shadow may ship its own /etc/default/useradd and /etc/shells;
+    # declare the overlap so ours wins at compose.
     overlap-whitelist:
     - /etc/default/useradd
     - /etc/shells

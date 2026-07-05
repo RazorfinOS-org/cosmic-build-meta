@@ -1,6 +1,6 @@
 # Defaults for `useradd`. cosmic-initial-setup creates the primary account
-# via accountsservice.CreateUser -> `useradd -m -k /etc/skel` with no explicit
-# -s, so the SHELL= line here becomes the new user's default login shell.
+# via accountsservice -> `useradd -m` (no -s), so SHELL= here sets the
+# default login shell.
 GROUP=100
 HOME=/home
 INACTIVE=-1

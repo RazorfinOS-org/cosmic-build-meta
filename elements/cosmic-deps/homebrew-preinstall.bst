@@ -1,21 +1,10 @@
-# First-boot Homebrew package preinstall.
-#
-# cosmic-deps/brew.bst + brew-tarball.bst ship Homebrew itself (the ublue-os
-# first-boot extract + update/upgrade timers). This element adds an OPT-IN
-# package preinstall on top, mirroring our Flatpak story
-# (oci/integration/flatpak-config.bst):
-#   - brew-preinstall.service: a oneshot ordered After=brew-setup.service that
-#     runs `brew bundle install` against the system Brewfile as the primary
-#     user once network is up. Idempotent (brew bundle skips installed).
-#   - Brewfile: the vendor package list at /usr/share/cosmic/homebrew/ -- the
-#     customization point. Ships a small lightweight default set.
-#   - 92-homebrew.preset: enables the service so systemd preset-all (run at
-#     image build by oci/integration/cosmic-presets.bst) flips it on.
-#
-# Pulled by cosmic-deps/extras.bst alongside the Homebrew payload, so it only
-# ships where brew does. Upstream ublue-os/brew has no equivalent (Bluefin
-# ships Brewfiles under /usr/share/ublue-os/homebrew/ but doesn't auto-run
-# them); this is our addition.
+# First-boot Homebrew package preinstall, mirroring the Flatpak setup in
+# oci/integration/flatpak-config.bst:
+#   brew-preinstall.service -- oneshot ordered after brew-setup.service,
+#     runs the /usr/libexec/cosmic/brew-preinstall helper
+#   Brewfile -- package list at /usr/share/cosmic/homebrew/Brewfile
+#   92-homebrew.preset -- enables the service at image build
+# Pulled by cosmic-deps/extras.bst alongside the Homebrew payload.
 kind: manual
 
 sources:
