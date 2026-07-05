@@ -9,9 +9,26 @@ config:
   install-commands:
   - install -Dm755 target/release/coreutils "%{install-root}/usr/bin/uutils-coreutils"
   - |
+    # cp/mv/rm are NOT given unprefixed symlinks -- the GNU versions (from
+    # bootstrap/coreutils.bst) stay authoritative for the destructive
+    # file-manipulation trio:
+    #   cp -- uutils has a proven chmod-through-symlink bug: copy_file
+    #         computes dest_is_symlink from pre-copy metadata, then
+    #         fs::set_permissions follows a freshly-created symlink dest.
+    #         Fallout: `bootc install` runs this image's `cp -a` on /etc,
+    #         follows the getty@tty1.service -> /dev/null mask symlink, and
+    #         chmods /dev/null to 0755 on the INSTALLING HOST (shared /dev
+    #         bind mount).
+    #   mv/rm -- same risk class (system tooling like bootc/ostree shells out
+    #         to them against trees full of symlinks and expects exact GNU
+    #         semantics); hold them back until upstream maturity is proven.
+    # The prefixed uutils-{cp,mv,rm} remain available for opt-in use.
     for prog in $(target/release/coreutils --list); do
       ln -sr "%{install-root}/usr/bin/uutils-coreutils" "%{install-root}/usr/bin/uutils-${prog}"
-      ln -sr "%{install-root}/usr/bin/uutils-coreutils" "%{install-root}/usr/bin/${prog}"
+      case "${prog}" in
+        cp|mv|rm) ;;
+        *) ln -sr "%{install-root}/usr/bin/uutils-coreutils" "%{install-root}/usr/bin/${prog}" ;;
+      esac
     done
 
 public:
@@ -31,7 +48,10 @@ public:
     - /usr/bin/chroot
     - /usr/bin/cksum
     - /usr/bin/comm
-    - /usr/bin/cp
+    # /usr/bin/{cp,mv,rm} intentionally absent: no unprefixed symlinks are
+    # installed for them (see install-commands) so there is no overlap -- and
+    # if one reappears, the compose should fail loudly rather than silently
+    # shadow the GNU tools.
     - /usr/bin/csplit
     - /usr/bin/cut
     - /usr/bin/date
@@ -67,7 +87,6 @@ public:
     - /usr/bin/mknod
     - /usr/bin/mktemp
     - /usr/bin/more
-    - /usr/bin/mv
     - /usr/bin/nice
     - /usr/bin/nl
     - /usr/bin/nohup
@@ -84,7 +103,6 @@ public:
     - /usr/bin/pwd
     - /usr/bin/readlink
     - /usr/bin/realpath
-    - /usr/bin/rm
     - /usr/bin/rmdir
     - /usr/bin/seq
     - /usr/bin/sha1sum
