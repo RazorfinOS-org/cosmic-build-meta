@@ -1,0 +1,10 @@
+# /etc/zprofile -- sourced by zsh login shells before /etc/zshrc.
+#
+# zsh does NOT read /etc/profile or /etc/profile.d/*.sh on its own, so a
+# login zsh would miss PATH additions and the Homebrew shellenv that
+# ublue-os/brew installs at /etc/profile.d/brew.sh. Pull them in under sh
+# emulation (the profile scripts are POSIX sh). Mirrors what Arch/Debian
+# ship in /etc/zsh/zprofile.
+if [ -f /etc/profile ]; then
+  emulate sh -c '. /etc/profile'
+fi

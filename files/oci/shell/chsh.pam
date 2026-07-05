@@ -1,0 +1,11 @@
+#%PAM-1.0
+# FDSDK's shadow.bst removes /etc/pam.d/chsh, which makes `chsh` fall back to
+# /etc/pam.d/other and fail -- so users couldn't change their login shell.
+# Restore a standard stack (matches Fedora/Arch) so zsh <-> bash switching
+# works. pam_rootok lets root / `sudo chsh` skip the prompt; unprivileged
+# users authenticate against system-auth (the same stack login/greetd use).
+auth       sufficient   pam_rootok.so
+auth       include      system-auth
+account    include      system-auth
+password   include      system-auth
+session    include      system-auth

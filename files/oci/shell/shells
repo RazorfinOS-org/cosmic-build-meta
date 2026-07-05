@@ -1,0 +1,8 @@
+# Valid login shells. Needed so chsh accepts zsh and pkexec's SHELL-env
+# safety check passes. FDSDK doesn't ship /etc/shells for the bootc image.
+/bin/sh
+/bin/bash
+/usr/bin/sh
+/usr/bin/bash
+/bin/zsh
+/usr/bin/zsh

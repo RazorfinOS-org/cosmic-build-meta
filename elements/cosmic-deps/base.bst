@@ -46,6 +46,12 @@ depends:
   - freedesktop-sdk.bst:components/nano.bst
   - freedesktop-sdk.bst:components/vim.bst
 
+  # zsh -- the image's default login shell (wired via
+  # oci/integration/shell-defaults.bst). Not packaged by FDSDK, so vendored
+  # in cosmic-deps/zsh.bst. bash stays present (via runtime-minimal) as the
+  # fallback shell and for system service accounts.
+  - cosmic-deps/zsh.bst
+
   # Privilege escalation (runtime, distinct from polkit).
   # Without sudo, the user's first move on a fresh shell -- `sudo systemctl
   # status foo`, `sudo dnf install ...`, etc. -- silently 404s. polkit
