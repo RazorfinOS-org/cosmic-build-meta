@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# First-boot Homebrew package preinstall (see brew-preinstall.service).
+#
+# Runs as root: the unit cannot use User=1000 because on the very first boot
+# the primary account does not exist yet (cosmic-initial-setup creates it
+# after multi-user.target) and systemd would fail the unit with 217/USER.
+# Instead we resolve UID 1000 at runtime and drop privileges with setpriv
+# (no PAM involvement, unlike runuser). If the user does not exist yet we
+# exit 0 -- the oneshot re-runs on the next boot, by which time the account
+# created by cosmic-initial-setup is present.
+set -euo pipefail
+
+BREW=/home/linuxbrew/.linuxbrew/bin/brew
+BREWFILE=/usr/share/cosmic/homebrew/Brewfile
+
+entry="$(getent passwd 1000)" || {
+    echo "brew-preinstall: no UID-1000 user yet (first boot before initial-setup); skipping until next boot"
+    exit 0
+}
+user="${entry%%:*}"
+home="$(printf '%s' "$entry" | cut -d: -f6)"
+
+echo "brew-preinstall: installing ${BREWFILE} as ${user}"
+exec setpriv --reuid="$user" --regid="$(id -g "$user")" --init-groups \
+    env HOME="$home" USER="$user" LOGNAME="$user" \
+        HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar \
+        HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew \
+        HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew \
+        HOMEBREW_NO_ANALYTICS=1 \
+        HOMEBREW_NO_ENV_HINTS=1 \
+    "$BREW" bundle install --file="$BREWFILE"

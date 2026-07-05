@@ -12,20 +12,18 @@ kind: stack
 
 depends:
   # --- General-purpose CLI utilities -------------------------------------
-  # glow    -- render Markdown in the terminal
-  # gum     -- build glamorous shell scripts (charmbracelet)
-  # fzf     -- fuzzy finder; ubiquitous interactive filter
-  # fastfetch -- fast system-info / "screenshot" tool
-  # distrobox -- run any distro's tooling in a container (pairs with podman)
-  # wl-clipboard -- wl-copy / wl-paste for Wayland clipboard from the CLI
-  # bpftop  -- eBPF program monitor TUI (diagnostics)
-  - cosmic-deps/glow.bst
-  - cosmic-deps/gum.bst
-  - cosmic-deps/fzf.bst
-  - cosmic-deps/fastfetch.bst
+  # Only tools that benefit from being system-level (available pre-Homebrew,
+  # tied to desktop/host integration) are baked in. Pure leaf CLI tools
+  # (glow, gum, fzf, fastfetch, bpftop) are preinstalled from Homebrew
+  # instead -- see files/oci/homebrew/Brewfile -- to keep the image lean
+  # and let brew keep them updated.
+  #
+  # distrobox    -- run any distro's tooling in a container; host/podman
+  #                 integration, wanted before brew/network on first boot
+  # wl-clipboard -- wl-copy / wl-paste; Wayland desktop util other apps
+  #                 and scripts expect at the system level
   - cosmic-deps/distrobox.bst
   - cosmic-deps/wl-clipboard.bst
-  - cosmic-deps/bpftop.bst
 
   # --- Homebrew ----------------------------------------------------------
   # The prebuilt Homebrew payload (/usr/share/homebrew.tar.zst) plus the
@@ -35,6 +33,9 @@ depends:
   # line pulls both. Needs tar/findutils/git at runtime -- provided by the
   # core GNU userland block in cosmic-deps/base.bst.
   - cosmic-deps/brew-tarball.bst
+  # Opt-in first-boot `brew bundle install` of the system Brewfile
+  # (/usr/share/cosmic/homebrew/Brewfile) via brew-preinstall.service.
+  - cosmic-deps/homebrew-preinstall.bst
 
   # --- Rust coreutils / sudo (opinionated system-wide replacements) ------
   # uutils-coreutils installs unprefixed /usr/bin/{ls,cp,mv,...} and

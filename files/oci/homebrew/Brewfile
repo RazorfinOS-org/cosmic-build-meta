@@ -1,0 +1,38 @@
+# System Brewfile -- packages preinstalled from Homebrew on first boot by
+# brew-preinstall.service (installed via cosmic-deps/homebrew-preinstall.bst).
+#
+# This is the customization point: add `brew "<formula>"` / `cask "<name>"`
+# lines here. `brew bundle install` is idempotent, so anything already present
+# is skipped. Users can also uninstall these afterwards -- they won't be
+# force-reinstalled unless brew-preinstall.service re-runs on a later boot.
+#
+# TRADEOFF: every formula here is downloaded (as a prebuilt bottle) on the
+# user's first boot, so keep this list small and lightweight. Heavy or
+# source-built formulae make first boot slow and network-dependent. This is
+# why Bluefin ships Brewfiles under /usr/share/ublue-os/homebrew/ but does NOT
+# auto-run them -- we opt into auto-install here, so err on the side of few.
+#
+# Shell-init note: tools like zoxide/starship need an `eval "$(... init)"`
+# line in the user's shell rc to actually activate; installing the binary
+# here does not wire that up. Standalone binaries (eza, fd, ripgrep, ...)
+# work immediately.
+
+# --- Lightweight, standalone modern CLI defaults (fast bottle installs) ---
+brew "eza"        # modern ls (icons, git-aware, tree)
+brew "fd"         # simple, fast find alternative
+brew "ripgrep"    # fast recursive grep (rg)
+brew "bat"        # cat with syntax highlighting + paging
+
+# --- Formerly baked into the image; moved here so brew keeps them fresh ---
+brew "fastfetch"  # fast system-info / "screenshot" tool
+brew "fzf"        # fuzzy finder
+brew "glow"       # render Markdown in the terminal
+brew "gum"        # glamorous shell-script UI toolkit (charmbracelet)
+brew "bpftop"     # eBPF program monitor TUI
+
+# --- Opt-in examples (uncomment to preinstall) ---
+# brew "zoxide"     # smarter cd (needs shell init in ~/.bashrc)
+# brew "starship"   # cross-shell prompt (needs shell init)
+# brew "tealdeer"   # fast tldr client (tldr)
+# brew "zellij"     # terminal multiplexer
+# brew "gh"         # GitHub CLI

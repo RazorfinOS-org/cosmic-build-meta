@@ -1,0 +1,13 @@
+# Default unit policy for the Homebrew package preinstall.
+#
+# ublue-os/brew's own 01-homebrew.preset (shipped via cosmic-deps/brew.bst
+# system_files) already enables brew-setup.service + the update/upgrade
+# timers. This preset adds our first-boot package preinstall on top.
+#
+# brew-preinstall.service runs `brew bundle install` against
+# /usr/share/cosmic/homebrew/Brewfile after brew-setup.service has extracted
+# Homebrew, as the primary user, once network is up. Idempotent across boots.
+# Disable this (drop a higher-numbered preset with `disable
+# brew-preinstall.service`) if you want Homebrew available but no packages
+# auto-installed.
+enable brew-preinstall.service
