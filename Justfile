@@ -700,6 +700,15 @@ publish-all:
 # Run `bootc <args>` inside the loaded image, with host container
 # storage and /dev exposed (privileged; required for `install to-disk`).
 # Mounts the repo at /data so loopback paths under build/ are reachable.
+#
+# Gotcha (proven via bpftrace on security_path_chmod): installing an image
+# whose /usr/bin/cp is uutils cp (pre-carve-out builds) flips the HOST
+# /dev/null to 0755 -- bootc's composefs backend runs the TARGET IMAGE's
+# `cp -a` on /etc, and uutils cp chmods through the getty@tty1.service ->
+# /dev/null mask symlink into the bind-mounted host /dev. Images built with
+# the cosmic-deps/uutils-coreutils.bst carve-out (GNU cp) are immune. If it
+# bites on an old image: `sudo chmod 666 /dev/null` (no `2>/dev/null` -- a
+# broken /dev/null can't be opened for the redirect).
 [group('image')]
 bootc *args:
     sudo podman run \
