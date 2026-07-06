@@ -8,7 +8,7 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 
 - **132 local elements** (`elements/`), ~700 with freedesktop-sdk transitives. `just build` succeeds with 0 failures from a cold cache.
 - **Two GPU variants × an optional gaming axis** = four images. `cosmic` (Mesa, default) and `cosmic-nvidia` (NVIDIA proprietary 610.43.02 driver, open kernel modules, EGL/GBM userspace, device-node and logind/udev glue) build from the same BST graph; only the top-level image stack differs. The `gaming` project option (`-o gaming true`, or `COSMIC_GAMING=true` in the Justfile) layers the gaming stack onto either GPU variant, producing `cosmic-gaming` and `cosmic-nvidia-gaming`.
-- **Gaming variant** (opt-in) inspired by Bazzite/OpenGamingCollective: adds the gaming stack **and swaps the kernel** for the Open Gaming Collective build (sched_ext schedulers, ntsync, handheld enablement) via a freedesktop-sdk junction override of `components/linux.bst` → `core-deps/linux-ogc.bst`. The stack itself is native Steam launcher/bootstrap, native gamescope + OGC game-mode session, host GameMode, Steam/controller udev rules, SDL controller DB, native MangoHud/vkBasalt, InputPlumber, Vulkan discovery glue, SDL/audio/input compatibility libraries, and first-boot Flathub preinstalls for Lutris, Heroic, Bottles, ProtonPlus, Protontricks, and GOverlay. The default (non-gaming) image no longer ships Steam.
+- **Gaming variant** (opt-in) inspired by Bazzite/OpenGamingCollective: adds the gaming stack **and swaps the kernel** for the Open Gaming Collective build (sched_ext schedulers, ntsync, handheld enablement) via a freedesktop-sdk junction override of `components/linux.bst` → `core-deps/linux-ogc.bst`. The stack itself is native Steam launcher/bootstrap, native gamescope + OGC game-mode session, host GameMode, Steam/controller udev rules, SDL controller DB, native MangoHud/vkBasalt, InputPlumber, Vulkan discovery glue, SDL/audio/input compatibility libraries, and first-boot Flathub preinstalls for Lutris, Heroic, Bottles, ProtonPlus, Protontricks, and GOverlay. The variant has been built and boot-tested end-to-end with the gaming stack present; broad gameplay validation is still pending. The default (non-gaming) image no longer ships Steam.
 - **Bootable image** (`bootable.raw`): boots into `cosmic-initial-setup` → `cosmic-greeter` → user session under QEMU + KVM + OVMF.
 - **Live ISO**: UEFI-bootable GPT disk image with autologin to a `cosmic-live` user, autostarts [cosmonaut-installer](https://github.com/razorfinos-org/cosmonaut-installer) — a native libcosmic GUI driving a privileged DBus daemon that installs from the OCI image baked into the ISO (`oci:/usr/lib/bootc/install-source/main`) against an opinionated profile (btrfs + composefs + systemd-boot, optional LUKS).
 - **CI**: `build.yml` builds all four images (`{cosmic,cosmic-nvidia}{,-gaming}`) weekly + on push to `main`, publishes to `ghcr.io/razorfinos-org/cosmic-build-meta:<image>-{nightly,vX.Y.Z}` with keyless cosign signing and SLSA build-provenance attestations. Live ISOs are built by a separate `iso.yml` `workflow_dispatch` that bakes a published image into the ISO — kept out of the main build so image publishing isn't gated on the slower ISO assembly.
@@ -19,8 +19,7 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 - No artifact cache stood up yet — cold builds take hours, mostly Rust compile time. CI uses `actions/cache` keyed on the BST cache directory; no public artifact server.
 - Only x86_64 has been built end-to-end. aarch64 and riscv64 are wired in `project.conf` but untested.
 - First-login per-user setup wizard is suppressed (settings configured in OEM mode don't carry over).
-- Physical NVIDIA Live ISO performance/DRM handoff is still under active validation. Current images include the confirmed baseline fixes (NVIDIA userspace/device nodes, greetd PAM → logind session, debug tooling), but the remaining `cosmic-comp` KMS permission issue is being investigated separately.
-- The gaming variant (`-o gaming true`, including the OGC kernel swap) is wired but not yet build-tested end-to-end; the default and NVIDIA variants are the validated path.
+- Gaming images are build/boot-tested and the expected stack is present, but actual gameplay/per-game compatibility has not been broadly validated yet.
 
 ## Quick start
 
@@ -122,6 +121,12 @@ config:
   # so the build graph doesn't end up with two divergent FDSDK copies.
   overrides:
     freedesktop-sdk.bst: cosmic-build-meta.bst:freedesktop-sdk.bst
+
+  # Optional: build cosmic-build-meta's integrated gaming variant. This
+  # appends gaming/deps.bst to oci/cosmic/stack.bst and swaps FDSDK's kernel
+  # for core-deps/linux-ogc.bst through the junction override.
+  # options:
+  #   gaming: true
 ```
 
 **Depend on a public stack**:
@@ -135,11 +140,24 @@ depends:
 depends:
   - cosmic-build-meta.bst:core/public-stacks/cosmic-session.bst
 
+# Or add the host gaming stack to a downstream image
+# (native Steam bootstrap, gamescope, GameMode, controller rules, etc.)
+depends:
+  - cosmic-build-meta.bst:core/public-stacks/cosmic-full.bst
+  - cosmic-build-meta.bst:gaming/public-stacks/gaming-core.bst
+
+# Or include the curated non-Steam gaming Flatpak preinstalls too
+depends:
+  - cosmic-build-meta.bst:core/public-stacks/cosmic-full.bst
+  - cosmic-build-meta.bst:gaming/public-stacks/gaming-full.bst
+
 # Or cherry-pick individual components
 depends:
   - cosmic-build-meta.bst:core/cosmic-comp.bst
   - cosmic-build-meta.bst:core/cosmic-panel.bst
 ```
+
+The explicit `gaming/public-stacks/*` elements can be consumed as normal add-on stacks. Set the junction `gaming: true` option when you want cosmic-build-meta's integrated gaming image behavior as well: the OGC kernel swap, gaming `os-release` variant metadata, and automatic inclusion from `oci/cosmic/stack.bst`.
 
 **Public stacks**:
 
