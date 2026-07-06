@@ -55,7 +55,7 @@ sources:
 - kind: git_repo
   url: github:RazorfinOS-org/cosmonaut-installer.git
   track: main
-  ref: v0.2.0-0-g5a76a85f36d083028148aa0cf7c76c657579ecdc
+  ref: v0.4.0-0-g5c4b93bb205616879cb38f78809d925a75dbd713
 
 - kind: cargo2
   url: "crates:"
@@ -121,6 +121,10 @@ sources:
     name: adler2
     version: 2.0.1
     sha: 320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa
+  - kind: registry
+    name: aes
+    version: 0.8.4
+    sha: b169f7a6d4742236a0a00c541b845991d0ac43e546831af1249753ab4c3aa3a0
   - kind: registry
     name: ahash
     version: 0.8.12
@@ -311,6 +315,10 @@ sources:
     version: 0.10.4
     sha: 3078c7629b62d3f0439517fa394996acacc5cbc91c5a20d8c658e77abd503a71
   - kind: registry
+    name: block-padding
+    version: 0.3.3
+    sha: a8894febbff9f758034a5b8e12d87918f56dfc64a8e1fe757d65e29041538d93
+  - kind: registry
     name: block2
     version: 0.5.1
     sha: 2c132eebf10f5cad5289222520a4a058514204aed6d791f1cf4fe8088b82d15f
@@ -367,6 +375,10 @@ sources:
     version: 0.4.1
     sha: 138efcf0940a02ebf0cc8d1eff41a1682a46b431630f4c52450d6265876021fa
   - kind: registry
+    name: cbc
+    version: 0.1.2
+    sha: 26b52a9543ae338f279b96b0b9fed9c8093744685043739079ce85cd58f289a6
+  - kind: registry
     name: cc
     version: 1.2.62
     sha: a1dce859f0832a7d088c4f1119888ab94ef4b5d6795d1ce05afb7fe159d79f98
@@ -378,6 +390,10 @@ sources:
     name: cfg_aliases
     version: 0.2.1
     sha: 613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724
+  - kind: registry
+    name: cipher
+    version: 0.4.4
+    sha: 773f3b9af64447d2ce9850330c473515014aa235e6a783b02db81ff39e4a3dad
   - kind: registry
     name: clap
     version: 4.6.1
@@ -494,6 +510,11 @@ sources:
     name: cosmic-config-derive
     version: 1.0.0
   - kind: git
+    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    repo: github:pop-os/dbus-settings-bindings
+    name: cosmic-dbus-networkmanager
+    version: 0.1.0
+  - kind: git
     commit: 9c562fe3ecf03241a46a60c0078cd6ea10bd75ce
     repo: github:pop-os/freedesktop-icons
     name: cosmic-freedesktop-icons
@@ -560,12 +581,24 @@ sources:
     sha: f27ae1dd37df86211c42e150270f82743308803d90a6f6e6651cd730d5e1732f
   - kind: registry
     name: darling
+    version: 0.20.11
+    sha: fc7f46116c46ff9ab3eb1597a45688b6715c6e628b5c133e288e709a29bcb4ee
+  - kind: registry
+    name: darling
     version: 0.21.3
     sha: 9cdf337090841a411e2a7f3deb9187445851f91b309c0c0a29e05f74a00a48c0
   - kind: registry
     name: darling_core
+    version: 0.20.11
+    sha: 0d00b9596d185e565c2207a0b01f8bd1a135483d02d9b7b0a54b11da8d53412e
+  - kind: registry
+    name: darling_core
     version: 0.21.3
     sha: 1247195ecd7e3c85f83c8d2a366e4210d588e802133e1e355180a9870b517ea4
+  - kind: registry
+    name: darling_macro
+    version: 0.20.11
+    sha: fc34b93ccb385b40dc71c6fceac4b2ad23662c7eeb248cf10d529b7e055b6ead
   - kind: registry
     name: darling_macro
     version: 0.21.3
@@ -574,6 +607,18 @@ sources:
     name: data-url
     version: 0.3.2
     sha: be1e0bca6c3637f992fc1cc7cbc52a78c1ef6db076dbf1059c4323d6a2048376
+  - kind: registry
+    name: derive_builder
+    version: 0.20.2
+    sha: 507dfb09ea8b7fa618fcf76e953f4f5e192547945816d5358edffe39f6f94947
+  - kind: registry
+    name: derive_builder_core
+    version: 0.20.2
+    sha: 2d5bcf7b024d6835cfb3d473887cd966994907effbe9227e8c8219824d06c4e8
+  - kind: registry
+    name: derive_builder_macro
+    version: 0.20.2
+    sha: ab63b0e2bf4d5928aff72e83a7dace85d7bba5fe12dcc3c5a572d78caffd3f3c
   - kind: registry
     name: derive_setters
     version: 0.1.9
@@ -649,6 +694,10 @@ sources:
     version: 0.8.1
     sha: edf234dd1594d6dd434a8fb8cada51ddbbc593e40e4a01556a0b31c62da2775b
   - kind: registry
+    name: either
+    version: 1.15.0
+    sha: 48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719
+  - kind: registry
     name: endi
     version: 1.1.1
     sha: 66b7e2430c6dff6a955451e2cfc438f09cea1965a9d6f87f7e3b90decc014099
@@ -688,6 +737,10 @@ sources:
     name: event-listener-strategy
     version: 0.5.4
     sha: 8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93
+  - kind: registry
+    name: eyre
+    version: 0.6.12
+    sha: 7cd915d99f24784cdc19fd37ef22b97e3ff0ae756c7e492e9fbfe897d61e2aec
   - kind: registry
     name: fast-srgb8
     version: 1.0.0
@@ -933,6 +986,14 @@ sources:
     version: 0.2.1
     sha: dfa686283ad6dd069f105e5ab091b04c62850d3e4cf5d67debad1933f55023df
   - kind: registry
+    name: hkdf
+    version: 0.12.4
+    sha: 7b5f8eb2ad728638ea2c7d47a21db23b7b58a72ed6a38256b8a1849f15fbbdf7
+  - kind: registry
+    name: hmac
+    version: 0.12.1
+    sha: 6c49c37c09c17a53d937dfbb742eb3a961d65a994e6bcdcf37e7399d0cc8ab5e
+  - kind: registry
     name: i18n-config
     version: 0.4.8
     sha: 3e06b90c8a0d252e203c94344b21e35a30f3a3a85dc7db5af8f8df9f3e0c63ef
@@ -1096,6 +1157,10 @@ sources:
     version: 0.13.0
     sha: edcd27d72f2f071c64249075f42e205ff93c9a4c5f6c6da53e79ed9f9832c285
   - kind: registry
+    name: indenter
+    version: 0.3.4
+    sha: 964de6e86d545b246d84badc0fef527924ace5134f30641c203ef52ba83f58d5
+  - kind: registry
     name: indexmap
     version: 2.14.0
     sha: d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9
@@ -1108,6 +1173,10 @@ sources:
     version: 0.1.5
     sha: e05c02b5e89bff3b946cedeca278abc628fe811e604f027c45a8aa3cf793d0eb
   - kind: registry
+    name: inout
+    version: 0.1.4
+    sha: 879f10e63c20629ecabbb64a8010319738c66a5cd0c29b02d63d272b03751d01
+  - kind: registry
     name: intl-memoizer
     version: 0.5.3
     sha: 310da2e345f5eb861e7a07ee182262e94975051db9e4223e909ba90f392f163f
@@ -1119,6 +1188,10 @@ sources:
     name: is_terminal_polyfill
     version: 1.70.2
     sha: a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695
+  - kind: registry
+    name: itertools
+    version: 0.14.0
+    sha: 2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285
   - kind: registry
     name: itoa
     version: 1.0.18
@@ -1361,6 +1434,11 @@ sources:
     name: nix
     version: 0.29.0
     sha: 71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46
+  - kind: git
+    commit: 507e342c21d3ce6ae41b1d4f3fa2f0ad5ee23e75
+    repo: github:pop-os/dbus-settings-bindings
+    name: nm-secret-agent-manager
+    version: 0.1.0
   - kind: registry
     name: notify
     version: 8.2.0
@@ -1373,6 +1451,30 @@ sources:
     name: nu-ansi-term
     version: 0.50.3
     sha: 7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5
+  - kind: registry
+    name: num
+    version: 0.4.3
+    sha: 35bd024e8b2ff75562e5f34e7f4905839deb4b22955ef5e73d2fea1b9813cb23
+  - kind: registry
+    name: num-bigint
+    version: 0.4.6
+    sha: a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9
+  - kind: registry
+    name: num-complex
+    version: 0.4.6
+    sha: 73f88a1307638156682bada9d7604135552957b7818057dcef22705b4d509495
+  - kind: registry
+    name: num-integer
+    version: 0.1.46
+    sha: 7969661fd2958a5cb096e56c8e1ad0444ac2bbcd0061bd28660485a44879858f
+  - kind: registry
+    name: num-iter
+    version: 0.1.45
+    sha: 1429034a0490724d0075ebb2bc9e875d6503c3cf69e235a8941aa757d83ef5bf
+  - kind: registry
+    name: num-rational
+    version: 0.4.2
+    sha: f83d14da390562dca69fc84082e73e548e1ad308d24accdedd2720017cb37824
   - kind: registry
     name: num-traits
     version: 0.2.19
@@ -1650,6 +1752,14 @@ sources:
     version: 0.10.1
     sha: af066a9c399a26e020ada66a034357a868728e72cd426f3adcd35f80d88d88c8
   - kind: registry
+    name: procfs
+    version: 0.18.0
+    sha: 25485360a54d6861439d60facef26de713b1e126bf015ec8f98239467a2b82f7
+  - kind: registry
+    name: procfs-core
+    version: 0.18.0
+    sha: e6401bf7b6af22f78b563665d15a22e9aef27775b79b149a66ca022468a4e405
+  - kind: registry
     name: profiling
     version: 1.0.18
     sha: 3d595e54a326bc53c1c197b32d295e14b169e3cfeaa8dc82b529f947fba6bcf5
@@ -1814,6 +1924,14 @@ sources:
     version: 0.11.0
     sha: 1dd3accc0f3f4bbaf2c9e1957a030dc582028130c67660d44c0a0345a22ca69b
   - kind: registry
+    name: secret-service
+    version: 5.1.0
+    sha: 9a62d7f86047af0077255a29494136b9aaaf697c76ff70b8e49cded4e2623c14
+  - kind: registry
+    name: secure-string
+    version: 0.3.0
+    sha: 548ba8c9ff631f7bb3a64de1e8ad73fe20f6d04090724f2b496ed45314ad7488
+  - kind: registry
     name: self_cell
     version: 1.2.2
     sha: b12e76d157a900eb52e81bc6e9f3069344290341720e9178cde2407113ac8d89
@@ -1939,6 +2057,10 @@ sources:
     name: strsim
     version: 0.11.1
     sha: 7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f
+  - kind: registry
+    name: subtle
+    version: 2.6.1
+    sha: 13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292
   - kind: registry
     name: svg_fmt
     version: 0.4.5
@@ -2141,8 +2263,8 @@ sources:
     sha: b1d386ff53b415b7fe27b50bb44679e2cc4660272694b7b6f3326d8480823a94
   - kind: registry
     name: unicode-width
-    version: 0.2.2
-    sha: b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254
+    version: 0.1.14
+    sha: 7dd6e30e90baa6f72411720665d41d89b9a3d039dc45b8faea1ddd07f617f6af
   - kind: registry
     name: unicode-xid
     version: 0.2.6
@@ -2340,6 +2462,10 @@ sources:
     version: 0.4.1
   - kind: registry
     name: windows
+    version: 0.54.0
+    sha: 9252e5725dbed82865af151df558e754e4a3c2c30818359eb17465f1346a1b49
+  - kind: registry
+    name: windows
     version: 0.58.0
     sha: dd04d41d93c4992d421894c18c8b43496aa748dd4c081bac0dc93eb0489272b6
   - kind: registry
@@ -2350,6 +2476,10 @@ sources:
     name: windows-collections
     version: 0.2.0
     sha: 3beeceb5e5cfd9eb1d76b381630e82c4241ccd0d27f1a39ed41b2760b255c5e8
+  - kind: registry
+    name: windows-core
+    version: 0.54.0
+    sha: 12661b9c89351d684a50a8a643ce5f608e20243b9fb84687800163429f161d65
   - kind: registry
     name: windows-core
     version: 0.58.0
@@ -2390,6 +2520,10 @@ sources:
     name: windows-numerics
     version: 0.2.0
     sha: 9150af68066c4c5c07ddc0ce30421554771e528bde427614c61038bc2c92c2b1
+  - kind: registry
+    name: windows-result
+    version: 0.1.2
+    sha: 5e383302e8ec8515204254685643de10811af0ed97ea37210dc26fb0032647f8
   - kind: registry
     name: windows-result
     version: 0.2.0
@@ -2743,6 +2877,10 @@ sources:
     name: zerofrom-derive
     version: 0.1.7
     sha: 11532158c46691caf0f2593ea8358fed6bbf68a0315e80aae9bd41fbade684a1
+  - kind: registry
+    name: zeroize
+    version: 1.8.2
+    sha: b97154e67e32c85465826e8bcc1c59429aaaf107c1e4a9e53c8d8ccd5eff88d0
   - kind: registry
     name: zerotrie
     version: 0.2.4
