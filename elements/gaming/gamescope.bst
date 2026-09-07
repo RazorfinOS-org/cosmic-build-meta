@@ -47,6 +47,8 @@ sources:
 
 build-depends:
 - freedesktop-sdk.bst:public-stacks/buildsystem-meson.bst
+# gamescope src/meson.build shells out to git for its version stamp.
+- freedesktop-sdk.bst:components/git.bst
 - freedesktop-sdk.bst:components/glslang.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/vulkan-headers.bst

@@ -3,7 +3,9 @@
 kind: stack
 
 depends:
-  # Kernel + firmware (we do NOT build our own kernel; FDSDK upstream)
+  # Kernel + firmware. FDSDK's kernel by default; `-o gaming true` swaps
+  # this to core-deps/linux-ogc.bst via the junction override in
+  # elements/freedesktop-sdk.bst.
   - freedesktop-sdk.bst:components/linux.bst
   - freedesktop-sdk.bst:components/linux-firmware.bst
 

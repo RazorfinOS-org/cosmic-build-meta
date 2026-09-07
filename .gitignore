@@ -4,6 +4,11 @@ builddir/
 workspaces/
 *.log
 
+# CAS mTLS credentials + generated CI config (never commit the key)
+client.crt
+client.key
+buildstream-ci.conf
+
 # Build artifacts
 target/
 

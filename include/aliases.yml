@@ -17,6 +17,8 @@ aliases:
   github-raw: https://raw.githubusercontent.com/
   # Valve's Steam launcher/bootstrap package.
   steam-static: https://cdn.fastly.steamstatic.com/
+  # Valve's apt repo; versioned pool paths are immutable once published.
+  steam-repo: https://repo.steampowered.com/
   # NVIDIA Linux driver .run packages.
   nvidia-xfree86: https://download.nvidia.com/XFree86/
   # zsh release tarballs (default login shell; not packaged by FDSDK).

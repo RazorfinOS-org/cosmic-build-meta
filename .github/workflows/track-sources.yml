@@ -35,6 +35,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        # PAT so pushed branches/PRs trigger build.yml (GITHUB_TOKEN
+        # events don't); falls back to GITHUB_TOKEN when unset.
+        token: ${{ secrets.GH_TRACK_TOKEN || secrets.GITHUB_TOKEN }}
 
     - name: Install just
       uses: extractions/setup-just@v2
@@ -67,6 +71,9 @@ jobs:
 
     - name: Track all COSMIC element sources
       run: BST_FLAGS="--no-interactive" just track-all
+
+    - name: Track gaming stack + OGC kernel sources
+      run: BST_FLAGS="--no-interactive" just track-gaming
 
     - name: Detect epoch regressions
       run: |
@@ -118,8 +125,10 @@ jobs:
             --body "Automated source tracking update." \
             --base main
         fi
+        gh pr merge --auto --squash "$BRANCH" \
+          || echo "::notice::auto-merge unavailable (enable it in repo settings + require build-ok)"
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_TRACK_TOKEN || secrets.GITHUB_TOKEN }}
 
   track-junctions:
     runs-on: ubuntu-24.04
@@ -127,6 +136,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_TRACK_TOKEN || secrets.GITHUB_TOKEN }}
 
     - name: Install just
       uses: extractions/setup-just@v2
@@ -173,4 +184,4 @@ jobs:
             --base main
         fi
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_TRACK_TOKEN || secrets.GITHUB_TOKEN }}

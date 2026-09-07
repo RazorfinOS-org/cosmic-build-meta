@@ -26,5 +26,19 @@ jobs:
         restore-keys: |
           bst-cache-${{ runner.arch }}
 
+    # No x86_64_v3 override: build.yml doesn't pass one either, so the
+    # check resolves the same cache keys the real build uses.
     - name: Validate all element definitions
-      run: BST_FLAGS="--no-interactive -o x86_64_v3 true" just check
+      run: BST_FLAGS="--no-interactive" just check
+
+    - name: Validate published image graphs (gaming + OGC kernel included)
+      run: |
+        set -euo pipefail
+        for g in false true; do
+          for e in oci/cosmic/image.bst oci/cosmic-nvidia/image.bst; do
+            echo "::group::show $e (gaming=$g)"
+            COSMIC_GAMING="$g" BST_FLAGS="--no-interactive" \
+              just bst show --deps all --format '%{name}' "$e" > /dev/null
+            echo "::endgroup::"
+          done
+        done

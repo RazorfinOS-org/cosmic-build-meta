@@ -55,6 +55,16 @@ jobs:
       - name: Install just
         uses: extractions/setup-just@v2
 
+      - name: Generate BuildStream CI config
+        # RE off: the ISO recipe checks the artifact out onto the runner.
+        env:
+          CASD_CLIENT_CERT: ${{ vars.CASD_CLIENT_CERT }}
+          CASD_CLIENT_KEY: ${{ secrets.CASD_CLIENT_KEY }}
+        uses: ./.github/actions/generate-bst-ci-config
+        with:
+          enable-remote-execution: 'false'
+          enable-push: 'true'
+
       - name: Restore BuildStream local cache
         uses: actions/cache@v4
         with:
@@ -99,8 +109,12 @@ jobs:
 
       - name: Build Live ISO (${{ matrix.variant }})
         env:
-          BST_FLAGS: '--no-interactive --on-error=continue'
+          BST_FLAGS: '--no-interactive --on-error=continue --config /src/buildstream-ci.conf'
         run: just build-iso-from-prepared-source ${{ matrix.variant }}
+
+      - name: Remove CASD client credentials
+        if: always()
+        run: rm -f client.key client.crt
 
       - name: Install cosign
         uses: sigstore/cosign-installer@v3

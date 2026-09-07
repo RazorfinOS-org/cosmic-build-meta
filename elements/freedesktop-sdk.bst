@@ -5,7 +5,7 @@ sources:
   url: gitlab:freedesktop-sdk/freedesktop-sdk.git
   track: freedesktop-sdk-25.08*
 
-  ref: freedesktop-sdk-25.08.13-0-g8446990f0a549bb1f3ceb654af64fc176b274488
+  ref: freedesktop-sdk-25.08.16-0-gc4f8b7234c787e8282fb9d4f208b08f9f677eba9
 config:
   options:
     target_arch: '%{arch}'
@@ -14,8 +14,6 @@ config:
         bootstrap_build_arch: 'x86_64'
     - arch == 'aarch64':
         bootstrap_build_arch: 'aarch64'
-    - arch == "riscv64":
-        bootstrap_build_arch: "x86_64"
   # Redirect every reference to fdsdk's flatpak elements (including
   # transitive ones from xdg-desktop-portal{,-base}) to our vendored
   # 1.17.6 build. Without this both flatpak.bst (full) and our
@@ -28,14 +26,15 @@ config:
   overrides:
     components/flatpak.bst: cosmic-deps/flatpak.bst
     components/flatpak-minimal.bst: cosmic-deps/flatpak.bst
-    # Gaming variant swaps the kernel for the Open Gaming Collective
-    # build. Routing it through the junction override (instead of a
-    # parallel element tree) means every consumer of components/linux.bst
-    # -- cosmic-deps/base.bst, oci/initramfs.bst, and critically
-    # cosmic-deps-nvidia/nvidia-drivers.bst which compiles the NVIDIA
-    # modules against the kernel build tree -- resolves to the OGC
-    # kernel automatically, so module/kernel co-versioning holds by
-    # construction in the nvidia+gaming combination.
+    # Keep kernel selection at the junction boundary so every consumer of
+    # components/linux.bst -- cosmic-deps/base.bst, oci/initramfs.bst,
+    # and critically cosmic-deps-nvidia/nvidia-drivers.bst which compiles
+    # the NVIDIA modules against the kernel build tree -- resolves the
+    # same kernel and module/kernel co-versioning holds by construction.
+    # Both kernels are self-built with one shared config formula
+    # (fdsdk-config.sh + cosmic-config.sh); gaming swaps the tree for
+    # the Open Gaming Collective build.
+    components/linux.bst: core-deps/linux-fdsdk.bst
     (?):
     - gaming == true:
         components/linux.bst: core-deps/linux-ogc.bst

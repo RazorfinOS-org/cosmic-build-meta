@@ -34,14 +34,14 @@ depends:
 
 sources:
 - kind: remote
-  url: nvidia-xfree86:Linux-x86_64/610.43.02/NVIDIA-Linux-x86_64-610.43.02.run
-  # SHA256 of the 462 MB .run. NVIDIA does not publish a sidecar; computed
-  # locally and committed.
-  ref: 3034a054bb4cdf7752ff8dc272564cb105513804bff53538945901b16ca77463
-  filename: NVIDIA-Linux-x86_64-610.43.02.run
+  # 610.57.04 matches projectbluefin/dakota's pin: 610.43.02 predates the
+  # kernel 7.2 header shuffle and fails on an implicit strncpy declaration.
+  url: nvidia-xfree86:Linux-x86_64/610.57.04/NVIDIA-Linux-x86_64-610.57.04.run
+  ref: b2e935c66b83bb00c0c857bc8e0ee0fd52de9286b40c9cc1eec29a7ce7eb116d
+  filename: NVIDIA-Linux-x86_64-610.57.04.run
 
 variables:
-  nvidia-version: '610.43.02'
+  nvidia-version: '610.57.04'
   strip-binaries: ''
 
 config:
@@ -300,3 +300,48 @@ config:
         find . -maxdepth 3 -type f -name '*_nvidia*.json' >&2 || true
         exit 1
     fi
+
+  # 32-bit driver stack, gaming variant only (the element's cache key
+  # already forks on gaming via the kernel junction override). COMPAT32
+  # payload lives under 32/ in the .run; the i686 GLVND/Vulkan loaders
+  # from gaming/steam-libs-i686.bst dispatch into these, and nvidia_icd.json
+  # serves both ELF classes (library_path is a bare soname resolved via
+  # steam-native.bst's /etc/ld.so.conf.d/00-i386-linux-gnu.conf).
+  (?):
+  - gaming == true:
+      install-commands:
+        (>):
+        - |
+          set -euo pipefail
+          cd extracted
+          LIBDIR32="%{install-root}/usr/lib/i386-linux-gnu"
+          install -d "$LIBDIR32"
+          find . -maxdepth 4 -type f -path '*/32/*' \
+              \( -name 'libcuda.so.*' \
+              -o -name 'libnvcuvid.so.*' \
+              -o -name 'libnvidia-*.so.*' \
+              -o -name 'libEGL_nvidia.so.*' \
+              -o -name 'libGLESv1_CM_nvidia.so.*' \
+              -o -name 'libGLESv2_nvidia.so.*' \
+              -o -name 'libGLX_nvidia.so.*' \) \
+              ! -name 'libnvidia-egl-wayland2.so*' \
+              -exec install -Dm755 -t "$LIBDIR32" {} +
+
+          for lib in "$LIBDIR32"/lib*.so*; do
+              [ -f "$lib" ] || continue
+              base=$(basename "$lib")
+              soname=$(objdump -p "$lib" 2>/dev/null | sed '/ *SONAME */{s///;q};d')
+              if [ -n "$soname" ] && [ ! -e "$LIBDIR32/$soname" ]; then
+                  ln -sf "$base" "$LIBDIR32/$soname"
+              fi
+          done
+          if [ -f "$LIBDIR32/libcuda.so.%{nvidia-version}" ] && \
+             [ ! -e "$LIBDIR32/libcuda.so.1" ]; then
+              ln -sf "libcuda.so.%{nvidia-version}" "$LIBDIR32/libcuda.so.1"
+          fi
+
+          if [ ! -f "$LIBDIR32/libGLX_nvidia.so.%{nvidia-version}" ]; then
+              echo "FATAL: 32-bit libGLX_nvidia missing; .run COMPAT32 layout changed" >&2
+              find . -maxdepth 4 -path '*/32/*' -name 'libGLX*' >&2 || true
+              exit 1
+          fi

@@ -333,7 +333,8 @@ config:
     # pam_unix with nullok_secure which succeeds for users with no
     # password set (like cosmic-live, cosmic-initial-setup). Real-login
     # users (post-install) authenticate normally through the same stack.
-    install -Dm644 /dev/stdin "%{install-root}/etc/pam.d/greetd" <<'EOF'
+    install -Dm644 /dev/null "%{install-root}/etc/pam.d/greetd"
+    cat > "%{install-root}/etc/pam.d/greetd" <<'EOF'
     #%PAM-1.0
     auth      include   system-auth
     account   include   system-auth

@@ -25,8 +25,9 @@
 #      gigabytes of DWARF nobody boots with.
 #
 # Version bumps: `just bst source track core-deps/linux-ogc.bst` follows
-# v*-ogc* tags. Watch the NVIDIA side when OGC jumps a stable series
-# (e.g. 7.0.x -> 7.1.x): nvidia-drivers.bst must compile against the new
+# v7.2.*-ogc* tags; update the ogc-localversion variable to match the
+# new tag. Watch the NVIDIA side when OGC jumps a stable series
+# (e.g. 7.2.x -> 7.3.x): nvidia-drivers.bst must compile against the new
 # tree before the gaming+nvidia variant can ship it.
 kind: make
 description: OGC Linux kernel (gaming variant)
@@ -52,6 +53,10 @@ build-depends:
   strict: true
 
 variables:
+  # OGC patchset revision of the pinned tag; keep in sync with the
+  # `ref:` under sources (v<kver>-ogcN-...). Not derivable at build
+  # time: the tree ships no EXTRAVERSION or localversion files.
+  ogc-localversion: '-ogc4'
   bootdir: /boot
   indep-libdir: '%{prefix}/lib'
   # Modules are stripped by kbuild (INSTALL_MOD_STRIP=1) *before* the
@@ -66,8 +71,6 @@ variables:
       src-arch: x86
   - arch == "aarch64":
       kernel_arch: arm64
-  - arch == "riscv64":
-      kernel_arch: riscv
 
 environment:
   ARCH: '%{kernel_arch}'
@@ -131,6 +134,54 @@ config:
     echo CONFIG_NTSYNC >> expected-configs
 
   - |
+    # Stamp `uname -r` with the OGC revision (e.g. 7.2.1-ogc4).
+    # kernelrelease drives the modules dir, build tree and NVIDIA
+    # module build alike, so co-versioning holds.
+    scripts/config --keep-case --set-str LOCALVERSION "%{ogc-localversion}"
+    scripts/config --keep-case -d LOCALVERSION_AUTO
+
+  - |
+    # Cosmic deltas go through config-utils.sh enable/module so they land
+    # in expected-configs and the post-olddefconfig gate verifies they
+    # survived; raw scripts/config calls would be silently droppable.
+    . ./config-utils.sh
+
+    # Keep fdsdk's expected SP800-90A DRBGs: linux 7.1 dropped the
+    # RNG_DEFAULT select that used to switch this menu on, and with it
+    # off olddefconfig discards the child options.
+    enable CRYPTO_DRBG_MENU
+
+    # The zswap.compressor=zstd karg needs the compressor built in, not =m.
+    enable CRYPTO_ZSTD
+
+    # The OGC tree is not WERROR-clean (their own packaging and Fedora
+    # both build without it).
+    remove WERROR
+
+    # Hardware-enablement deltas from the Fedora config audit (VM guests,
+    # homelab HBAs, laptop camera/audio/input completion).
+    . ./cosmic-config.sh
+
+  - |
+    # Drop expectations for options this tree no longer offers (the
+    # vendored fdsdk config pass targets an older kernel era). Gaming-
+    # critical symbols are exempt: losing them must fail the build.
+    find . -name 'Kconfig*' -exec grep -h '^\(menu\)\{0,1\}config ' {} + \
+      | awk '{print $2}' | sort -u > .kconfig-symbols
+    cp expected-configs expected-configs.orig
+    while IFS= read -r cfg; do
+      sym=${cfg#CONFIG_}
+      case "$sym" in
+        SCHED_CLASS_EXT|NTSYNC|ANDROID_BINDER_IPC|ANDROID_BINDERFS) continue ;;
+      esac
+      if ! grep -qx "$sym" .kconfig-symbols; then
+        echo "note: pruning expectation for ${cfg} (absent from this tree)" 1>&2
+        sed -i "/^\(CONFIG_\)\{0,1\}${sym}\$/d" expected-configs
+      fi
+    done < expected-configs.orig
+    rm -f expected-configs.orig
+
+  - |
     make -j1 olddefconfig
 
   - |
@@ -149,6 +200,9 @@ config:
         [ "${missing_configs}" = 0 ]
       ;;
     esac
+
+    # has() accepts =m; the zswap karg requires =y.
+    grep -q '^CONFIG_CRYPTO_ZSTD=y$' .config
 
   install-commands:
   - |
@@ -187,7 +241,7 @@ config:
     ln -sr "${targetdir}" "%{install-root}%{indep-libdir}/modules/${release}/build"
 
   (?):
-  - arch in ["aarch64", "riscv64"]:
+  - arch == "aarch64":
       install-commands:
         (>):
         - |
@@ -207,12 +261,14 @@ public:
 sources:
 - kind: git_repo
   url: github:OpenGamingCollective/linux.git
-  track: v*-ogc*
-  ref: v7.0.9-ogc3-0-gdcad54d2480699ac5515a7372a106224d9106acc
+  track: v7.2.*-ogc*
+  ref: v7.2.1-ogc4-0-g14c028f83498b2900fecd0940a058a3ac0622afe
 - kind: local
   path: files/linux-ogc/config-utils.sh
 - kind: local
   path: files/linux-ogc/fdsdk-config.sh
+- kind: local
+  path: files/linux-ogc/cosmic-config.sh
 - kind: local
   path: files/linux-ogc/ogc.config.set
 - kind: local

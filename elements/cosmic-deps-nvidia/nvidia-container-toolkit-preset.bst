@@ -14,7 +14,8 @@ variables:
 config:
   install-commands:
   - |
-    install -Dm644 /dev/stdin "%{install-root}/usr/lib/systemd/system-preset/80-nvidia-container-toolkit.preset" <<'PRESET'
+    install -Dm644 /dev/null "%{install-root}/usr/lib/systemd/system-preset/80-nvidia-container-toolkit.preset"
+    cat > "%{install-root}/usr/lib/systemd/system-preset/80-nvidia-container-toolkit.preset" <<'PRESET'
     enable nvidia-cdi-refresh.path
     enable nvidia-cdi-refresh.service
     PRESET
