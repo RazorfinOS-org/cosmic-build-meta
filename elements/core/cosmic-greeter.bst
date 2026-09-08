@@ -1,6 +1,8 @@
 kind: manual
 
 build-depends:
+# COSMIC 1.7 image stack decodes AVIF; dav1d-sys needs the C library.
+- freedesktop-sdk.bst:components/dav1d.bst
 - freedesktop-sdk.bst:components/rust.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/gcc-base.bst
@@ -14,6 +16,7 @@ build-depends:
 - freedesktop-sdk.bst:components/libinput.bst
 
 depends:
+- freedesktop-sdk.bst:components/dav1d.bst
 - core-deps/greetd.bst
 - freedesktop-sdk.bst:components/linux-pam.bst
 - freedesktop-sdk.bst:components/libxkbcommon.bst
