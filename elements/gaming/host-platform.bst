@@ -41,6 +41,8 @@ depends:
   # Input needs permission to open directly. They are installed from Valve's
   # native Steam package by gaming/steam-native.bst.
   - gaming/sdl-gamecontrollerdb.bst
+  # OGC builds NTSYNC=m; Wine/Proton need /dev/ntsync present at boot.
+  - gaming/ntsync-modules-load.bst
 
   # Vulkan loader/link compatibility for native host tools. Mesa/NVIDIA ICDs
   # arrive via the normal COSMIC/NVIDIA stacks; this makes discovery paths sane.

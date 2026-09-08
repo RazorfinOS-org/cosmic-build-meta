@@ -7,11 +7,16 @@
 # self-updates into the user's home directory on first launch.
 kind: manual
 
+# The CDN's client/installer/steam.deb is an unversioned URL: Valve's
+# 1.0.0.87 release changed its content under our pinned sha256 and broke
+# every fetch (dakota testing CI, 2026-08-03). The apt pool serves the
+# identical payload at a versioned path that never changes once published,
+# so pin that instead; bumps are an explicit url+ref+filename change here.
 sources:
 - kind: remote
-  url: steam-static:client/installer/steam.deb
-  ref: b44634a6a604ca7c8b23809d0f2a921a0348bb2081c8cb8944116d0799872b70
-  filename: steam-1.0.0.85.deb
+  url: steam-repo:steam/pool/steam/s/steam/steam-launcher_1.0.0.87_amd64.deb
+  ref: 765aba9a0ed339a50226ceb614fcc9879a991ba184098bc8de920efb12c714a4
+  filename: steam-launcher_1.0.0.87_amd64.deb
 
 build-depends:
 - freedesktop-sdk.bst:bootstrap/bash.bst
@@ -59,7 +64,7 @@ config:
   - |
     mkdir -p deb data "%{install-root}"
     cd deb
-    ar x ../steam-1.0.0.85.deb
+    ar x ../steam-launcher_1.0.0.87_amd64.deb
     cd ..
     tar -xf deb/data.tar.xz -C data
 
@@ -77,7 +82,8 @@ config:
     # steamdeps command so Valve's launcher does not emit python-apt/dpkg noise
     # before continuing.
     rm -rf "%{install-root}/etc/apt"
-    install -Dm755 /dev/stdin "%{install-root}/usr/lib/steam/bin_steamdeps.py" <<'EOF'
+    install -Dm755 /dev/null "%{install-root}/usr/lib/steam/bin_steamdeps.py"
+    cat > "%{install-root}/usr/lib/steam/bin_steamdeps.py" <<'EOF'
     #!/usr/bin/env sh
     exit 0
     EOF
@@ -87,7 +93,8 @@ config:
     # bundled scout runtime can load an older libxcb.so.1 before our matching
     # host libxcb-shm.so.0, causing undefined symbols such as
     # xcb_send_request_with_fds.
-    install -Dm644 /dev/stdin "%{install-root}/etc/ld.so.conf.d/00-i386-linux-gnu.conf" <<'EOF'
+    install -Dm644 /dev/null "%{install-root}/etc/ld.so.conf.d/00-i386-linux-gnu.conf"
+    cat > "%{install-root}/etc/ld.so.conf.d/00-i386-linux-gnu.conf" <<'EOF'
     /usr/lib/i386-linux-gnu/GL/default/lib
     /usr/lib/i386-linux-gnu
     EOF
@@ -107,7 +114,7 @@ config:
     # This keeps libraries such as libxcb.so.1 and libxcb-shm.so.0 ABI-compatible.
     export LD_LIBRARY_PATH="/usr/lib/i386-linux-gnu/GL/default/lib:/usr/lib/i386-linux-gnu${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-    exec "$LAUNCHSTEAMDIR/$STEAMBOOTSTRAP" ${log_opened+-srt-logger-opened} -cef-disable-gpu "$@"
+    exec "$LAUNCHSTEAMDIR/$STEAMBOOTSTRAP" ${log_opened+-srt-logger-opened} "$@"
     '''
     if old not in text:
         raise SystemExit('failed to locate Steam bootstrap exec block')

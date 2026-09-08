@@ -13,13 +13,10 @@ on:
       - '**/*.md'
       - 'docs/**'
       - 'LICENSE*'
+  # No paths-ignore on pull_request: the changes job skips docs-only PRs
+  # at job level so the build-ok required check still reports.
   pull_request:
     branches: [main]
-    paths-ignore:
-      - '*.md'
-      - '**/*.md'
-      - 'docs/**'
-      - 'LICENSE*'
   workflow_dispatch:
 
 permissions:
@@ -36,10 +33,35 @@ env:
   IMAGE_REGISTRY: ghcr.io/razorfinos-org/cosmic-build-meta
 
 jobs:
+  changes:
+    name: Detect build-relevant changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      build: ${{ steps.filter.outputs.build }}
+    steps:
+      - name: Filter changed files
+        id: filter
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          FILES=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+            --paginate --jq '.[].filename')
+          if printf '%s\n' "$FILES" | grep -vE '\.md$|^docs/|^LICENSE' | grep -q .; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build_and_push:
     name: Build & Push ${{ matrix.image }}
     runs-on: ubuntu-24.04
     timeout-minutes: 360
+    needs: changes
 
     strategy:
       fail-fast: false
@@ -71,9 +93,10 @@ jobs:
     #   - auto-track PRs (verifies upstream-source bumps build cleanly)
     #   - PRs explicitly labelled `build` (manual opt-in)
     if: >-
-      github.event_name != 'pull_request' ||
-      startsWith(github.head_ref, 'auto/track-') ||
-      contains(github.event.pull_request.labels.*.name, 'build')
+      needs.changes.outputs.build == 'true' &&
+      (github.event_name != 'pull_request' ||
+       startsWith(github.head_ref, 'auto/track-') ||
+       contains(github.event.pull_request.labels.*.name, 'build'))
 
     steps:
       - uses: actions/checkout@v4
@@ -124,16 +147,23 @@ jobs:
             echo "additional_tags=${V}-nightly.${DATE}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Generate BuildStream CI config
+        # Fork PRs / missing credentials degrade to a local-only config;
+        # anonymous pulls still work via project.conf.
+        env:
+          CASD_CLIENT_CERT: ${{ vars.CASD_CLIENT_CERT }}
+          CASD_CLIENT_KEY: ${{ secrets.CASD_CLIENT_KEY }}
+        uses: ./.github/actions/generate-bst-ci-config
+        with:
+          enable-remote-execution: ${{ steps.eligibility.outputs.can_push == 'true' && vars.CASD_CLIENT_CERT != '' }}
+          enable-push: ${{ steps.eligibility.outputs.can_push }}
+
       - name: Restore BuildStream local cache
-        # BuildStream/buildbox-casd has no OCI registry support -- artifact
-        # caches speak Bazel Remote CAS gRPC, not OCI distribution-spec.
-        # Until we stand up a real bst-artifact-server, rely on
-        # actions/cache for ~/.cache/buildstream. Per-image key so the
-        # matrix jobs don't fight over the same cache; the gaming jobs
-        # fall back to their non-gaming sibling's cache (identical graph
-        # except the kernel-dependent subtree), then to any arch cache;
-        # new key per run writes back fresh state. Cap is 10 GB per repo
-        # on github-hosted.
+        # Transitional fallback while the remote cache warms; drop once
+        # hit rates hold. Per-image key so the matrix jobs don't fight
+        # over the same cache; the gaming jobs fall back to their
+        # non-gaming sibling's cache, then to any arch cache. Cap is
+        # 10 GB per repo on github-hosted.
         uses: actions/cache@v4
         with:
           path: ~/.cache/buildstream
@@ -153,8 +183,32 @@ jobs:
         env:
           COSMIC_IMAGE_TAG: ${{ steps.tags.outputs.primary_tag }}
           COSMIC_GAMING: ${{ matrix.gaming }}
-          BST_FLAGS: '--no-interactive --on-error=continue'
-        run: just build-variant ${{ matrix.variant }}
+          BST_FLAGS: '--no-interactive --on-error=continue --config /src/buildstream-ci.conf'
+          RE_EXPECTED: ${{ steps.eligibility.outputs.can_push == 'true' && vars.CASD_CLIENT_CERT != '' }}
+        run: |
+          set -o pipefail
+          just build-variant ${{ matrix.variant }} 2>&1 | tee /tmp/bst-console.log
+          # A green cache hit is not proof BuildStream loaded the remote
+          # executor; fail closed if the startup banner is missing.
+          if [ "$RE_EXPECTED" = "true" ]; then
+            grep -q "Remote Execution Configuration" /tmp/bst-console.log \
+              || { echo "::error::remote execution requested but not engaged"; exit 1; }
+          fi
+
+      - name: Remove CASD client credentials
+        if: always()
+        run: rm -f client.key client.crt
+
+      - name: Rechunk image into content-based layers
+        # Replaces the single squashed layer so `bootc upgrade` pulls
+        # deltas; set repo variable COSMIC_SKIP_CHUNK=1 to bypass.
+        if: steps.eligibility.outputs.can_push == 'true' && vars.COSMIC_SKIP_CHUNK != '1'
+        env:
+          COSMIC_IMAGE_TAG: ${{ steps.tags.outputs.primary_tag }}
+          COSMIC_GAMING: ${{ matrix.gaming }}
+        run: |
+          sudo apt-get install -y -q --no-install-recommends attr
+          just chunk-variant ${{ matrix.variant }}
 
       - name: Log in to GHCR
         if: steps.eligibility.outputs.can_push == 'true'
@@ -172,12 +226,19 @@ jobs:
           ADDITIONAL_TAGS: ${{ steps.tags.outputs.additional_tags }}
         run: |
           set -euo pipefail
-          sudo podman push "${IMAGE_REGISTRY}:${PRIMARY_TAG}"
+          # zstd layers: smaller pulls, and required groundwork for
+          # chunked-layer publishing later. --digestfile captures the
+          # pushed manifest digest (dakota's formula); podman inspect
+          # .Digest on a locally built image is unreliable.
+          sudo podman push --compression-format=zstd \
+            --digestfile /tmp/push-digest.txt "${IMAGE_REGISTRY}:${PRIMARY_TAG}"
           for tag in ${ADDITIONAL_TAGS}; do
             sudo podman tag "${IMAGE_REGISTRY}:${PRIMARY_TAG}" "${IMAGE_REGISTRY}:${tag}"
-            sudo podman push "${IMAGE_REGISTRY}:${tag}"
+            sudo podman push --compression-format=zstd "${IMAGE_REGISTRY}:${tag}"
           done
-          DIGEST=$(sudo podman inspect --format '{{ "{{.Digest}}" }}' "${IMAGE_REGISTRY}:${PRIMARY_TAG}")
+          DIGEST=$(cat /tmp/push-digest.txt)
+          echo "$DIGEST" | grep -qE '^sha256:[0-9a-f]{64}$' \
+            || { echo "::error::invalid pushed digest: $DIGEST"; exit 1; }
           {
             echo "pushed=true"
             echo "digest=${DIGEST}"
@@ -215,3 +276,18 @@ jobs:
           name: build-logs-${{ matrix.image }}
           path: ~/.cache/buildstream/logs/
           retention-days: 7
+
+  build-ok:
+    # Single stable-named aggregator for branch protection; skipped
+    # matrix jobs count as pass.
+    name: Build OK
+    if: always()
+    needs: [changes, build_and_push]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check results
+        run: |
+          [ "${{ needs.changes.result }}" = "success" ] || exit 1
+          r="${{ needs.build_and_push.result }}"
+          [ "$r" = "success" ] || [ "$r" = "skipped" ] || exit 1

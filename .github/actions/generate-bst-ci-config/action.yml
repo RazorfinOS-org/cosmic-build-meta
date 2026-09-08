@@ -1,0 +1,147 @@
+name: Generate BuildStream CI config
+description: Write BuildStream CI config for remote builds and local artifact consumers.
+
+# Writes buildstream-ci.conf + client.crt/client.key into the workspace
+# root (= /src in the bst container); consume with
+# BST_FLAGS: --config /src/buildstream-ci.conf. Without CASD credentials
+# it writes a valid local-only config.
+
+inputs:
+  enable-remote-execution:
+    description: Route build actions and CAS storage through cache.projectbluefin.io.
+    required: true
+  enable-push:
+    description: Publish built artifacts and fetched sources during the BuildStream build.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Generate BuildStream CI config
+      shell: bash
+      env:
+        ENABLE_REMOTE_EXECUTION: ${{ inputs.enable-remote-execution }}
+        ENABLE_PUSH: ${{ inputs.enable-push }}
+      run: |
+        set -euo pipefail
+        WORKSPACE_ROOT="${GITHUB_WORKSPACE:-$PWD}"
+
+        if [[ "${ENABLE_REMOTE_EXECUTION:-false}" == "true" ]] &&
+           { [[ -z "${CASD_CLIENT_CERT:-}" ]] || [[ -z "${CASD_CLIENT_KEY:-}" ]]; }; then
+          echo "::error::remote execution was requested but CASD client credentials are missing"
+          exit 1
+        fi
+
+        printf '%s\n' "${CASD_CLIENT_CERT:-}" > "$WORKSPACE_ROOT/client.crt"
+        printf '%s\n' "${CASD_CLIENT_KEY:-}" > "$WORKSPACE_ROOT/client.key"
+        chmod 0600 "$WORKSPACE_ROOT/client.crt" "$WORKSPACE_ROOT/client.key"
+
+        # Every remote service entry shares one endpoint tuning and mTLS
+        # identity; the stanzas expand inside the unquoted heredocs below.
+        CONNECTION_CONFIG=$(cat <<'EOF'
+            connection-config:
+              keepalive-time: 180
+              retry-limit: 5
+              retry-delay: 1000
+              request-timeout: 180
+        EOF
+        )
+        CLIENT_AUTH=$(cat <<'EOF'
+            auth:
+              client-key: /src/client.key
+              client-cert: /src/client.crt
+        EOF
+        )
+
+        if [[ "${ENABLE_REMOTE_EXECUTION:-false}" == "true" ]]; then
+          MAX_JOBS=8
+        else
+          MAX_JOBS=1
+        fi
+
+        cat > "$WORKSPACE_ROOT/buildstream-ci.conf" <<'BSTCONF'
+        scheduler:
+          on-error: continue
+          fetchers: 32
+          builders: 2
+          network-retries: 3
+
+        logging:
+          message-format: '[%{wallclock}][%{elapsed}][%{key}][%{element}] %{action} %{message}'
+          error-lines: 80
+
+        cachedir: /root/.cache/buildstream
+        BSTCONF
+
+        cat >> "$WORKSPACE_ROOT/buildstream-ci.conf" <<BSTCONFBUILD
+        build:
+          retry-failed: True
+          max-jobs: ${MAX_JOBS}
+        BSTCONFBUILD
+
+        if [[ -n "${CASD_CLIENT_CERT:-}" ]] && [[ -n "${CASD_CLIENT_KEY:-}" ]]; then
+          PUSH_FLAG="true"
+          [[ "${ENABLE_PUSH:-true}" == "false" ]] && PUSH_FLAG="false"
+          cat >> "$WORKSPACE_ROOT/buildstream-ci.conf" <<BSTCONFCACHE
+        artifacts:
+          servers:
+          - url: https://cache.projectbluefin.io:11002
+            push: ${PUSH_FLAG}
+        ${CONNECTION_CONFIG}
+        ${CLIENT_AUTH}
+          - url: https://cache.freedesktop-sdk.io:11001
+            push: false
+        ${CONNECTION_CONFIG}
+
+        source-caches:
+          servers:
+          - url: https://cache.projectbluefin.io:11002
+            push: ${PUSH_FLAG}
+        ${CONNECTION_CONFIG}
+        ${CLIENT_AUTH}
+          - url: https://cache.freedesktop-sdk.io:11001
+            push: false
+        ${CONNECTION_CONFIG}
+        BSTCONFCACHE
+        fi
+
+        cat >> "$WORKSPACE_ROOT/buildstream-ci.conf" <<'BSTCONFCACHEBLOCK'
+
+        cache:
+          cache-buildtrees: never
+        BSTCONFCACHEBLOCK
+
+        if [[ "${ENABLE_REMOTE_EXECUTION:-false}" == "true" ]]; then
+          # The top-level storage service makes the runner's local casd a
+          # remote-backed cache, so artifact payloads stay on the BuildBox host.
+          # Keep this out of fetch-only configs (ISO/publish jobs): export must
+          # materialize the final artifact on the runner.
+          cat >> "$WORKSPACE_ROOT/buildstream-ci.conf" <<BSTCONFREMOTE
+          storage-service:
+            url: https://cache.projectbluefin.io:11002
+        ${CONNECTION_CONFIG}
+        ${CLIENT_AUTH}
+
+        remote-execution:
+          execution-service:
+            url: https://cache.projectbluefin.io:11002
+        ${CONNECTION_CONFIG}
+        ${CLIENT_AUTH}
+          storage-service:
+            url: https://cache.projectbluefin.io:11002
+        ${CONNECTION_CONFIG}
+        ${CLIENT_AUTH}
+          action-cache-service:
+            url: https://cache.projectbluefin.io:11002
+            push: true
+        ${CONNECTION_CONFIG}
+        ${CLIENT_AUTH}
+        BSTCONFREMOTE
+          echo "Remote execution enabled: yes"
+        else
+          echo "Remote execution enabled: no"
+        fi
+
+        echo "=== BuildStream CI config ==="
+        cat "$WORKSPACE_ROOT/buildstream-ci.conf"

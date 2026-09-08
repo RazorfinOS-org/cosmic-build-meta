@@ -6,8 +6,10 @@ kind: manual
 sources:
 - kind: git_repo
   url: github:LuaJIT/LuaJIT.git
-  track: v2.1.ROLLING
-  ref: v2.1.ROLLING-0-g2096ea625d78304e1955b4d7bfd5853cb547fba9
+  # Upstream deleted the v2.1.ROLLING tag; pin the v2.1 branch tip
+  # by bare commit like dakota (f277abd).
+  track: v2.1
+  ref: 1edc3e52b67eaf6ce5f809be8e17d6862594b8bc
 
 build-depends:
 - freedesktop-sdk.bst:public-stacks/buildsystem-make.bst

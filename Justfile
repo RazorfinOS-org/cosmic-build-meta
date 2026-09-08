@@ -35,9 +35,9 @@ filesystem := env_var_or_default("COSMIC_FILESYSTEM", "btrfs")
 # Used by `chunk-variant` to replace the single squashed layer with N
 # content-based layers so `bootc upgrade` pulls deltas, not the whole image.
 chunkah_image := env_var_or_default("COSMIC_CHUNKAH_IMAGE", "quay.io/coreos/chunkah:v0.6.0@sha256:ff8b8b466a942ec6000445d4001fc661e2fc5a952ad9ee29b4de9ab09d1d1708")
-# Max layers chunkah emits. Its default is 64; its own bootc guidance
-# recommends ~128 for bootable/large images; containers-storage caps at 500.
-chunk_max_layers := env_var_or_default("COSMIC_CHUNK_MAX_LAYERS", "128")
+# Max layers chunkah emits. 120 matches projectbluefin/dakota's proven
+# publish path; containers-storage caps at 500.
+chunk_max_layers := env_var_or_default("COSMIC_CHUNK_MAX_LAYERS", "120")
 
 # Sparse loopback file `generate-bootable-image` writes the install into.
 bootable_image := env_var_or_default("COSMIC_BOOTABLE_IMAGE", "build/bootable.raw")
@@ -143,8 +143,7 @@ bst *args:
 # To build a specific element, use `just bst build <element>` directly.
 [group('build')]
 build:
-    just bst build oci/cosmic/image.bst
-    just load-image
+    just build-variant cosmic
 
 # Build a specific image variant (cosmic or cosmic-nvidia) and load it
 # into rootful podman storage. Used by CI's matrix; locally use this if
@@ -467,35 +466,13 @@ boot-iso-headless variant="cosmic":
 checkout-image dir="build/oci-image":
     just bst artifact checkout --directory {{dir}} oci/cosmic/image.bst
 
-# Load the OCI artifact into rootful podman storage as
-# ${COSMIC_IMAGE_NAME}:${COSMIC_IMAGE_TAG} (default
-# ghcr.io/razorfinos-org/cosmic-build-meta:cosmic-nightly).
-#
-# Mirrors projectbluefin/dakota's `export` recipe: `podman pull oci:`
-# the BST checkout, then `podman build --squash-all` via an inline
-# Containerfile to collapse the 3 build-oci layers into a single layer.
-# The squash is mandatory -- bootc 1.15.0's splitstream parser chokes
-# with "Unexpected EOF in splitstream" reading our raw multi-layer
-# build-oci output, but works fine on the squashed result.
-#
-# Checkout dir lives under build/ because `just bst` only bind-mounts
-# {{justfile_directory()}} into the bst2 container.
+# Load the cosmic OCI artifact into rootful podman storage. Alias for
+# `load-image-variant cosmic`, which is gaming-aware: COSMIC_GAMING=true
+# tags the result :cosmic-gaming-* instead of overwriting the non-gaming
+# image. See load-image-variant for the squash rationale.
 [group('image')]
 load-image:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    stagedir="build/oci-image"
-    rm -rf "${stagedir}"
-    mkdir -p "$(dirname ${stagedir})"
-    just bst artifact checkout --directory "${stagedir}" oci/cosmic/image.bst
-    image_id=$(sudo podman pull -q "oci:${stagedir}")
-    printf 'FROM %s\n' "${image_id}" | sudo podman build \
-        --pull=never \
-        --squash-all \
-        --security-opt label=type:unconfined_t \
-        -t "{{image_name}}:{{image_tag}}" \
-        -f - .
-    sudo podman rmi "${image_id}" >/dev/null 2>&1 || true
+    just load-image-variant cosmic
 
 # Compute the effective image identity (`<variant>[-gaming]`) for the
 # current COSMIC_GAMING setting. `<variant>-gaming` keeps gaming checkout
@@ -545,6 +522,11 @@ _effective-tag variant="cosmic":
 # Variant-aware load-image. Used by CI's matrix and by local-dev runs
 # that want to iterate on the cosmic-nvidia image without overwriting
 # the cosmic build's podman tag.
+#
+# Mirrors projectbluefin/dakota's `export` recipe: `podman pull oci:`
+# the BST checkout, then `podman build --squash-all` via an inline
+# Containerfile. The squash is mandatory -- bootc 1.15.0's splitstream
+# parser chokes on our raw multi-layer build-oci output.
 [group('image')]
 load-image-variant variant="cosmic":
     #!/usr/bin/env bash
@@ -599,8 +581,9 @@ push-variant variant="cosmic":
 
 # Rechunk an already-built variant image into content-based layers with
 # chunkah, replacing the single squashed layer so `bootc upgrade` pulls
-# deltas instead of the whole ~8 GB image. PROTOTYPE -- measure delta sizes
-# vs the squashed image (and boot-test) before adopting on the publish path.
+# deltas instead of the whole ~8 GB image. On the CI publish path since
+# the CAS/chunking overhaul; flags mirror projectbluefin/dakota's proven
+# chunkify (--prune /sysroot/, stale ostree label removal, 120 layers).
 #
 # Flow (all rootful, since the image lives in root's containers-storage):
 #   1. mount a writable copy of the built image's rootfs
@@ -633,11 +616,15 @@ chunk-variant variant="cosmic":
 
     # Writable rootfs so the component pre-pass can setfattr (image mounts
     # are read-only). Force-clean the throwaway container on any exit.
-    cid="$(sudo podman create "${ref}")"
+    # Explicit dummy command: bootc images ship no CMD/ENTRYPOINT and
+    # podman create refuses without one.
+    cid="$(sudo podman create "${ref}" true)"
     trap 'sudo podman rm -f "${cid}" >/dev/null 2>&1 || true' EXIT
     rootfs="$(sudo podman mount "${cid}")"
 
     echo "==> Assigning chunkah components"
+    command -v setfattr >/dev/null || {
+        echo "error: setfattr not found; install the 'attr' package" >&2; exit 1; }
     sudo files/chunkah/assign-components.sh "${rootfs}"
 
     echo "==> Running chunkah (max-layers {{chunk_max_layers}})"
@@ -645,11 +632,15 @@ chunk-variant variant="cosmic":
         --security-opt label=disable \
         -v "${rootfs}":/chunkah:ro \
         -v "${PWD}/${outdir}":/out \
+        -e CHUNKAH_ROOTFS=/chunkah \
         -e CHUNKAH_CONFIG_STR="${config}" \
         {{chunkah_image}} \
         build \
             --max-layers {{chunk_max_layers}} \
             --skip-special-files \
+            --prune /sysroot/ \
+            --label ostree.commit- \
+            --label ostree.final-diffid- \
             --annotation "org.opencontainers.image.ref.name=${ref}" \
             --label "containers.bootc=1" \
             --output oci:/out/img
@@ -663,7 +654,7 @@ chunk-variant variant="cosmic":
     sudo skopeo copy "oci:${outdir}/img" "containers-storage:${ref}"
 
     echo "==> Verifying setuid survived the round-trip"
-    vcid="$(sudo podman create "${ref}")"
+    vcid="$(sudo podman create "${ref}" true)"
     vroot="$(sudo podman mount "${vcid}")"
     sudo files/chunkah/check-setuid.sh "${vroot}" || \
         { sudo podman rm -f "${vcid}" >/dev/null 2>&1 || true; exit 1; }
@@ -868,6 +859,13 @@ track *elements:
 [group('track')]
 track-all:
     just bst source track --deps all core/deps.bst
+
+# Track gaming stack + OGC kernel sources. The gaming graph hangs off
+# oci/cosmic/stack.bst behind `-o gaming true`, so track-all never
+# reaches it; the OGC kernel follows v7.2.*-ogc* tags.
+[group('track')]
+track-gaming:
+    COSMIC_GAMING=true just bst source track --deps all gaming/deps.bst core-deps/linux-ogc.bst
 
 # ── Inspection ───────────────────────────────────────────────────────
 

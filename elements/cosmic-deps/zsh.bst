@@ -26,5 +26,7 @@ variables:
 
 sources:
 - kind: tar
-  url: zsh:zsh-5.9.1.tar.xz
-  ref: 5d20bec03f981dc4e9a09ec245e7415388ff641f79c5c5c416b5042e58d8280d
+  # zsh.org rotates superseded releases from /pub/ to /pub/old/; on a
+  # 404 here, bump the version or repoint at /pub/old/.
+  url: zsh:zsh-5.9.2.tar.xz
+  ref: 36fa734374b44783582cec09bcd67822e2f992c779ec1624ab5596df078d2f81

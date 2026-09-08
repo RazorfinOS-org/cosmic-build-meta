@@ -15,6 +15,14 @@ depends:
   # modprobe glue (modeset=1, nouveau blacklist, module load order).
   - cosmic-deps-nvidia/deps.bst
 
+variables:
+  nvidia-variant: 'COSMIC NVIDIA'
+  nvidia-variant-id: cosmic-nvidia
+  (?):
+  - gaming == true:
+      nvidia-variant: 'COSMIC NVIDIA gaming'
+      nvidia-variant-id: cosmic-nvidia-gaming
+
 public:
   bst:
     integration-commands:
@@ -32,3 +40,15 @@ public:
           exit 1
       fi
       depmod -a "$KVER"
+    # Brand os-release for the NVIDIA variant; the shared
+    # oci/integration/os-release.bst only distinguishes gaming.
+    # Integration runs after all staging, so this wins deterministically.
+    - |
+      while IFS= read -r line; do
+        case "$line" in
+          VARIANT=*)    printf '%s\n' 'VARIANT="%{nvidia-variant}"' ;;
+          VARIANT_ID=*) printf '%s\n' 'VARIANT_ID=%{nvidia-variant-id}' ;;
+          *)            printf '%s\n' "$line" ;;
+        esac
+      done < /usr/lib/os-release > /usr/lib/os-release.new
+      mv /usr/lib/os-release.new /usr/lib/os-release
