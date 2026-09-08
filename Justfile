@@ -860,12 +860,14 @@ track *elements:
 track-all:
     just bst source track --deps all core/deps.bst
 
-# Track gaming stack + OGC kernel sources. The gaming graph hangs off
-# oci/cosmic/stack.bst behind `-o gaming true`, so track-all never
-# reaches it; the OGC kernel follows v7.2.*-ogc* tags.
+# Track the OGC kernel (follows v7.2.*-ogc* tags). Kernel only, not the
+# gaming stack: gamescope's vendored git_module pins break under blind
+# tracking when the fork moves submodule remotes (dakota tracks an
+# explicit element list for the same reason). Gaming app bumps are
+# manual url+ref edits.
 [group('track')]
 track-gaming:
-    COSMIC_GAMING=true just bst source track --deps all gaming/deps.bst core-deps/linux-ogc.bst
+    COSMIC_GAMING=true just bst source track core-deps/linux-ogc.bst
 
 # ── Inspection ───────────────────────────────────────────────────────
 
