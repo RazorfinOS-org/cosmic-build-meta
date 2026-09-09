@@ -56,7 +56,7 @@ variables:
   # OGC patchset revision of the pinned tag; keep in sync with the
   # `ref:` under sources (v<kver>-ogcN-...). Not derivable at build
   # time: the tree ships no EXTRAVERSION or localversion files.
-  ogc-localversion: '-ogc4'
+  ogc-localversion: '-ogc3'
   bootdir: /boot
   indep-libdir: '%{prefix}/lib'
   # Modules are stripped by kbuild (INSTALL_MOD_STRIP=1) *before* the
@@ -262,7 +262,7 @@ sources:
 - kind: git_repo
   url: github:OpenGamingCollective/linux.git
   track: v7.2.*-ogc*
-  ref: v7.2.1-ogc4-0-g14c028f83498b2900fecd0940a058a3ac0622afe
+  ref: v7.2.3-ogc3-0-g151eb3adafae8820f349a4454c1f1e8d5fc991a4
 - kind: local
   path: files/linux-ogc/config-utils.sh
 - kind: local

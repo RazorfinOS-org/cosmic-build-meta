@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/launcher.git
   track: master
-  ref: epoch-1.2.0-0-g5b868510716673b31a650488401489898352e2d9
+  ref: epoch-1.7.0-0-g6390080a98a4a59b4e8196d28de97d3cb4d138ec
 - kind: cargo2
   url: "crates:"
   ref:
@@ -944,7 +944,7 @@ sources:
     version: 2.6.1
     sha: 13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292
   - kind: git
-    commit: 3b86984332be2c930a3536ab714b843c851fa8ca
+    commit: 0fa672f8dadb884001ef9a251b149ed432879629
     repo: github:pop-os/dbus-settings-bindings
     name: switcheroo-control
     version: 0.1.0
@@ -1476,7 +1476,6 @@ sources:
     name: zvariant_utils
     version: 3.2.1
     sha: c6949d142f89f6916deca2232cf26a8afacf2b9fdc35ce766105e104478be599
-
 config:
   configure-commands: []
   build-commands:
