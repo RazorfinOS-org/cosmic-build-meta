@@ -34,12 +34,12 @@ variables:
   sysroot-seed: 96f41f54-8854-401d-851f-ca5bec6e613f
   # Baked into org.opencontainers.image.ref.name below -- this is the
   # `bootc upgrade` origin of installed systems, so the gaming variant
-  # must point at its own tag or gaming installs would upgrade back
-  # onto the non-gaming image.
-  image-ref-tag: cosmic-nightly
+  # must point at its own package or gaming installs would upgrade back
+  # onto the non-gaming image. One GHCR package per variant, plain tags.
+  image-repo: cosmic
   (?):
   - gaming == true:
-      image-ref-tag: cosmic-gaming-nightly
+      image-repo: cosmic-gaming
 
 config:
   commands:
@@ -95,5 +95,5 @@ config:
           'org.opencontainers.image.url': 'https://github.com/razorfinos-org/cosmic-build-meta'
           'containers.bootc': '1'
       index-annotations:
-        'org.opencontainers.image.ref.name': 'ghcr.io/razorfinos-org/cosmic-build-meta:%{image-ref-tag}'
+        'org.opencontainers.image.ref.name': 'ghcr.io/razorfinos-org/%{image-repo}:nightly'
     EOF

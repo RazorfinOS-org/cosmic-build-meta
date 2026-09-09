@@ -13,7 +13,7 @@ on:
           - cosmic-nvidia
           - both
       image_tag:
-        description: Published image tag/suffix to bake into the ISO (nightly -> <variant>-nightly; full image refs are accepted)
+        description: Published image tag to bake into the ISO (resolved on the variant's package; full image refs are accepted)
         type: string
         required: true
         default: nightly
@@ -33,7 +33,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  IMAGE_REGISTRY: ghcr.io/razorfinos-org/cosmic-build-meta
+  IMAGE_REGISTRY_BASE: ghcr.io/razorfinos-org
 
 jobs:
   build_iso:
@@ -91,12 +91,8 @@ jobs:
           if [[ "$INPUT" == */* ]]; then
             IMAGE_REF="$INPUT"
           else
-            if [[ "$INPUT" == "$V-"* ]]; then
-              TAG="$INPUT"
-            else
-              TAG="$V-$INPUT"
-            fi
-            IMAGE_REF="${IMAGE_REGISTRY}:${TAG}"
+            # Plain tag on the variant's own package.
+            IMAGE_REF="${IMAGE_REGISTRY_BASE}/${V}:${INPUT}"
           fi
 
           SAFE_NAME=$(printf '%s' "$IMAGE_REF" | tr '/:@' '----' | tr -c 'A-Za-z0-9._-' '-')

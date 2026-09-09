@@ -30,10 +30,10 @@ variables:
   # machine IDs / partition UUIDs when both are deployed.
   sysroot-seed: 7f9c5d11-3a26-4b9e-8e21-1d4f3f9e2c57
   # bootc upgrade origin; see oci/cosmic/image.bst for rationale.
-  image-ref-tag: cosmic-nvidia-nightly
+  image-repo: cosmic-nvidia
   (?):
   - gaming == true:
-      image-ref-tag: cosmic-nvidia-gaming-nightly
+      image-repo: cosmic-nvidia-gaming
 
 config:
   commands:
@@ -96,5 +96,5 @@ config:
           'org.opencontainers.image.url': 'https://github.com/razorfinos-org/cosmic-build-meta'
           'containers.bootc': '1'
       index-annotations:
-        'org.opencontainers.image.ref.name': 'ghcr.io/razorfinos-org/cosmic-build-meta:%{image-ref-tag}'
+        'org.opencontainers.image.ref.name': 'ghcr.io/razorfinos-org/%{image-repo}:nightly'
     EOF

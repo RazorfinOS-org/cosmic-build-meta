@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE_REGISTRY: ghcr.io/razorfinos-org/cosmic-build-meta
+  IMAGE_REGISTRY_BASE: ghcr.io/razorfinos-org
 
 jobs:
   changes:
@@ -62,6 +62,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 360
     needs: changes
+    env:
+      # One GHCR package per variant; tags are plain (:nightly, :pr-N).
+      IMAGE_REGISTRY: ghcr.io/razorfinos-org/${{ matrix.image }}
 
     strategy:
       fail-fast: false
@@ -126,25 +129,21 @@ jobs:
 
       - name: Determine image tags
         id: tags
-        # Tags are image-prefixed (cosmic-nightly, cosmic-nvidia-nightly,
-        # cosmic-gaming-nightly, cosmic-nvidia-gaming-nightly) so all
-        # variants coexist in the same registry repo. PR builds get
-        # a single :{image}-pr-N tag; tag-push events get :{image}-{ref}
-        # plus :{image}-stable; everything else gets :{image}-nightly +
-        # :{image}-nightly.YYYYMMDD.
+        # Each variant is its own GHCR package, so tags are plain: PR
+        # builds get :pr-N; tag-push events get :{ref} plus :stable;
+        # everything else gets :nightly + :nightly.YYYYMMDD.
         run: |
           DATE=$(date -u +%Y%m%d)
-          V="${{ matrix.image }}"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "primary_tag=${V}-pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            echo "primary_tag=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
             echo "additional_tags=" >> "$GITHUB_OUTPUT"
           elif [ "${{ github.ref_type }}" = "tag" ]; then
             REF="${GITHUB_REF#refs/tags/}"
-            echo "primary_tag=${V}-${REF}" >> "$GITHUB_OUTPUT"
-            echo "additional_tags=${V}-stable" >> "$GITHUB_OUTPUT"
+            echo "primary_tag=${REF}" >> "$GITHUB_OUTPUT"
+            echo "additional_tags=stable" >> "$GITHUB_OUTPUT"
           else
-            echo "primary_tag=${V}-nightly" >> "$GITHUB_OUTPUT"
-            echo "additional_tags=${V}-nightly.${DATE}" >> "$GITHUB_OUTPUT"
+            echo "primary_tag=nightly" >> "$GITHUB_OUTPUT"
+            echo "additional_tags=nightly.${DATE}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Generate BuildStream CI config
@@ -253,7 +252,7 @@ jobs:
         if: steps.push.outputs.pushed == 'true'
         # No private key needed. Sigstore Fulcio CA issues a short-lived
         # cert tied to this workflow's GitHub OIDC identity. Verify with:
-        #   cosign verify ${IMAGE_REGISTRY}:cosmic-nightly \
+        #   cosign verify ghcr.io/razorfinos-org/cosmic:nightly \
         #     --certificate-identity-regexp \
         #       'https://github.com/razorfinos-org/cosmic-build-meta/.github/workflows/build.yml@.+' \
         #     --certificate-oidc-issuer https://token.actions.githubusercontent.com
