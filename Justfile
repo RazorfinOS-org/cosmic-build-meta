@@ -21,12 +21,15 @@ bst2_image := env_var_or_default("BST2_IMAGE", "registry.gitlab.com/freedesktop-
 # Common BST options
 bst_opts := "--option arch " + arch + " --option gaming " + gaming
 
-# Identity of the local podman image produced by `just load-image`.
-# Defaults match the `org.opencontainers.image.ref.name` annotation in
-# elements/oci/cosmic/image.bst so the installed system's upgrade origin
-# (`bootc upgrade`) points at the same tag we'd push to GHCR.
-image_name := env_var_or_default("COSMIC_IMAGE_NAME", "ghcr.io/razorfinos-org/cosmic-build-meta")
+# GHCR namespace: one package per variant (cosmic, cosmic-gaming,
+# cosmic-nvidia, cosmic-nvidia-gaming), matching the ref.name annotation
+# in the image elements so installed systems' `bootc upgrade` follows
+# the same ref we push.
+image_registry := env_var_or_default("COSMIC_IMAGE_REGISTRY", "ghcr.io/razorfinos-org")
 image_tag := env_var_or_default("COSMIC_IMAGE_TAG", "nightly")
+# Variant used by the variant-less dev recipes (`just bootc`,
+# `just generate-bootable-image`); gaming applies via COSMIC_GAMING.
+dev_variant := env_var_or_default("COSMIC_VARIANT", "cosmic")
 
 # Filesystem for `bootc install to-disk` (btrfs|xfs|ext4).
 filesystem := env_var_or_default("COSMIC_FILESYSTEM", "btrfs")
@@ -243,7 +246,7 @@ prep-install-source-from-image variant="cosmic" image_ref="":
     set -euo pipefail
     ref="{{image_ref}}"
     if [ -z "$ref" ]; then
-        ref="{{image_name}}:{{variant}}-nightly"
+        ref="{{image_registry}}/$(just _effective-image {{variant}}):nightly"
     fi
     outdir="build/install-source-{{variant}}"
     rm -rf "$outdir"
@@ -481,43 +484,12 @@ load-image:
 _effective-image variant="cosmic":
     @if [ "{{gaming}}" = "true" ]; then echo "{{variant}}-gaming"; else echo "{{variant}}"; fi
 
-# Compute the podman/GHCR tag for a variant under the current
-# COSMIC_GAMING + COSMIC_IMAGE_TAG. Single source of truth shared by
-# load-image-variant (build) and push-variant (publish) so the two can
-# never drift.
-#
-# Tag scheme: the base `cosmic` variant maps to COSMIC_IMAGE_TAG as-is
-# (default :nightly, matching `just build`). Other `cosmic-*` identities
-# prefix an unqualified tag with the stripped name, but preserve tags
-# that are already prefixed. Examples:
-#   cosmic + nightly                        -> :nightly
-#   cosmic-nvidia + nightly                 -> :nvidia-nightly
-#   cosmic-nvidia + nvidia-nightly          -> :nvidia-nightly
-#   cosmic-nvidia + cosmic-nvidia-*         -> :cosmic-nvidia-*
-#   cosmic (gaming) + cosmic-gaming-nightly -> :cosmic-gaming-nightly
-_effective-tag variant="cosmic":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    eff="$(just _effective-image {{variant}})"
-    case "${eff}" in
-        cosmic)
-            tag="{{image_tag}}"
-            ;;
-        cosmic-*)
-            suffix="${eff#cosmic-}"
-            case "{{image_tag}}" in
-                "${eff}"|"${eff}-"*|"${suffix}"|"${suffix}-"*) tag="{{image_tag}}" ;;
-                *) tag="${suffix}-{{image_tag}}" ;;
-            esac
-            ;;
-        *)
-            case "{{image_tag}}" in
-                "${eff}"|"${eff}-"*) tag="{{image_tag}}" ;;
-                *) tag="${eff}-{{image_tag}}" ;;
-            esac
-            ;;
-    esac
-    printf '%s\n' "${tag}"
+# Full image reference for a variant under the current COSMIC_GAMING +
+# COSMIC_IMAGE_TAG: one GHCR package per variant, plain tags. Single
+# source of truth shared by load-image-variant (build) and push-variant
+# (publish) so the two can never drift.
+_effective-ref variant="cosmic":
+    @echo "{{image_registry}}/$(just _effective-image {{variant}}):{{image_tag}}"
 
 # Variant-aware load-image. Used by CI's matrix and by local-dev runs
 # that want to iterate on the cosmic-nvidia image without overwriting
@@ -537,15 +509,15 @@ load-image-variant variant="cosmic":
     mkdir -p "$(dirname ${stagedir})"
     just bst artifact checkout --directory "${stagedir}" oci/{{variant}}/image.bst
     image_id=$(sudo podman pull -q "oci:${stagedir}")
-    tag="$(just _effective-tag {{variant}})"
+    ref="$(just _effective-ref {{variant}})"
     printf 'FROM %s\n' "${image_id}" | sudo podman build \
         --pull=never \
         --squash-all \
         --security-opt label=type:unconfined_t \
-        -t "{{image_name}}:${tag}" \
+        -t "${ref}" \
         -f - .
     sudo podman rmi "${image_id}" >/dev/null 2>&1 || true
-    echo "Loaded {{image_name}}:${tag}"
+    echo "Loaded ${ref}"
 
 # Push an already-built variant image to GHCR via skopeo.
 #
@@ -568,8 +540,7 @@ load-image-variant variant="cosmic":
 push-variant variant="cosmic":
     #!/usr/bin/env bash
     set -euo pipefail
-    tag="$(just _effective-tag {{variant}})"
-    ref="{{image_name}}:${tag}"
+    ref="$(just _effective-ref {{variant}})"
     if ! sudo podman image exists "${ref}"; then
         echo "error: ${ref} not in rootful podman storage." >&2
         echo "  Run \`COSMIC_GAMING={{gaming}} COSMIC_IMAGE_TAG={{image_tag}} just build-variant {{variant}}\` first." >&2
@@ -601,8 +572,7 @@ push-variant variant="cosmic":
 chunk-variant variant="cosmic":
     #!/usr/bin/env bash
     set -euo pipefail
-    tag="$(just _effective-tag {{variant}})"
-    ref="{{image_name}}:${tag}"
+    ref="$(just _effective-ref {{variant}})"
     if ! sudo podman image exists "${ref}"; then
         echo "error: ${ref} not in rootful podman storage; run \`just build-variant {{variant}}\` first" >&2
         exit 1
@@ -676,8 +646,7 @@ publish-all:
     pushed=0 skipped=0
     for combo in "cosmic:false" "cosmic-nvidia:false" "cosmic:true" "cosmic-nvidia:true"; do
         v="${combo%%:*}"; g="${combo##*:}"
-        tag="$(COSMIC_GAMING="$g" just _effective-tag "$v")"
-        ref="{{image_name}}:${tag}"
+        ref="$(COSMIC_GAMING="$g" just _effective-ref "$v")"
         if sudo podman image exists "${ref}"; then
             COSMIC_GAMING="$g" just push-variant "$v"
             pushed=$((pushed + 1))
@@ -710,7 +679,7 @@ bootc *args:
         -e RUST_LOG=debug \
         -v "{{justfile_directory()}}:/data" \
         --security-opt label=type:unconfined_t \
-        "{{image_name}}:{{image_tag}}" bootc {{args}}
+        "$(just _effective-ref {{dev_variant}})" bootc {{args}}
 
 # Allocate a sparse raw disk and `bootc install to-disk` the loaded
 # image into it via loopback. Result is a qemu-runnable image at
@@ -757,8 +726,8 @@ generate-bootable-image:
     #     the kernel ringbuffer (so they go out ttyS0), no ANSI escapes
     #     that confuse `less` on the serial capture.
     just bootc install to-disk --composefs-backend \
-        --source-imgref "containers-storage:{{image_name}}:{{image_tag}}" \
-        --target-imgref "{{image_name}}:{{image_tag}}" \
+        --source-imgref "containers-storage:$(just _effective-ref {{dev_variant}})" \
+        --target-imgref "$(just _effective-ref {{dev_variant}})" \
         --target-transport containers-storage \
         --target-no-signature-verification \
         --via-loopback "/data/{{bootable_image}}" \

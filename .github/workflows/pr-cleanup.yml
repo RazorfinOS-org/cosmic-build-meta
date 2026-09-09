@@ -1,9 +1,9 @@
 name: PR cleanup
 
 # Delete PR tags from GHCR when the PR closes (merged or not).
-# Build workflow pushes variant-prefixed tags (:cosmic-pr-N and
-# :cosmic-nvidia-pr-N) for internal-source PRs (auto/track-* or
-# `build`-labelled). Without cleanup, those tags pile up forever.
+# Build workflow pushes a plain :pr-N tag to each variant's package for
+# internal-source PRs (auto/track-* or `build`-labelled). Without
+# cleanup, those tags pile up forever.
 
 on:
   pull_request:
@@ -24,27 +24,27 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PACKAGE: cosmic-build-meta
         run: |
           set -euo pipefail
           OWNER="${GITHUB_REPOSITORY_OWNER}"
 
-          for PR_TAG in "cosmic-pr-${PR_NUMBER}" "cosmic-nvidia-pr-${PR_NUMBER}" "pr-${PR_NUMBER}"; do
-            # Resolve tag -> version id, then delete that version. If the
-            # tag doesn't exist (PR was filtered out of the build matrix,
-            # or it is the legacy unprefixed tag) we silently continue.
+          # One package per variant; each gets a plain :pr-N tag.
+          for PACKAGE in cosmic cosmic-gaming cosmic-nvidia cosmic-nvidia-gaming; do
+            PR_TAG="pr-${PR_NUMBER}"
+            # Resolve tag -> version id, then delete that version. Tolerate
+            # missing tags (PR was filtered out of the build matrix).
             VERSION_ID=$(gh api \
               "/orgs/${OWNER}/packages/container/${PACKAGE}/versions" \
               --paginate \
               --jq ".[] | select(.metadata.container.tags[]? == \"${PR_TAG}\") | .id" \
-              | head -n1)
+              2>/dev/null | head -n1)
 
             if [ -z "${VERSION_ID}" ]; then
-              echo "::notice::Tag ${PR_TAG} not found; nothing to delete"
+              echo "::notice::${PACKAGE}:${PR_TAG} not found; nothing to delete"
               continue
             fi
 
-            echo "Deleting version ${VERSION_ID} (tag ${PR_TAG})"
+            echo "Deleting ${PACKAGE} version ${VERSION_ID} (tag ${PR_TAG})"
             gh api \
               --method DELETE \
               "/orgs/${OWNER}/packages/container/${PACKAGE}/versions/${VERSION_ID}"

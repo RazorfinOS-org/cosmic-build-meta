@@ -11,7 +11,7 @@ The [COSMIC](https://github.com/pop-os/cosmic-epoch) desktop as a **bootc/OCI im
 - **Gaming variant** (opt-in) inspired by Bazzite/OpenGamingCollective: adds the gaming stack **and swaps the kernel** for the Open Gaming Collective build (sched_ext schedulers, ntsync, handheld enablement) via a freedesktop-sdk junction override of `components/linux.bst` → `core-deps/linux-ogc.bst`. The stack itself is native Steam launcher/bootstrap, native gamescope + OGC game-mode session, host GameMode, Steam/controller udev rules, SDL controller DB, native MangoHud/vkBasalt, InputPlumber, Vulkan discovery glue, SDL/audio/input compatibility libraries, and first-boot Flathub preinstalls for Lutris, Heroic, Bottles, ProtonPlus, Protontricks, and GOverlay. The variant has been built and boot-tested end-to-end with the gaming stack present; broad gameplay validation is still pending. The default (non-gaming) image no longer ships Steam.
 - **Bootable image** (`bootable.raw`): boots into `cosmic-initial-setup` → `cosmic-greeter` → user session under QEMU + KVM + OVMF.
 - **Live ISO**: UEFI-bootable GPT disk image with autologin to a `cosmic-live` user, autostarts [cosmonaut-installer](https://github.com/razorfinos-org/cosmonaut-installer) — a native libcosmic GUI driving a privileged DBus daemon that installs from the OCI image baked into the ISO (`oci:/usr/lib/bootc/install-source/main`) against an opinionated profile (btrfs + composefs + systemd-boot, optional LUKS).
-- **CI**: `build.yml` builds all four images (`{cosmic,cosmic-nvidia}{,-gaming}`) weekly + on push to `main`, publishes to `ghcr.io/razorfinos-org/cosmic-build-meta:<image>-{nightly,vX.Y.Z}` with keyless cosign signing and SLSA build-provenance attestations. Live ISOs are built by a separate `iso.yml` `workflow_dispatch` that bakes a published image into the ISO — kept out of the main build so image publishing isn't gated on the slower ISO assembly.
+- **CI**: `build.yml` builds all four images (`{cosmic,cosmic-nvidia}{,-gaming}`) weekly + on push to `main`, publishes each variant to its own package, `ghcr.io/razorfinos-org/<image>:{nightly,vX.Y.Z}` with keyless cosign signing and SLSA build-provenance attestations. Live ISOs are built by a separate `iso.yml` `workflow_dispatch` that bakes a published image into the ISO — kept out of the main build so image publishing isn't gated on the slower ISO assembly.
 
 **Known caveats**
 
@@ -41,8 +41,8 @@ just boot-vm                    # QEMU + KVM + OVMF, GTK display
 For the NVIDIA variant, build and load the variant-specific image tag:
 
 ```sh
-just build-variant cosmic-nvidia     # loads ghcr.io/razorfinos-org/cosmic-build-meta:nvidia-nightly locally
-COSMIC_IMAGE_TAG=nvidia-nightly just generate-bootable-image
+just build-variant cosmic-nvidia     # loads ghcr.io/razorfinos-org/cosmic-nvidia:nightly locally
+COSMIC_VARIANT=cosmic-nvidia just generate-bootable-image
 just boot-vm
 ```
 
@@ -93,8 +93,9 @@ The ISO artifact is really a **UEFI-bootable GPT disk image** with an `.iso` fil
 | `COSMIC_VM_XRES` / `COSMIC_VM_YRES` | `1680` / `1050` | Initial guest resolution. Must agree with `files/oci/cosmic-defaults/outputs.ron` — the Justfile vars only affect QEMU, not cosmic-comp's mode pick. |
 | `COSMIC_OVMF_CODE` / `COSMIC_OVMF_VARS` | `/usr/share/edk2/ovmf/OVMF_{CODE,VARS}.fd` | OVMF firmware paths. Override on Debian (`/usr/share/OVMF/…`) or Arch (`/usr/share/edk2-ovmf/x64/…`). |
 | `COSMIC_FILESYSTEM` | `btrfs` | Root filesystem for the bootable image (`btrfs` / `xfs` / `ext4`). |
-| `COSMIC_IMAGE_NAME` | `ghcr.io/razorfinos-org/cosmic-build-meta` | Local podman tag namespace for `just bootc` and `just generate-bootable-image`. Matches the `org.opencontainers.image.ref.name` annotation so `bootc upgrade` resolves the same ref post-install. |
-| `COSMIC_IMAGE_TAG` | `nightly` | Local image tag. `just build` loads `:nightly`; `just build-variant cosmic-nvidia` turns the unqualified default into `:nvidia-nightly`. If the value is already variant-prefixed (`nvidia-*` or `cosmic-nvidia-*`), it is preserved. CI uses full registry tags (`cosmic-nightly`, `cosmic-nvidia-nightly`, …). |
+| `COSMIC_IMAGE_REGISTRY` | `ghcr.io/razorfinos-org` | GHCR namespace; each variant is its own package under it, matching the `org.opencontainers.image.ref.name` annotation so `bootc upgrade` resolves the same ref post-install. |
+| `COSMIC_VARIANT` | `cosmic` | Variant used by the variant-less dev recipes (`just bootc`, `just generate-bootable-image`); gaming applies via `COSMIC_GAMING`. |
+| `COSMIC_IMAGE_TAG` | `nightly` | Image tag, used as-is on every variant's package (CI uses `nightly`, `nightly.YYYYMMDD`, `pr-N`, `stable`). |
 | `COSMIC_BOOTABLE_IMAGE` | `build/bootable.raw` | Path of the sparse raw disk image. |
 | `COSMIC_BOOTABLE_SIZE` | `30G` | Size of the sparse fallocate. |
 | `COSMIC_INSTALL_TARGET` | `build/install-target.raw` | Sparse target disk attached as `/dev/vdb` to `boot-iso` so cosmonaut-installer has somewhere to install onto. |
@@ -265,10 +266,10 @@ docs/images/                     README screenshots
 
 `.github/workflows/build.yml` builds all four images (`cosmic`, `cosmic-nvidia`, `cosmic-gaming`, `cosmic-nvidia-gaming`) in a matrix on every push to `main`, weekly on Monday 08:00 UTC, and on `v*` tags. The gaming axis is a BST project option (`-o gaming true` via `COSMIC_GAMING`) on the same element paths, so the matrix just toggles `gaming` per row and derives an `image` identity used for tags, cache keys, and log artifacts. PRs build only when authored by the `auto/track-*` source-bump bot or labelled `build` (saves runner minutes). Each successful run publishes:
 
-- **OCI image** to `ghcr.io/razorfinos-org/cosmic-build-meta:<image>-{nightly,vX.Y.Z}` (and `<image>-pr-N` for PR builds), squashed with `podman build --squash-all`.
+- **OCI image** to `ghcr.io/razorfinos-org/<image>:{nightly,vX.Y.Z}` (and `:pr-N` for PR builds), one package per variant, squashed with `podman build --squash-all`.
 - **Cosign signature** + certificate (keyless, OIDC-bound). Verify with:
   ```sh
-  cosign verify ghcr.io/razorfinos-org/cosmic-build-meta:cosmic-nightly \
+  cosign verify ghcr.io/razorfinos-org/cosmic:nightly \
       --certificate-identity-regexp='https://github.com/razorfinos-org/cosmic-build-meta/.*' \
       --certificate-oidc-issuer='https://token.actions.githubusercontent.com'
   ```
