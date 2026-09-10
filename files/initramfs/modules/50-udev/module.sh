@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 install() {
     for rule in /usr/lib/udev/rules.d/*.rules; do
         case "$(basename "${rule}")" in
