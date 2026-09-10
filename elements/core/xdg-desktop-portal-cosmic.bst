@@ -59,7 +59,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/xdg-desktop-portal-cosmic.git
   track: master
-  ref: epoch-1.7.0-3-gabf258b86338185d2f7ecd243273ffc3deffca5f
+  ref: epoch-1.8.0-0-gabf258b86338185d2f7ecd243273ffc3deffca5f
 - kind: cargo2
   url: "crates:"
   ref:

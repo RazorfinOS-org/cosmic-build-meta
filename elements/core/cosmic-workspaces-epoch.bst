@@ -37,7 +37,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-workspaces-epoch.git
   track: master
-  ref: epoch-1.7.0-2-g38d09960b70709839e3e4f9fd473aa26a529f701
+  ref: epoch-1.8.0-0-g38d09960b70709839e3e4f9fd473aa26a529f701
 - kind: cargo2
   url: "crates:"
   ref:
