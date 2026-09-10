@@ -15,7 +15,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-applibrary.git
   track: master
-  ref: epoch-1.7.0-7-g5b7638f116360c1139efe795c8739cc89c87dca1
+  ref: epoch-1.8.0-0-g5b7638f116360c1139efe795c8739cc89c87dca1
 - kind: cargo2
   url: "crates:"
   ref:

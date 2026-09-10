@@ -19,7 +19,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-session.git
   track: master
-  ref: epoch-1.7.0-0-g3bdf11741a430821ea0114aa670ad3dff8fd8e09
+  ref: epoch-1.8.0-2-g3ccf897693f2af81235fcfaf41456b7d031cfb4e
 - kind: cargo2
   url: "crates:"
   ref:
