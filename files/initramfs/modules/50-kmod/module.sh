@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 BINARIES=(
     insmod
     depmod
@@ -52,7 +53,7 @@ install() {
         install_file "/usr/bin/${b}"
     done
 
-    for name in ${MODULES_BY_NAME[@]}; do
+    for name in "${MODULES_BY_NAME[@]}"; do
         for path in $(modinfo -k "${kernelver}" -b /usr -n "${name}"); do
             case "${path}" in
                 /*)

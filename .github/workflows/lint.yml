@@ -1,0 +1,50 @@
+name: Lint
+
+# Static checks on the shell and workflow sources. Neither the initramfs
+# module fragments in files/initramfs/ nor the kernel config helpers in
+# files/linux-ogc/ are exercised by `just check`, and they run at boot on
+# every image, so nothing was reading them before a build shipped.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.sh'
+      - '.github/workflows/**'
+  push:
+    branches: [main]
+    paths:
+      - '**.sh'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      # -S error only. The initramfs fragments are sourced with $root,
+      # $kernelver and $moddir supplied by run-module.sh, so SC2154
+      # ("referenced but not assigned") fires on every one of them and is
+      # noise here rather than a finding.
+      - name: Run shellcheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          severity: error
+
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run actionlint
+        uses: docker://rhysd/actionlint:latest
+        with:
+          args: -color

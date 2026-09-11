@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 BINARIES=(
     btrfs
     btrfsck
