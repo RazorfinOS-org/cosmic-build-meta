@@ -29,6 +29,8 @@ depends:
 
   # Secret Service API (browsers, NetworkManager-applet, SMB credentials)
   - freedesktop-sdk.bst:components/libsecret.bst
+  # Secret Service provider; libsecret above is only the client API.
+  - cosmic-deps/gnome-keyring.bst
 
   # Bluetooth daemon (cosmic-settings BT panel)
   - freedesktop-sdk.bst:components/bluez.bst
