@@ -20,6 +20,7 @@ depends:
   - oci/integration/mime-defaults.bst
   - oci/integration/cosmic-tuning.bst
   - oci/integration/fprintd-pam.bst
+  - oci/integration/swap.bst
   - oci/integration/extrafs.bst
 
   # Kernel firmware + initramfs (kernel itself comes via cosmic-deps/deps.bst)
