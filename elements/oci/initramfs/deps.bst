@@ -10,6 +10,9 @@ depends:
 - freedesktop-sdk.bst:components/dbus.bst
 - freedesktop-sdk.bst:components/fuse3.bst
 - freedesktop-sdk.bst:components/linux-firmware.bst
+# The early-ucode cpio is built from what is staged here; fdsdk's
+# linux-firmware has no Intel blob.
+- cosmic-deps/intel-ucode.bst
 - freedesktop-sdk.bst:components/shadow.bst
 - freedesktop-sdk.bst:components/systemd.bst
 - freedesktop-sdk.bst:components/tpm2-tss.bst

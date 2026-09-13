@@ -18,3 +18,5 @@ depends:
   - cosmic-deps-nvidia/nvidia-modprobe-config.bst
   - cosmic-deps-nvidia/nvidia-container-toolkit.bst
   - cosmic-deps-nvidia/nvidia-container-toolkit-preset.bst
+  # NVDEC-backed VA-API so browsers/apps hardware-decode on NVIDIA.
+  - cosmic-deps-nvidia/nvidia-vaapi-driver.bst

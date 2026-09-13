@@ -10,6 +10,8 @@ depends:
   - freedesktop-sdk.bst:components/pipewire-daemon.bst
   - freedesktop-sdk.bst:components/wireplumber.bst
   - freedesktop-sdk.bst:components/alsa-lib.bst
+  # alsactl + restore units so mixer state survives reboot.
+  - cosmic-deps/alsa-utils.bst
   - freedesktop-sdk.bst:components/rtkit.bst
 
   # Bluetooth A2DP audio codec. Without sbc, BT headphones connect but
