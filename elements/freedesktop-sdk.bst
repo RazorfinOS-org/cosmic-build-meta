@@ -26,6 +26,9 @@ config:
   overrides:
     components/flatpak.bst: cosmic-deps/flatpak.bst
     components/flatpak-minimal.bst: cosmic-deps/flatpak.bst
+    # fdsdk's libibus is client-lib-only; our full ibus installs the
+    # same lib, so collapse every reference to one source of truth.
+    components/libibus.bst: cosmic-deps/ibus.bst
     # Keep kernel selection at the junction boundary so every consumer of
     # components/linux.bst -- cosmic-deps/base.bst, oci/initramfs.bst,
     # and critically cosmic-deps-nvidia/nvidia-drivers.bst which compiles
