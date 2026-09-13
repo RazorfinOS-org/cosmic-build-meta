@@ -22,9 +22,11 @@ brew "glow"       # terminal Markdown renderer
 brew "gum"        # shell-script UI toolkit
 brew "bpftop"     # eBPF program monitor
 
+# Shell-init tools; /etc/zshrc hooks each only when installed
+brew "zoxide"     # smarter cd
+brew "starship"   # cross-shell prompt
+brew "tealdeer"   # fast tldr client
+
 # Opt-in examples (uncomment to preinstall)
-# brew "zoxide"     # smarter cd (needs shell init)
-# brew "starship"   # cross-shell prompt (needs shell init)
-# brew "tealdeer"   # fast tldr client
 # brew "zellij"     # terminal multiplexer
 # brew "gh"         # GitHub CLI

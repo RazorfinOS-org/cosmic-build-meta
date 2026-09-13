@@ -29,9 +29,18 @@ autoload -Uz compinit && compinit -u
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
-# Prompt (no external deps)
+# Prompt (no external deps; starship below replaces it when installed)
 autoload -Uz colors && colors
 PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f %(!.#.$) '
+
+# Brew-installed tools that need shell init (see Brewfile). Guarded so a
+# fresh boot before brew-preinstall finishes still gets a working shell.
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
 # Common aliases
 alias ll='ls -lah'
