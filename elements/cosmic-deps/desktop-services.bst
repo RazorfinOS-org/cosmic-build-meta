@@ -32,6 +32,9 @@ depends:
   # Secret Service provider; libsecret above is only the client API.
   - cosmic-deps/gnome-keyring.bst
 
+  # VPN / 802.1x editing the cosmic-settings network panel lacks.
+  - cosmic-deps/nm-connection-editor.bst
+
   # Bluetooth daemon (cosmic-settings BT panel)
   - freedesktop-sdk.bst:components/bluez.bst
 
