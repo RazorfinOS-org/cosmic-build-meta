@@ -53,6 +53,8 @@ enable fstrim.timer
 # `fwupdmgr update` can show available updates without a manual
 # refresh first. Daily cadence is fwupd's own default.
 enable fwupd-refresh.timer
+# One-shot systemd-boot menu timeout (see oci/integration/cosmic-tuning.bst).
+enable cosmic-boot-timeout.service
 
 # Container tooling
 enable podman.socket

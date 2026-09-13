@@ -1,0 +1,18 @@
+# One-shot: give the systemd-boot menu a 5s timeout so rollback to the
+# previous bootc deployment is reachable without racing a keypress.
+# Written to the ESP's loader.conf, so it must run on the installed
+# system (not at image build); a stamp in /var keeps it one-shot even
+# though presets re-fire only on first boot.
+[Unit]
+Description=Set systemd-boot menu timeout once
+ConditionPathExists=/sys/firmware/efi
+ConditionPathExists=!/var/lib/cosmic/boot-timeout-set
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bootctl set-timeout 5
+ExecStartPost=/usr/bin/mkdir -p /var/lib/cosmic
+ExecStartPost=/usr/bin/touch /var/lib/cosmic/boot-timeout-set
+
+[Install]
+WantedBy=multi-user.target

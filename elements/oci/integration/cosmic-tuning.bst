@@ -79,3 +79,22 @@ config:
   # power transition (common on Intel/Realtek) come back via the
   # normal init path instead of needing a btusb reload or reboot.
   - install -Dm755 tuning/system-sleep/bluetooth-suspend "%{install-root}/usr/lib/systemd/system-sleep/bluetooth-suspend"
+
+  # Hide the composefs loop device from udisks2/cosmic-files.
+  - install -Dm644 tuning/udev/rules.d/90-hide-composefs-loop.rules "%{install-root}/usr/lib/udev/rules.d/90-hide-composefs-loop.rules"
+
+  # Keep the PC speaker out of PipeWire's sink list: after resume it
+  # can otherwise become the default output. Console beep keeps working.
+  - install -Dm644 tuning/wireplumber/51-disable-pcsp.conf "%{install-root}/usr/share/wireplumber/wireplumber.conf.d/51-disable-pcsp.conf"
+
+  # /etc/resolv.conf -> resolved stub symlink + factory-seeded
+  # /etc/hosts, for software that bypasses NSS and reads both directly.
+  - install -Dm644 tuning/tmpfiles.d/10-cosmic-network.conf "%{install-root}/usr/lib/tmpfiles.d/10-cosmic-network.conf"
+  - install -Dm644 tuning/factory/hosts "%{install-root}/usr/share/factory/etc/hosts"
+
+  # NetworkManager connectivity check: enables captive-portal detection.
+  - install -Dm644 tuning/NetworkManager/conf.d/20-cosmic-connectivity.conf "%{install-root}/usr/lib/NetworkManager/conf.d/20-cosmic-connectivity.conf"
+
+  # One-shot 5s systemd-boot menu timeout so bootc rollback is
+  # reachable without racing a keypress. Enabled via 90-cosmic.preset.
+  - install -Dm644 tuning/system/cosmic-boot-timeout.service "%{install-root}/usr/lib/systemd/system/cosmic-boot-timeout.service"
