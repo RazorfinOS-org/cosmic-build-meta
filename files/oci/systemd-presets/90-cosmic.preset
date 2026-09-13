@@ -32,6 +32,10 @@ enable wireplumber.service
 # oci/integration/cosmic-tuning.bst.
 enable polkit.service
 enable accounts-daemon.service
+# System76 power/scheduler daemons (cosmic-settings power panel,
+# cosmic-comp foreground boost). See cosmic-deps/power.bst.
+enable com.system76.PowerDaemon.service
+enable com.system76.Scheduler.service
 enable bootc-fetch-apply-updates.timer
 
 # mDNS / DNS-SD: `ssh hostname.local`, network printer discovery,
