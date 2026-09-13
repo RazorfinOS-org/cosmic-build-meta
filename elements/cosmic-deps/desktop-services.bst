@@ -61,11 +61,9 @@ depends:
   - freedesktop-sdk.bst:components/hunspell.bst
   - freedesktop-sdk.bst:components/dictionaries.bst
 
-  # IBus client library. Required for CJK / non-Latin input methods.
-  # No daemon enabled by default -- shipping the lib lets users layer
-  # in (or Flatpak) the engine of their choice (ibus-anthy, libpinyin,
-  # hangul, fcitx5-mozc) and have GTK / Qt apps pick it up at startup.
-  - freedesktop-sdk.bst:components/libibus.bst
+  # Full IBus framework (also the junction-override target for fdsdk's
+  # components/libibus.bst). Language engines are follow-ups.
+  - cosmic-deps/ibus.bst
 
   # Notification API used by virtually every non-COSMIC desktop app
   # (Firefox, Thunderbird, GIMP, Inkscape, Telegram, ...). cosmic-
