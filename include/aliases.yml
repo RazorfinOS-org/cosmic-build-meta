@@ -32,6 +32,7 @@ aliases:
   unicode: https://www.unicode.org/Public/
   # Git repository aliases
   github: https://github.com/
+  codeberg: https://codeberg.org/
   gitlab: https://gitlab.com/
   gnome: https://gitlab.gnome.org/
   freedesktop: https://gitlab.freedesktop.org/
