@@ -54,4 +54,8 @@ config:
   # state); /etc/flatpak/preinstall.d is reserved for site-local
   # additions made after deployment.
   - install -Dm644 flatpak/preinstall.d/org.mozilla.firefox.preinstall "%{install-root}/usr/share/flatpak/preinstall.d/org.mozilla.firefox.preinstall"
+  # GUI gap-fillers: fwupd front-end and scanning (Simple Scan bundles
+  # its own sane backends -- no host sane-backends needed).
+  - install -Dm644 flatpak/preinstall.d/org.gnome.Firmware.preinstall   "%{install-root}/usr/share/flatpak/preinstall.d/org.gnome.Firmware.preinstall"
+  - install -Dm644 flatpak/preinstall.d/org.gnome.SimpleScan.preinstall "%{install-root}/usr/share/flatpak/preinstall.d/org.gnome.SimpleScan.preinstall"
   - install -Dm644 systemd-presets/91-flatpak.preset      "%{install-root}/usr/lib/systemd/system-preset/91-flatpak.preset"
