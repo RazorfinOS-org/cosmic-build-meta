@@ -1,0 +1,48 @@
+# /etc/pam.d/system-auth -- fingerprint-enabled override of FDSDK's
+# stock file (installed by oci/integration/fprintd-pam.bst; see that
+# element for why a full-file override is the only mechanism).
+#
+# This is FDSDK 25.08's files/linux-pam-config/system-auth verbatim,
+# plus exactly ONE added line: `auth sufficient pam_fprintd.so`.
+# On every FDSDK bump, re-diff the rest of this file against the
+# junction ref's copy and re-sync if upstream changed it.
+#
+# ORDERING CONTRACT (do not reorder):
+#   * pam_fprintd.so sits ABOVE pam_unix.so -- the reader is offered
+#     first, matching how fdsdk's own fingerprint-auth file and every
+#     major distro order it.
+#   * It is `sufficient`, not `required`: a fingerprint match
+#     short-circuits to success, but ANY failure (no reader, nothing
+#     enrolled, no match, timeout, fprintd not running) falls through
+#     to pam_unix, so the password remains a full fallback. This line
+#     can never lock anyone out.
+#   * It sits directly after pam_env and before the systemd-homed
+#     line -- homed users keep their password path via the
+#     `-auth sufficient pam_systemd_home.so` below.
+#
+# No-reader latency: pam_fprintd asks fprintd (net.reactivated.Fprint,
+# D-Bus activated) for devices; with no reader or no enrolled prints it
+# returns PAM_AUTHINFO_UNAVAIL immediately, so sudo/polkit/greetd gain
+# no perceptible delay on reader-less hardware. A wait only happens
+# when a reader with enrolled prints is present (then it times out to
+# the password prompt).
+auth        required      pam_env.so
+auth        sufficient    pam_fprintd.so
+-auth       sufficient    pam_systemd_home.so
+auth        sufficient    pam_unix.so try_first_pass nullok_secure
+auth        required      pam_deny.so
+
+-account    sufficient    pam_systemd_home.so
+account     required      pam_unix.so
+
+-password   sufficient    pam_systemd_home.so
+password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=
+password    sufficient    pam_unix.so try_first_pass use_authtok nullok_secure sha512 shadow
+password    required      pam_deny.so
+
+-session    optional      pam_systemd_home.so
+session     optional      pam_keyinit.so revoke
+session     required      pam_limits.so
+-session     optional      pam_systemd.so
+session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid
+session     required      pam_unix.so
