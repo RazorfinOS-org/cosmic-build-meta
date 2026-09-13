@@ -6,6 +6,9 @@
 kind: stack
 
 depends:
+  # OBS virtual camera module; not autoloaded.
+  - cosmic-deps/v4l2loopback.bst
+
   # Audio
   - freedesktop-sdk.bst:components/pipewire-daemon.bst
   - freedesktop-sdk.bst:components/wireplumber.bst

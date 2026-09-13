@@ -2,8 +2,16 @@
 # Ported from projectbluefin/dakota's dakota-config.sh (2026-09-01 Fedora
 # config audit, kernel-core 7.1.8-200.fc44, per-row reviewed). Buckets:
 # VM-guest storage/net, homelab HBAs, laptop camera/audio/input completion.
+# Local deltas beyond the port: TUXEDO/Uniwill, Hyper-V storvsc/keyboard.
 # Uses config-utils.sh enable/module so every option lands in
 # expected-configs and the post-olddefconfig gate verifies it survived.
+
+# Use upstream TUXEDO/Uniwill support; conflicting vendor modules are deferred.
+if has X86; then
+    enable X86_PLATFORM_DRIVERS_UNIWILL
+    module UNIWILL_LAPTOP
+    module TUXEDO_NB04_WMI_AB
+fi
 
 # IPU7 lives in drivers/staging/media; these open the menu (they build
 # nothing by themselves, staging drivers still need explicit enables).
@@ -32,6 +40,10 @@ module HID_ITE
 module HID_MICROSOFT
 module HID_RAZER
 module HID_SENSOR_PROX
+# Complete the Hyper-V guest set: fdsdk carries net/balloon/mouse only,
+# so Gen2 guests had no virtual disk (storvsc) or keyboard driver.
+module HYPERV_KEYBOARD
+module HYPERV_STORAGE
 module HYPERV_VSOCKETS
 module MEGARAID_MAILBOX
 module MEGARAID_MM
