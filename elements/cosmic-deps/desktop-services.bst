@@ -38,6 +38,8 @@ depends:
   # Printing
   - freedesktop-sdk.bst:components/cups-daemon.bst
   - freedesktop-sdk.bst:components/cups-filters.bst
+  # Brother mono-laser driver; driverless IPP doesn't cover the family.
+  - cosmic-deps/brlaser.bst
 
   # Color management for printers/displays
   - freedesktop-sdk.bst:components/colord.bst

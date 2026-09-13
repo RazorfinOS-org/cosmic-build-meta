@@ -21,3 +21,5 @@ depends:
 
   # Locally-vendored (not in FDSDK 25.08)
   - cosmic-deps/wireless-regdb.bst
+  # Intel microcode; also staged in oci/initramfs/deps.bst for early load.
+  - cosmic-deps/intel-ucode.bst
