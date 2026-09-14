@@ -21,7 +21,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-bg.git
   track: master
-  ref: epoch-1.8.0-0-g1685f7fc99cbb9cbe981ac672d6451ba6faff7db
+  ref: epoch-1.8.0-1-g9d82a34dab4e73d90ba66c9f72d18d0f9b8be208
 - kind: cargo2
   url: "crates:"
   ref:
@@ -254,6 +254,11 @@ sources:
     repo: github:pop-os/libcosmic
     name: cosmic-config-derive
     version: 1.0.0
+  - kind: git
+    commit: c0cff4db14c37ed954983158e4055aa94c7741d9
+    repo: github:pop-os/cosmic-protocols
+    name: cosmic-protocols
+    version: 0.2.0
   - kind: registry
     name: cpufeatures
     version: 0.3.0
@@ -1261,6 +1266,10 @@ sources:
     name: wayland-scanner
     version: 0.31.10
     sha: 9c324a910fd86ebdc364a3e61ec1f11737d3b1d6c273c0239ee8ff4bc0d24b4a
+  - kind: registry
+    name: wayland-server
+    version: 0.31.14
+    sha: 0dde9c29be0f723a573977de51ee455bf3dfa03652730a74f9dd3b337e374d75
   - kind: registry
     name: wayland-sys
     version: 0.31.11
