@@ -20,7 +20,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-panel.git
   track: master
-  ref: epoch-1.8.0-0-gf664a34c788f09689be9efa88e41040d7e6361f1
+  ref: epoch-1.8.0-4-ge6e6442d762291beeb908bb7dd8a2cefff8eb7d3
 - kind: cargo2
   url: "crates:"
   ref:
@@ -56,10 +56,6 @@ sources:
     name: apply
     version: 0.3.0
     sha: f47b57fc4521e3cae26a4d45b5227f8fadee4c345be0fefd8d5d1711afb8aeb9
-  - kind: registry
-    name: approx
-    version: 0.4.0
-    sha: 3f2a05fd1bd10b2527e20a2cd32d8873d115b8b39fe219ee25f42a8aca6ba278
   - kind: registry
     name: approx
     version: 0.5.1
@@ -124,10 +120,6 @@ sources:
     name: atomic-waker
     version: 1.1.2
     sha: 1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0
-  - kind: registry
-    name: atomic_float
-    version: 1.1.0
-    sha: 628d228f918ac3b82fe590352cc719d30664a0c13ca3a60266fe02c7132d480a
   - kind: git
     commit: 043ab4859d53ffd3d55334685303d8df39c9f768
     repo: github:jackpot51/rust-atomicwrites
@@ -237,10 +229,6 @@ sources:
     name: cfg_aliases
     version: 0.2.1
     sha: 613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724
-  - kind: registry
-    name: cgmath
-    version: 0.18.0
-    sha: 1a98d30140e3296250832bbaaff83b27dcd6fa3cc70fb6f1f3e5c9c0023b5317
   - kind: registry
     name: chacha20
     version: 0.10.1
@@ -744,6 +732,10 @@ sources:
     name: glam
     version: 0.25.0
     sha: 151665d9be52f9bb40fc7966565d39666f2d1e69233571b71b87791c7e0528b3
+  - kind: registry
+    name: glam
+    version: 0.33.7
+    sha: e762b9b188634fc508d4ec54b62ea3d352c43fd431d18d05d46f559f217f4725
   - kind: registry
     name: grid
     version: 1.0.1
@@ -1417,6 +1409,10 @@ sources:
     version: 0.8.11
     sha: d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4
   - kind: registry
+    name: reis
+    version: 0.7.1
+    sha: 4b967ec6489a42067a20724f11987bb96178ea796873cbe1afd25fb93ee6f85f
+  - kind: registry
     name: renderdoc-sys
     version: 1.1.0
     sha: 19b30a45b0cd0bcca8037f3d0dc3421eaf95327a17cad11964fb8179b4fc4832
@@ -1565,10 +1561,10 @@ sources:
     version: 1.15.2
     sha: 8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90
   - kind: git
-    commit: f0992e76cc0daf67554ad94cfce2f2d7f99c930e
+    commit: 0ff00983b6007257a7a161a4fe8b14a778e2ac8f
     repo: github:smithay/smithay
     query:
-      rev: f0992e7
+      rev: 0ff0098
     name: smithay
     version: 0.7.0
   - kind: registry

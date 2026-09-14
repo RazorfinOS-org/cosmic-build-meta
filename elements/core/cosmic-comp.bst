@@ -33,7 +33,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-comp.git
   track: master
-  ref: epoch-1.8.0-0-ga55785993e8ef6aad38862cb1a9e1ccaad3c340d
+  ref: epoch-1.8.0-2-ga7349b72e39fd91d7ed25eddb2fa24b900a615d5
 - kind: cargo2
   url: "crates:"
   ref:
@@ -204,8 +204,8 @@ sources:
     sha: bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a
   - kind: registry
     name: bitflags
-    version: 2.11.0
-    sha: 843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af
+    version: 2.13.2
+    sha: 3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06
   - kind: registry
     name: block
     version: 0.1.6
@@ -387,7 +387,7 @@ sources:
     name: cosmic-freedesktop-icons
     version: 0.4.0
   - kind: git
-    commit: 32283d76a8d0342da74c4cc022a533c52dcf378f
+    commit: c0cff4db14c37ed954983158e4055aa94c7741d9
     repo: github:pop-os//cosmic-protocols
     query:
       branch: main
