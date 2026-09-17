@@ -28,7 +28,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-applets.git
   track: master
-  ref: epoch-1.8.0-1-ge01b16f4a27e46e157cd671b9f16007b86360554
+  ref: epoch-1.8.0-3-g0bfc3da2cb838b702bc75809bf9d9288d77e366f
 - kind: cargo2
   url: "crates:"
   ref:
