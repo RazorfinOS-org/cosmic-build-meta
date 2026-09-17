@@ -19,7 +19,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-player.git
   track: master
-  ref: epoch-1.8.0-0-ga297c24a961e77a354850595aae40a5ce37ba973
+  ref: epoch-1.8.0-2-g66b3f34335a500ce5dc93880d06f7ae94905872f
 - kind: cargo2
   url: "crates:"
   ref:
