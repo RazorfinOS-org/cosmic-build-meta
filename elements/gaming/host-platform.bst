@@ -41,6 +41,9 @@ depends:
   # Input needs permission to open directly. They are installed from Valve's
   # native Steam package by gaming/steam-native.bst.
   - gaming/sdl-gamecontrollerdb.bst
+  # uaccess udev rules for the controller long tail beyond Valve's rules
+  # and InputPlumber's managed devices.
+  - gaming/game-devices-udev.bst
   # OGC builds NTSYNC=m; Wine/Proton need /dev/ntsync present at boot.
   - gaming/ntsync-modules-load.bst
 

@@ -29,6 +29,7 @@ depends:
   - cosmic-deps/firmware.bst          # sof-firmware, fwupd, plymouth, wireless-regdb
   - cosmic-deps/diagnostics.bst       # man-db, usbutils
   - cosmic-deps/storage.bst           # bootc, composefs, ostree, podman, mkfs.*, udisks2
-  - cosmic-deps/power.bst             # upower, power-profiles-daemon
+  - cosmic-deps/power.bst             # upower, system76-power, system76-scheduler
   - cosmic-deps/sandboxing.bst        # flatpak, bubblewrap, xdg-dbus-proxy
+  - cosmic-deps/accessibility.bst     # orca -> speech-dispatcher -> espeak-ng
   - cosmic-deps/extras.bst            # CLI tooling (glow/gum/fzf/fastfetch/distrobox/...), Homebrew, uutils/sudo-rs

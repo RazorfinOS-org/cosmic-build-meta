@@ -32,6 +32,10 @@ enable wireplumber.service
 # oci/integration/cosmic-tuning.bst.
 enable polkit.service
 enable accounts-daemon.service
+# System76 power/scheduler daemons (cosmic-settings power panel,
+# cosmic-comp foreground boost). See cosmic-deps/power.bst.
+enable com.system76.PowerDaemon.service
+enable com.system76.Scheduler.service
 enable bootc-fetch-apply-updates.timer
 
 # mDNS / DNS-SD: `ssh hostname.local`, network printer discovery,
@@ -49,6 +53,8 @@ enable fstrim.timer
 # `fwupdmgr update` can show available updates without a manual
 # refresh first. Daily cadence is fwupd's own default.
 enable fwupd-refresh.timer
+# One-shot systemd-boot menu timeout (see oci/integration/cosmic-tuning.bst).
+enable cosmic-boot-timeout.service
 
 # Container tooling
 enable podman.socket

@@ -12,6 +12,10 @@ depends:
   - cosmic-deps/distrobox.bst
   - cosmic-deps/wl-clipboard.bst
 
+  # qalc CLI: pop-launcher's calc plugin shells out to it at runtime
+  # and silently does nothing without it (launcher "= 1+1" math).
+  - cosmic-deps/libqalculate.bst
+
   # Homebrew: prebuilt payload (/usr/share/homebrew.tar.zst) plus the
   # ublue-os/brew first-boot glue (brew-setup.service extracts it to
   # /var/home/linuxbrew; update/upgrade timers; profile.d shellenv).

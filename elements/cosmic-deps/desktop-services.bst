@@ -29,6 +29,11 @@ depends:
 
   # Secret Service API (browsers, NetworkManager-applet, SMB credentials)
   - freedesktop-sdk.bst:components/libsecret.bst
+  # Secret Service provider; libsecret above is only the client API.
+  - cosmic-deps/gnome-keyring.bst
+
+  # VPN / 802.1x editing the cosmic-settings network panel lacks.
+  - cosmic-deps/nm-connection-editor.bst
 
   # Bluetooth daemon (cosmic-settings BT panel)
   - freedesktop-sdk.bst:components/bluez.bst
@@ -36,6 +41,8 @@ depends:
   # Printing
   - freedesktop-sdk.bst:components/cups-daemon.bst
   - freedesktop-sdk.bst:components/cups-filters.bst
+  # Brother mono-laser driver; driverless IPP doesn't cover the family.
+  - cosmic-deps/brlaser.bst
 
   # Color management for printers/displays
   - freedesktop-sdk.bst:components/colord.bst
@@ -59,11 +66,9 @@ depends:
   - freedesktop-sdk.bst:components/hunspell.bst
   - freedesktop-sdk.bst:components/dictionaries.bst
 
-  # IBus client library. Required for CJK / non-Latin input methods.
-  # No daemon enabled by default -- shipping the lib lets users layer
-  # in (or Flatpak) the engine of their choice (ibus-anthy, libpinyin,
-  # hangul, fcitx5-mozc) and have GTK / Qt apps pick it up at startup.
-  - freedesktop-sdk.bst:components/libibus.bst
+  # Full IBus framework (also the junction-override target for fdsdk's
+  # components/libibus.bst). Language engines are follow-ups.
+  - cosmic-deps/ibus.bst
 
   # Notification API used by virtually every non-COSMIC desktop app
   # (Firefox, Thunderbird, GIMP, Inkscape, Telegram, ...). cosmic-

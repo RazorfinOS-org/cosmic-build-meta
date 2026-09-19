@@ -336,7 +336,11 @@ config:
     install -Dm644 /dev/null "%{install-root}/etc/pam.d/greetd"
     cat > "%{install-root}/etc/pam.d/greetd" <<'EOF'
     #%PAM-1.0
-    auth      include   system-auth
+    # substack (not include): system-auth's `sufficient pam_unix` must
+    # return here, or the keyring line below never runs.
+    auth      substack  system-auth
+    # Auto-unlock the login keyring; optional = can never block login.
+    auth      optional  pam_gnome_keyring.so
     account   include   system-auth
     password  include   system-auth
     # system-auth does not import /etc/locale.conf for greetd-launched
@@ -344,6 +348,8 @@ config:
     # see LANG/LC_* and don't fall back to en-US.
     session   optional  pam_env.so readenv=1 envfile=/etc/locale.conf
     session   include   system-auth
+    # After system-auth so pam_systemd has set XDG_RUNTIME_DIR first.
+    session   optional  pam_gnome_keyring.so auto_start
     EOF
   strip-commands:
   - |

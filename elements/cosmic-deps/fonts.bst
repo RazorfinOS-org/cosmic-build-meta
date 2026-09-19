@@ -16,3 +16,7 @@ depends:
   # create-account page renders blank.
   - cosmic-deps/open-sans.bst
   - cosmic-deps/noto-sans-mono.bst
+  # Glyph-icon fallback (starship/eza/btop symbols in cosmic-term) and a
+  # selectable coding monospace. Neither changes the default UI fonts.
+  - cosmic-deps/nerd-fonts-symbols.bst
+  - cosmic-deps/jetbrains-mono.bst
