@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Hardware-enablement config deltas, applied after fdsdk-config.sh.
 # Ported from projectbluefin/dakota's dakota-config.sh (2026-09-01 Fedora
 # config audit, kernel-core 7.1.8-200.fc44, per-row reviewed). Buckets:

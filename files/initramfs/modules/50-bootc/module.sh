@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 install() {
     if [ "${INITRD_MODE-sysupdate}" != oci ]; then
         exit 0

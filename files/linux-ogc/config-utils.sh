@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 has() {
   state="$(scripts/config --keep-case -s "${1}")"
   case "${state}" in
