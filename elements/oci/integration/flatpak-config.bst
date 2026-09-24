@@ -14,8 +14,7 @@
 #      which materialises every app declared by .preinstall drop-ins
 #      under /usr/share/flatpak/preinstall.d/ (e.g. Firefox below).
 #      `flatpak preinstall` is idempotent and respects user uninstalls.
-#      Note: this subcommand is 1.17+; we vendor flatpak 1.17.6 in
-#      cosmic-deps/flatpak.bst because fdsdk still pins 1.16.3.
+#      This subcommand is 1.17+; fdsdk 26.08 ships 1.18.
 #   3. Ship 91-flatpak.preset to enable all of the above so
 #      systemd-preset-all (run by oci/integration/cosmic-presets.bst's
 #      preset machinery via systemd-firstboot/preset-all at image build)

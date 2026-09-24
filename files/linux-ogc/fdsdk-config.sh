@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: Freedesktop-SDK Developers
+# SPDX-License-Identifier: MIT
+
 set -eu
 # set -x
 
@@ -109,20 +112,15 @@ module CRYPTO_CTS
 module CRYPTO_DEFLATE
 module CRYPTO_DES
 module CRYPTO_DH
-enable CRYPTO_DRBG_CTR
-enable CRYPTO_DRBG_HASH
 module CRYPTO_ECB
 module CRYPTO_ECDSA
 module CRYPTO_ECRDSA
-module CRYPTO_FCRYPT
-module CRYPTO_GHASH
 module CRYPTO_HMAC
 module CRYPTO_LRW
 module CRYPTO_LZ4
 module CRYPTO_LZ4HC
 module CRYPTO_MD4
 module CRYPTO_MD5
-module CRYPTO_PCBC
 module CRYPTO_PCRYPT
 module CRYPTO_LIB_POLY1305
 module CRYPTO_RMD160
@@ -144,8 +142,6 @@ enable CRYPTO_USER_API_SKCIPHER
 case "$arch" in
     x86_64)
         module CRYPTO_AES_NI_INTEL
-        module CRYPTO_GHASH_CLMUL_NI_INTEL
-        module CRYPTO_DES3_EDE_X86_64
     ;;
     aarch64)
         module CRYPTO_GHASH_ARM64_CE
@@ -273,6 +269,7 @@ module VIRTIO_INPUT
 module SND_VIRTIO
 module I2C_VIRTIO
 module LIBNVDIMM
+module VIRTIO_VFIO_PCI
 module VIRTIO_ANCHOR
 enable VIRTIO_PMEM
 module VIRTIO_NET
@@ -546,19 +543,8 @@ module ZD1211RW
 # Ethernet hardware
 module IGB
 if has PCMCIA; then
-    module PCMCIA_3C574
-    module PCMCIA_3C589
-fi
-module TYPHOON
-module VORTEX
-module NE2K_PCI
-if has PCMCIA; then
-    module PCMCIA_AXNET
     module PCMCIA_PCNET
 fi
-module ADAPTEC_STARFIRE
-module ET131X
-module ACENIC
 module ENA_ETHERNET
 module AMD8111_ETH
 case "$arch" in
@@ -567,11 +553,13 @@ case "$arch" in
         module AMD_XGBE
     ;;
 esac
-if has PCMCIA; then
-    module PCMCIA_NMCLAN
-fi
-module PCNET32
-module AQTION
+case "$arch" in
+    aarch64)
+        ;;
+    *)
+        module AQTION
+        ;;
+esac
 module ALX
 module ATL1
 module ATL1C
@@ -587,30 +575,10 @@ enable BNXT_HWMON
 enable BNXT_SRIOV
 module CNIC
 module NET_VENDOR_BROADCOM
-module BNA
-module CHELSIO_T1
-enable CHELSIO_T1_1G
-module CHELSIO_T3
-module CHELSIO_T4
-module CHELSIO_T4VF
-module ENIC
-enable NET_TULIP
-module DE2104X
-module DM9102
 if has PCMCIA; then
     module PCMCIA_XIRCOM
 fi
-module TULIP
-module ULI526X
-module WINBOND_840
-module DL2K
-module BE2NET
-enable BE2NET_BE2
-enable BE2NET_BE3
-enable BE2NET_LANCER
-enable BE2NET_SKYHAWK
 module FEALNX
-module GVE
 module I40E
 module I40EVF
 module ICE
@@ -631,7 +599,6 @@ enable MLX5_EN_ARFS
 enable MLX5_EN_RXNFC
 enable MLX5_MPFS
 module MLXFW
-module KSZ884X_PCI
 case "$arch" in
     x86_64)
         enable NET_VENDOR_MICROSOFT
@@ -640,12 +607,8 @@ case "$arch" in
 esac
 enable NET_VENDOR_MYRI
 module MYRI10GE
-module NATSEMI
-module NS83820
 enable NET_VENDOR_NETRONOME
 module NFP
-module HAMACHI
-module YELLOWFIN
 module NETXEN_NIC
 module QED
 enable QED_SRIOV
@@ -655,7 +618,6 @@ module QLA3XXX
 module QLCNIC
 enable QLCNIC_HWMON
 enable QLCNIC_SRIOV
-module R6040
 module 8139CP
 module 8139TOO
 enable 8139TOO_8129
@@ -664,13 +626,7 @@ module SFC_FALCON
 module SFC
 enable SFC_MCDI_MON
 enable SFC_SRIOV
-module SC92031
-module SIS190
-module SIS900
 module EPIC100
-if has PCMCIA; then
-    module PCMCIA_SMC91C92
-fi
 module SMSC9420
 case "$arch" in
     x86_64)
@@ -678,14 +634,7 @@ case "$arch" in
     ;;
 esac
 module STMMAC_ETH
-module CASSINI
-module HAPPYMEAL
-module NIU
-module SUNGEM
-module TEHUTI
 module TLAN
-module VIA_RHINE
-module VIA_VELOCITY
 if has PCMCIA; then
     module PCMCIA_XIRC2PS
 fi
@@ -726,6 +675,12 @@ case "$arch" in
         module DRM_PANEL_SAMSUNG_SOFEF00
     ;;
 esac
+
+# DRM Panic
+enable CONFIG_DRM_PANIC
+enable CONFIG_DRM_PANIC_SCREEN_QR_CODE
+value_str DRM_PANIC_SCREEN "qr_code"
+value_str DRM_PANIC_SCREEN_QR_CODE_URL "https://freedesktop-sdk.org/panic#"
 
 # NPUs
 enable DRM_ACCEL
@@ -1001,11 +956,6 @@ module BT_HCIBFUSB
 module BT_HCIBTUSB
 module BT_HIDP
 module BT_RFCOMM
-if has PCMCIA; then
-    module BT_HCIBLUECARD
-    module BT_HCIBT3C
-    module BT_HCIDTL1
-fi
 enable BT_HCIBTUSB_AUTOSUSPEND
 enable BT_HCIBTUSB_MTK
 enable BT_HCIUART_3WIRE
@@ -1229,7 +1179,6 @@ case "$arch" in
         module SND_SOC_AMD_PS_MACH
         module SND_SOC_AMD_RENOIR
         module SND_SOC_AMD_RENOIR_MACH
-        module SND_SOC_AMD_RPL_ACP6x
         module SND_SOC_AMD_RV_RT5682_MACH
         module SND_SOC_AMD_SOF_MACH
         module SND_SOC_AMD_VANGOGH_MACH
@@ -1300,6 +1249,12 @@ if has ARCH_ENABLE_MEMORY_HOTPLUG; then
         enable ZONE_DEVICE
         enable DEVICE_PRIVATE
         enable HMM_MIRROR
+
+        case "$arch" in
+            aarch64|x86_64|riscv*)
+                module VIRTIO_MEM
+            ;;
+        esac
     fi
 fi
 
@@ -1657,6 +1612,9 @@ enable FS_ENCRYPTION
 enable XFS_ONLINE_SCRUB
 enable XFS_QUOTA
 enable XFS_RT
+
+module NFS_FS
+module NFSD
 
 enable FSCACHE
 
@@ -2636,6 +2594,9 @@ case "$arch" in
 esac
 
 enable CPU_FREQ
+if has GENERIC_ARCH_TOPOLOGY; then
+    module CPUFREQ_VIRT
+fi
 
 # cpufreq
 case "$arch" in
@@ -2772,6 +2733,7 @@ case "$arch" in
         enable X86_PLATFORM_DRIVERS_HP
         module ALIENWARE_WMI
         module ASUS_NB_WMI
+        module ASUS_ARMOURY
         module ASUS_WMI
         module ASUS_TF103C_DOCK
         enable DELL_SMBIOS_WMI
@@ -2843,3 +2805,8 @@ fi
 # MPTCP support
 enable MPTCP
 enable MPTCP_IPV6
+
+# Can improve performance. i915 and v3d drm drivers recommend enabling it.
+if has HAVE_ARCH_TRANSPARENT_HUGEPAGE; then
+    enable TRANSPARENT_HUGEPAGE
+fi

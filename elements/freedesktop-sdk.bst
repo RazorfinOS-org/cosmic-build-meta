@@ -3,9 +3,9 @@ kind: junction
 sources:
 - kind: git_repo
   url: gitlab:freedesktop-sdk/freedesktop-sdk.git
-  track: freedesktop-sdk-25.08*
+  track: freedesktop-sdk-26.08*
 
-  ref: freedesktop-sdk-25.08.17-0-g4535d0fa4894628fdf49999ac5c2aacd138a6035
+  ref: freedesktop-sdk-26.08.1-0-gb02b59ffe19a49a402f357fd5fcb1d552ebc50d7
 config:
   options:
     target_arch: '%{arch}'
@@ -14,21 +14,13 @@ config:
         bootstrap_build_arch: 'x86_64'
     - arch == 'aarch64':
         bootstrap_build_arch: 'aarch64'
-  # Redirect every reference to fdsdk's flatpak elements (including
-  # transitive ones from xdg-desktop-portal{,-base}) to our vendored
-  # 1.17.6 build. Without this both flatpak.bst (full) and our
-  # cosmic-deps/flatpak.bst install /usr/bin/flatpak in the runtime
-  # layer; whichever wins the overlap defines the version actually
-  # shipped, and on this image it was fdsdk's 1.16.x. The override
-  # collapses them into a single source of truth so `flatpak preinstall`
-  # is available (see oci/integration/flatpak-config.bst). Drop both
-  # entries when fdsdk advances to flatpak >= 1.18.
   overrides:
-    components/flatpak.bst: cosmic-deps/flatpak.bst
-    components/flatpak-minimal.bst: cosmic-deps/flatpak.bst
     # fdsdk's libibus is client-lib-only; our full ibus installs the
     # same lib, so collapse every reference to one source of truth.
     components/libibus.bst: cosmic-deps/ibus.bst
+    # 26.08's podman pulls fdsdk's nftables; ours is a superset
+    # (--with-xtables), so collapse both onto it.
+    components/nftables.bst: cosmic-deps/nftables.bst
     # Keep kernel selection at the junction boundary so every consumer of
     # components/linux.bst -- cosmic-deps/base.bst, oci/initramfs.bst,
     # and critically cosmic-deps-nvidia/nvidia-drivers.bst which compiles

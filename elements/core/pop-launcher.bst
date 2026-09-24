@@ -2,7 +2,7 @@ kind: manual
 
 build-depends:
 - freedesktop-sdk.bst:components/rust.bst
-- freedesktop-sdk.bst:components/gcc-base.bst
+- freedesktop-sdk.bst:components/_private/gcc-base.bst
 - freedesktop-sdk.bst:bootstrap/binutils.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/libxkbcommon.bst
