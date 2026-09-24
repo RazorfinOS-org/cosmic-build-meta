@@ -4,11 +4,12 @@
 # activated via the junction override in elements/freedesktop-sdk.bst
 # when the project is built with `-o gaming true`. It must reproduce
 # FDSDK's artifact contract exactly:
-#   - vmlinuz/config at %{bootdir} (oci/initramfs.bst stages from there)
-#   - modules at /usr/lib/modules/<kver>/ with a `build` symlink into
-#     /usr/src/linux-<kver> (nvidia-drivers.bst compiles against it)
+#   - vmlinuz/vmlinux/config/System.map and modules all under
+#     /usr/lib/modules/<kver>/ (the 26.08 layout -- nothing in /boot)
+#   - a `build` symlink into /usr/src/linux-<kver> (nvidia-drivers.bst
+#     compiles against it)
 #
-# The recipe is FDSDK 25.08 components/linux.bst with three deltas:
+# The recipe is FDSDK 26.08 components/linux.bst with three deltas:
 #   1. Source: OGC's stable-tree fork (github:OpenGamingCollective/linux)
 #      instead of kernel.org stable. FDSDK's patches/linux patch_queue is
 #      dropped -- the OGC tree carries its own gaming patchset (sched_ext
@@ -58,7 +59,6 @@ variables:
   # `ref:` under sources (v<kver>-ogcN-...). Not derivable at build
   # time: the tree ships no EXTRAVERSION or localversion files.
   ogc-localversion: '-ogc3'
-  bootdir: /boot
   indep-libdir: '%{prefix}/lib'
   # Modules are stripped by kbuild (INSTALL_MOD_STRIP=1) *before* the
   # module signature is appended; a post-build strip pass would tear
@@ -147,10 +147,10 @@ config:
     # survived; raw scripts/config calls would be silently droppable.
     . ./config-utils.sh
 
-    # Keep fdsdk's expected SP800-90A DRBGs: linux 7.1 dropped the
-    # RNG_DEFAULT select that used to switch this menu on, and with it
-    # off olddefconfig discards the child options.
-    enable CRYPTO_DRBG_MENU
+    # Linux 7.1 dropped the RNG_DEFAULT select that used to switch this
+    # menu on; 26.08 no longer expects the DRBGs, so set it without
+    # adding it to expected-configs.
+    scripts/config --keep-case -e CRYPTO_DRBG_MENU
 
     # The zswap.compressor=zstd karg needs the compressor built in, not =m.
     enable CRYPTO_ZSTD
@@ -206,11 +206,12 @@ config:
 
   install-commands:
   - |
-    install -Dm644 "%{image-name}" '%{install-root}%{bootdir}/vmlinuz'
-    install -Dm644 vmlinux '%{install-root}%{bootdir}/vmlinux'
-    install -Dm644 System.map '%{install-root}%{bootdir}/System.map'
-    install -Dm644 .config '%{install-root}%{bootdir}/config'
-    make -j1 INSTALL_MOD_PATH='%{install-root}%{prefix}' INSTALL_MOD_STRIP=1 modules_install
+    release=$(make -s kernelrelease)
+    install -Dm644 "%{image-name}" "%{install-root}%{indep-libdir}/modules/${release}/vmlinuz"
+    install -Dm644 vmlinux "%{install-root}%{indep-libdir}/modules/${release}/vmlinux"
+    install -Dm644 System.map "%{install-root}%{indep-libdir}/modules/${release}/System.map"
+    install -Dm644 .config "%{install-root}%{indep-libdir}/modules/${release}/config"
+    ZSTD_CLEVEL=19 make -j1 INSTALL_MOD_PATH="%{install-root}%{prefix}" INSTALL_MOD_STRIP=1 modules_install
 
   - |
     release=$(make -s kernelrelease)
@@ -245,18 +246,19 @@ config:
       install-commands:
         (>):
         - |
-          make -j1 INSTALL_DTBS_PATH='%{install-root}%{bootdir}/dtbs' dtbs_install
+          release=$(make -s kernelrelease)
+          make -j1 INSTALL_DTBS_PATH="%{install-root}%{indep-libdir}/modules/${release}/dtbs" dtbs_install
 
 public:
   bst:
     split-rules:
       devel:
         (>):
-        - '%{bootdir}/System.map'
+        - '%{indep-libdir}/modules/*/System.map'
         # DEBUG_INFO=y (forced by OGC for BTF) makes vmlinux ~0.5 GB;
         # runtime consumers (scx schedulers) read /sys/kernel/btf/vmlinux,
         # not this file, so keep it out of the composed images.
-        - '%{bootdir}/vmlinux'
+        - '%{indep-libdir}/modules/*/vmlinux'
 
 sources:
 - kind: git_repo
