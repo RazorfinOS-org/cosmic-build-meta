@@ -12,7 +12,8 @@
 #   1. Source: OGC's stable-tree fork (github:OpenGamingCollective/linux)
 #      instead of kernel.org stable. FDSDK's patches/linux patch_queue is
 #      dropped -- the OGC tree carries its own gaming patchset (sched_ext
-#      schedulers, ntsync, Valve VRAM work, handheld enablement).
+#      schedulers, ntsync, Valve VRAM work, handheld enablement); our
+#      own fixups to that patchset live in patches/linux-ogc.
 #   2. Config: FDSDK's fdsdk-config.sh pass (vendored at files/linux-ogc/,
 #      keep in sync when bumping the junction) followed by OGC's
 #      ogc.config.set/unset fragments from OpenGamingCollective/
@@ -154,9 +155,8 @@ config:
     # The zswap.compressor=zstd karg needs the compressor built in, not =m.
     enable CRYPTO_ZSTD
 
-    # The OGC tree is not WERROR-clean (their own packaging and Fedora
-    # both build without it).
-    remove WERROR
+    # Warnings are errors; OGC out-of-tree fixups live in patches/linux-ogc.
+    enable WERROR
 
     # Hardware-enablement deltas from the Fedora config audit (VM guests,
     # homelab HBAs, laptop camera/audio/input completion).
@@ -263,6 +263,10 @@ sources:
   url: github:OpenGamingCollective/linux.git
   track: v7.2.*-ogc*
   ref: v7.2.8-ogc1-0-gf90d862923d8254f6df4b7ea81df68eef6d3a45e
+# Fixups for the OGC patchset itself; review at every tag bump and
+# drop each patch once the fix lands upstream.
+- kind: patch_queue
+  path: patches/linux-ogc
 - kind: local
   path: files/linux-ogc/config-utils.sh
 - kind: local
