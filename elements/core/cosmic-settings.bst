@@ -28,7 +28,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings.git
   track: master
-  ref: epoch-1.8.0-6-ge6e2acc18878d224ba5027da44ee228384385c65
+  ref: epoch-1.9.0-2-g0e307f3cf4ca177abd57fad6f286200b8304b8dd
 - kind: cargo2
   url: "crates:"
   ref:
@@ -416,7 +416,7 @@ sources:
     version: 0.5.0
     sha: 3b5ab9db53bcda568284df0fd39f6eac24ad6f7ba7ff1168b9e76eba6576b976
   - kind: git
-    commit: d77e99fb1555e2728297677de61e23ada4d9d09b
+    commit: 87ab8179e1bd9880239c340855ae8862034bd0e8
     repo: github:pop-os/libcosmic
     name: build_helpers
     version: 0.14.0
@@ -643,12 +643,12 @@ sources:
     name: cosmic-comp-config
     version: 1.0.0
   - kind: git
-    commit: d77e99fb1555e2728297677de61e23ada4d9d09b
+    commit: 87ab8179e1bd9880239c340855ae8862034bd0e8
     repo: github:pop-os/libcosmic
     name: cosmic-config
     version: 1.0.0
   - kind: git
-    commit: d77e99fb1555e2728297677de61e23ada4d9d09b
+    commit: 87ab8179e1bd9880239c340855ae8862034bd0e8
     repo: github:pop-os/libcosmic
     name: cosmic-config-derive
     version: 1.0.0
@@ -672,6 +672,11 @@ sources:
     repo: github:pop-os/cosmic-mime-apps
     name: cosmic-mime-apps
     version: 0.2.0
+  - kind: git
+    commit: d7b66a24890d03e38dd8962d956bc802d4a41067
+    repo: github:pop-os/cosmic-osk
+    name: cosmic-osk-config
+    version: 0.1.0
   - kind: git
     commit: 15ba731b0850e5733a1f3bb51d5d48d58e6ce35b
     repo: github:pop-os/cosmic-panel
@@ -1344,12 +1349,12 @@ sources:
     name: iced
     version: 0.14.0
   - kind: git
-    commit: d77e99fb1555e2728297677de61e23ada4d9d09b
+    commit: 87ab8179e1bd9880239c340855ae8862034bd0e8
     repo: github:pop-os/libcosmic
     name: iced_accessibility
     version: 0.1.0
   - kind: git
-    commit: d77e99fb1555e2728297677de61e23ada4d9d09b
+    commit: 87ab8179e1bd9880239c340855ae8862034bd0e8
     repo: github:pop-os/libcosmic
     name: iced_core
     version: 0.14.0
@@ -1359,7 +1364,7 @@ sources:
     name: iced_debug
     version: 0.14.0
   - kind: git
-    commit: d77e99fb1555e2728297677de61e23ada4d9d09b
+    commit: 87ab8179e1bd9880239c340855ae8862034bd0e8
     repo: github:pop-os/libcosmic
     name: iced_futures
     version: 0.14.0
@@ -1995,8 +2000,8 @@ sources:
     sha: 650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086
   - kind: registry
     name: nmrs
-    version: 3.5.2
-    sha: aa84a0ad51eda83c8817099a0b613847599c712d049e89d892cca53ed6c4a337
+    version: 3.5.3
+    sha: 83ad7c7fb5d3552a6b08801a6fe858ec4e3af49be51b53cba51fa6615155f3f3
   - kind: registry
     name: no_std_io2
     version: 0.9.4

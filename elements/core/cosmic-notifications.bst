@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-notifications.git
   track: master
-  ref: epoch-1.8.0-4-gaa4dac2702506395ab76da1f6755e03b2ccb0db8
+  ref: epoch-1.9.0-0-gaa4dac2702506395ab76da1f6755e03b2ccb0db8
 - kind: cargo2
   url: "crates:"
   ref:

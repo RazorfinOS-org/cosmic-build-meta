@@ -28,7 +28,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-greeter.git
   track: master
-  ref: epoch-1.8.0-5-g0b0d2925ffa18ffb9a7f7175f90097bb502fbf43
+  ref: epoch-1.9.0-1-g8637169d9e87bb53ed5d156aeae298928d87b413
 
 # res/background.jpg is a Git LFS object (~3.7 MB) -- the orion-nebula
 # image used as the greeter's `fallback_background` via include_bytes!
@@ -615,6 +615,11 @@ sources:
     repo: github:pop-os/freedesktop-icons
     name: cosmic-freedesktop-icons
     version: 0.4.0
+  - kind: git
+    commit: d7b66a24890d03e38dd8962d956bc802d4a41067
+    repo: github:pop-os/cosmic-osk
+    name: cosmic-osk-config
+    version: 0.1.0
   - kind: git
     commit: c0cff4db14c37ed954983158e4055aa94c7741d9
     repo: github:pop-os/cosmic-protocols//
@@ -3503,6 +3508,10 @@ sources:
     name: zbus_names
     version: 4.3.4
     sha: d8bf88b4a3ff53e883001e0e0115b297a9d53c31b9c1edd2bfdd853e3428624e
+  - kind: registry
+    name: zbus_systemd
+    version: 0.26000.0
+    sha: 40c8310483ff4a77492d04a90bef30f40938059b4a4b4f7e456dda335d816cb6
   - kind: registry
     name: zbus_xml
     version: 5.2.1
