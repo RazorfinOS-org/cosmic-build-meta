@@ -20,7 +20,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-panel.git
   track: master
-  ref: epoch-1.8.0-6-gd6387697faf96f1a9cb04e580753089eec350249
+  ref: epoch-1.9.0-0-gb5cc19e351b82eed999097ced1ff267d27bf8e7a
 - kind: cargo2
   url: "crates:"
   ref:
