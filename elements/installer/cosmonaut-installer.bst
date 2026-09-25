@@ -39,7 +39,7 @@ depends:
 - freedesktop-sdk.bst:components/fontconfig.bst
 - freedesktop-sdk.bst:components/freetype.bst
 - freedesktop-sdk.bst:components/systemd.bst
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 # Runtime tools the engine subprocesses out to.
 - freedesktop-sdk.bst:components/util-linux.bst
 - freedesktop-sdk.bst:components/dosfstools.bst

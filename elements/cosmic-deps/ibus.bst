@@ -27,7 +27,7 @@ depends:
 - freedesktop-sdk.bst:components/pygobject.bst
 - freedesktop-sdk.bst:components/wayland.bst
 - freedesktop-sdk.bst:components/xorg-lib-x11.bst
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 - cosmic-deps/dconf.bst
 - cosmic-deps/cldr-emoji-annotation.bst
 - cosmic-deps/unicode-emoji.bst

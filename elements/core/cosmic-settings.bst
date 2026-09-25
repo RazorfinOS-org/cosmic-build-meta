@@ -22,7 +22,7 @@ depends:
 - freedesktop-sdk.bst:components/dav1d.bst
 - freedesktop-sdk.bst:components/fontconfig.bst
 - freedesktop-sdk.bst:components/freetype.bst
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 
 sources:
 - kind: git_repo

@@ -19,7 +19,7 @@
 # shared sysroot-prep block lands in both variants by construction.
 
 build-depends:
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 - freedesktop-sdk.bst:components/jq.bst
 - freedesktop-sdk.bst:components/systemd.bst
 - freedesktop-sdk.bst:components/dosfstools.bst
@@ -131,9 +131,8 @@ config:
   #   - any modules-load.d entry by short name silently no-ops
   # Running depmod against the staged sysroot reads the modules' own
   # MODULE_ALIAS() / dependency strings and writes the canonical
-  # mapping files. depmod is in kmod.bst which is part of FDSDK's
-  # runtime-minimal stack (already a build-dep above), so no extra
-  # element is needed.
+  # mapping files. depmod is in kmod.bst, which systemd.bst (already a
+  # build-dep above) pulls in, so no extra element is needed.
   - |
     KVER=$(ls /sysroot/usr/lib/modules | head -n1)
     depmod -a -b /sysroot "$KVER"

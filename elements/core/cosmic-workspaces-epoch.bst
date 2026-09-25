@@ -31,7 +31,7 @@ config:
 
 depends:
 - freedesktop-sdk.bst:components/wayland.bst
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 
 sources:
 - kind: git_repo

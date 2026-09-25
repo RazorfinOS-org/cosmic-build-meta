@@ -11,7 +11,7 @@ build-depends:
 
 depends:
 - core/pop-launcher.bst
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 
 sources:
 - kind: git_repo

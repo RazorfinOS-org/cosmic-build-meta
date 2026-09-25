@@ -19,7 +19,7 @@ build-depends:
 - freedesktop-sdk.bst:components/gstreamer-plugins-bad.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 - freedesktop-sdk.bst:components/libglvnd.bst
 - freedesktop-sdk.bst:components/gstreamer-plugins-bad.bst
 # libnvcuvid comes from nvidia-drivers.bst in the same stack; no dep

@@ -20,7 +20,7 @@ build-depends:
 - freedesktop-sdk.bst:bootstrap/coreutils.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 
 config:
   build-commands: []

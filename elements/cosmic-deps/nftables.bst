@@ -23,7 +23,7 @@ depends:
 - freedesktop-sdk.bst:components/libmnl.bst
 - freedesktop-sdk.bst:components/libnftnl.bst
 - freedesktop-sdk.bst:bootstrap/readline.bst
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 
 variables:
   conf-local: >-

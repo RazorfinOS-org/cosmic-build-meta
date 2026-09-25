@@ -8,7 +8,7 @@ build-depends:
 - freedesktop-sdk.bst:bootstrap/ncurses.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 - freedesktop-sdk.bst:bootstrap/ncurses.bst
 
 variables:

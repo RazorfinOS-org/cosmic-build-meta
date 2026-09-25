@@ -18,4 +18,4 @@ depends:
 - freedesktop-sdk.bst:components/curl.bst
 - freedesktop-sdk.bst:components/icu.bst
 - freedesktop-sdk.bst:bootstrap/readline.bst
-- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
+- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
