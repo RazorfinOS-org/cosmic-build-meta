@@ -13,7 +13,6 @@ enable flathub-remote-add.service
 # /usr/share/flatpak/preinstall.d/ and /etc/flatpak/preinstall.d/.
 # The subcommand is idempotent across boots and respects user
 # uninstalls (it won't reinstall what the user explicitly removed).
-# See cosmic-deps/flatpak.bst for why we vendor flatpak 1.17.6.
 enable flatpak-preinstall.service
 
 # flatpak-system-update.timer fires daily at 04:00 (with up to 1h

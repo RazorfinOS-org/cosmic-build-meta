@@ -14,13 +14,8 @@
 kind: stack
 
 depends:
-  # Flatpak runtime. Vendored at 1.17.6 (pre-release of 1.18) so the
-  # OCI image gets the `flatpak preinstall` subcommand + declarative
-  # /usr/share/flatpak/preinstall.d/ support that we use to ship
-  # Firefox by default. Switch back to
-  # freedesktop-sdk.bst:components/flatpak.bst once fdsdk advances to
-  # 1.18+ (then this comment + the local element can be deleted).
-  - cosmic-deps/flatpak.bst
+  # Flatpak runtime; fdsdk 26.08 ships 1.18, which has `flatpak preinstall`.
+  - freedesktop-sdk.bst:components/flatpak.bst
 
   # Sandboxing primitives Flatpak (and other tools like steam-runtime,
   # bwrap-oci, etc.) shell out to. Without bubblewrap, Flatpak fails

@@ -178,7 +178,7 @@ The `installer/cosmic-images-json.bst` element exists specifically so downstream
 
 ```
 elements/
-  freedesktop-sdk.bst            Junction to FDSDK 25.08
+  freedesktop-sdk.bst            Junction to FDSDK 26.08
   core/                          COSMIC binaries (compositor, shell, apps, greeter)
   core-deps/                     Build deps not in FDSDK (greetd, just, libdisplay-info, oniguruma, linux-ogc, …)
   cosmic-deps/                   Runtime system stack (base, fonts, networking, audio, bootc, …)

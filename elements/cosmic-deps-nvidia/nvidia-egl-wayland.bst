@@ -14,7 +14,7 @@ kind: meson
 build-depends:
 - freedesktop-sdk.bst:components/meson.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
-- freedesktop-sdk.bst:components/gcc-base.bst
+- freedesktop-sdk.bst:components/_private/gcc-base.bst
 - freedesktop-sdk.bst:bootstrap/binutils.bst
 - freedesktop-sdk.bst:components/wayland.bst
 - freedesktop-sdk.bst:components/wayland-protocols.bst

@@ -10,7 +10,7 @@ build-depends:
 - freedesktop-sdk.bst:bootstrap/bash.bst
 - freedesktop-sdk.bst:bootstrap/sed.bst
 # Kernel module compile.
-- freedesktop-sdk.bst:components/gcc-base.bst
+- freedesktop-sdk.bst:components/_private/gcc-base.bst
 - freedesktop-sdk.bst:bootstrap/binutils.bst
 - freedesktop-sdk.bst:components/make.bst
 - freedesktop-sdk.bst:components/gawk.bst
