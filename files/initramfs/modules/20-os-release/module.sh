@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 install() {
     install_file_at_path /usr/lib/os-release /usr/lib/initrd-release
     ln -s initrd-release "${root}/usr/lib/os-release"
