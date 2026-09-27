@@ -31,3 +31,4 @@ variables:
     --with-xtables
     --with-json
     --disable-python
+    --with-unitdir=%{prefix}/lib/systemd/system
