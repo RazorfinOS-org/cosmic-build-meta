@@ -1,6 +1,7 @@
 kind: manual
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/rust.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/_private/gcc-base.bst
@@ -14,7 +15,7 @@ build-depends:
 
 depends:
 - freedesktop-sdk.bst:components/wayland.bst
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 sources:
 - kind: git_repo

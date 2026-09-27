@@ -17,9 +17,10 @@ sources:
   ref: noto-monthly-release-2026.04.01-0-g132db3be0104de9ca0aac3c7b1dd33a8fd29ff39
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/fontconfig.bst
 
 variables:

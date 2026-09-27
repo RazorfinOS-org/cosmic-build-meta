@@ -11,7 +11,8 @@ sources:
       ref: c1407069204ed952afa38fb8f4dabd73969001e7f26d18ac46d9b4a9b4a76639
 
 build-depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- core-deps/sandbox-tools.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 runtime-depends:
 - cosmic-deps/brew.bst

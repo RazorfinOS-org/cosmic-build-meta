@@ -4,8 +4,11 @@
 # /dev/nvidia* nodes created early.
 kind: manual
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 variables:
   strip-binaries: ''

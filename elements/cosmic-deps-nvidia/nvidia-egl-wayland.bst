@@ -12,6 +12,7 @@
 kind: meson
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/meson.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
 - freedesktop-sdk.bst:components/_private/gcc-base.bst
@@ -29,7 +30,7 @@ build-depends:
 - cosmic-deps-nvidia/egl-external-platform.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 - freedesktop-sdk.bst:components/wayland.bst
 - freedesktop-sdk.bst:components/libdrm.bst
 

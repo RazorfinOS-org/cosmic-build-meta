@@ -1,4 +1,4 @@
-# Fonts: render text in any GTK/iced/Qt app. runtime-gnu does NOT
+# Fonts: render text in any GTK/iced/Qt app. runtime-minimal does NOT
 # pull fontconfig in, so this stack is mandatory for a usable desktop.
 kind: stack
 

@@ -41,12 +41,13 @@ sources:
   directory: pop-faces
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/meson.bst
 # gtk-update-icon-cache is bundled in gtk3
 - freedesktop-sdk.bst:components/gtk3.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 - freedesktop-sdk.bst:components/hicolor-icon-theme.bst
 
 variables:

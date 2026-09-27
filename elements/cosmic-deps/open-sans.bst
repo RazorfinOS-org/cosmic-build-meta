@@ -19,9 +19,10 @@ sources:
   ref: bd7e37632246368c60fdcbd374dbf9bad11969b6
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/fontconfig.bst
 
 variables:

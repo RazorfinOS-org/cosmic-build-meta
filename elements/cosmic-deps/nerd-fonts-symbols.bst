@@ -20,7 +20,7 @@ runtime-depends:
 - freedesktop-sdk.bst:components/fontconfig.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 variables:
   strip-binaries: ''

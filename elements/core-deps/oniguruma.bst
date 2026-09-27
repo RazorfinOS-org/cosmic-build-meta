@@ -1,6 +1,7 @@
 kind: cmake
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/cmake.bst
 - freedesktop-sdk.bst:components/ninja.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
@@ -8,7 +9,7 @@ build-depends:
 - freedesktop-sdk.bst:bootstrap/binutils.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 sources:
 - kind: git_repo

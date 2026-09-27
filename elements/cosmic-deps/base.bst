@@ -50,7 +50,7 @@ depends:
 
   # zsh -- the image's default login shell (wired via
   # oci/integration/shell-defaults.bst). Not packaged by FDSDK, so vendored
-  # in cosmic-deps/zsh.bst. bash stays present (via runtime-gnu) as the
+  # in cosmic-deps/zsh.bst. bash stays present (via runtime-minimal) as the
   # fallback shell and for system service accounts.
   - cosmic-deps/zsh.bst
 
@@ -85,7 +85,7 @@ depends:
   - freedesktop-sdk.bst:components/zip.bst
   - freedesktop-sdk.bst:components/bzip2.bst
 
-  # Core GNU userland. FDSDK's runtime-gnu is just bash + coreutils +
+  # Core GNU userland. FDSDK's runtime-minimal is just bash + coreutils +
   # glibc, so the rest of the POSIX/GNU toolkit only lands if something
   # else happens to pull it as a *runtime* dep. Several essentials have
   # ONLY build-stack referencers upstream and so never reached the image:
@@ -110,7 +110,7 @@ depends:
   - freedesktop-sdk.bst:components/wget2.bst
 
   # Runtime baseline + GPU stack
-  - freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+  - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
   - freedesktop-sdk.bst:vm/mesa-default.bst
 
   # Vulkan ICD loader (libvulkan.so.1). mesa ships drivers but not the
@@ -120,7 +120,7 @@ depends:
   - freedesktop-sdk.bst:components/vulkan-icd-loader.bst
 
   # Generates /usr/lib/locale/* for ALL supported languages.
-  # Without this, runtime-gnu only ships en_US.UTF-8 + C.UTF-8 (via
+  # Without this, runtime-minimal only ships en_US.UTF-8 + C.UTF-8 (via
   # utf-locale.bst), and cosmic-initial-setup's language picker shows
   # only English even though iso-codes is installed.
   - freedesktop-sdk.bst:components/locales.bst

@@ -39,8 +39,11 @@ sources:
   path: files/installer/networkd
   directory: networkd
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 variables:
   strip-binaries: ''

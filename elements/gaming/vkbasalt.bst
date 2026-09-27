@@ -18,7 +18,7 @@ build-depends:
 - freedesktop-sdk.bst:components/spirv-headers.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 - freedesktop-sdk.bst:components/vulkan-icd-loader.bst
 - freedesktop-sdk.bst:components/xorg-lib-x11.bst
 

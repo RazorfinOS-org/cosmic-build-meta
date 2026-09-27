@@ -6,8 +6,11 @@ sources:
     track: main
     ref: eddbb1a432c5a4b3d9ef2d524ef23c13f7855e06
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
-  - freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+  - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 variables:
   strip-binaries: ""

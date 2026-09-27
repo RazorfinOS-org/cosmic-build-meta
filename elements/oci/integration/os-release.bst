@@ -8,8 +8,11 @@ sources:
 - kind: local
   path: files/oci/os-release
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 variables:
   strip-binaries: ''
@@ -27,7 +30,7 @@ config:
         (>):
         # Rebrand VARIANT/VARIANT_ID for the gaming image. Done in pure
         # POSIX shell (no sed) -- this element only depends on
-        # runtime-gnu, which ships coreutils but not sed, and adding
+        # runtime-minimal, which ships coreutils but not sed, and adding
         # sed.bst would change the non-gaming cache key and force a
         # recompose. Reads the staged source and overwrites the installed
         # copy; `printf` is a shell built-in so no extra tools are needed.

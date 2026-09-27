@@ -27,7 +27,7 @@ build-depends:
 - freedesktop-sdk.bst:components/cpio.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 # Kernel modules go in /usr/lib/modules/<kver>/extra/. Co-versioning
 # is enforced; depmod runs at OCI image integration time.
 - freedesktop-sdk.bst:components/linux.bst

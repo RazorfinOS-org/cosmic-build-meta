@@ -14,10 +14,11 @@ sources:
 
   ref: f3907b395d410f1b97342292ca6bc83dd12eb4b205f2a0c48efdef99e517d7b0
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:bootstrap/coreutils.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 config:
   build-commands: []

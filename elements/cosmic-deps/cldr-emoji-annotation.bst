@@ -10,6 +10,7 @@ sources:
 
   ref: d5ee2abac64158c04884a722f8ef4830ea22b6c74aac20185be2838db8eda788
 build-depends:
+- core-deps/sandbox-tools.bst
 # unzip is libarchive's bsdunzip since 26.08; it links libbz2, which
 # libarchive doesn't declare.
 - freedesktop-sdk.bst:components/libarchive.bst
@@ -17,7 +18,7 @@ build-depends:
 - freedesktop-sdk.bst:bootstrap/coreutils.bst
 
 depends:
-- freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
+- freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 config:
   build-commands:
