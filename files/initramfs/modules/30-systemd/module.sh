@@ -31,9 +31,7 @@ FILES=(
     /usr/lib/systemd/systemd-integritysetup
     /usr/lib/systemd/systemd-cryptsetup
     /usr/lib/systemd/systemd-shutdown
-    # gnome-build-meta also ships /usr/lib/nvpcr/{cryptsetup,hardware,
-    # verity}.nvpcr (systemd 258+). FDSDK 26.08 has systemd 261; re-add
-    # once a booted image confirms fdsdk's build installs them.
+    # /usr/lib/nvpcr/*.nvpcr (systemd 258+) left out until confirmed on 26.08.
 )
 
 UNITS=(

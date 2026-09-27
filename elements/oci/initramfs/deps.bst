@@ -4,7 +4,6 @@
 kind: stack
 
 depends:
-# 26.08 moved bash/coreutils to runtime-gnu; 50-shell also copies gzip/sed.
 - freedesktop-sdk.bst:public-stacks/runtime-gnu.bst
 - freedesktop-sdk.bst:components/gzip.bst
 - freedesktop-sdk.bst:components/sed.bst
