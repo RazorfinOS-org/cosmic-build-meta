@@ -13,6 +13,7 @@ sources:
   ref: 26.13.3-0-g97a902fe8a550d8447cf60648e7b5f00c770a4fc
 
 build-depends:
+- freedesktop-sdk.bst:components/git.bst
 - freedesktop-sdk.bst:components/gobject-introspection.bst
 - freedesktop-sdk.bst:components/vala.bst
 - freedesktop-sdk.bst:components/sed.bst
