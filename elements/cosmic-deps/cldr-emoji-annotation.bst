@@ -10,8 +10,10 @@ sources:
 
   ref: d5ee2abac64158c04884a722f8ef4830ea22b6c74aac20185be2838db8eda788
 build-depends:
-# unzip is libarchive's bsdunzip since 26.08.
+# unzip is libarchive's bsdunzip since 26.08; it links libbz2, which
+# libarchive doesn't declare.
 - freedesktop-sdk.bst:components/libarchive.bst
+- freedesktop-sdk.bst:components/bzip2.bst
 - freedesktop-sdk.bst:bootstrap/coreutils.bst
 
 depends:
