@@ -20,7 +20,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-osd.git
   track: master
-  ref: epoch-1.9.0-0-g3faadf56bdaea4b088ea8dc5e808b167cec86de3
+  ref: epoch-1.9.0-7-g8eaadb53a03e5f52f3837bf41ea09d3a26ee69cf
 - kind: cargo2
   url: "crates:"
   ref:
