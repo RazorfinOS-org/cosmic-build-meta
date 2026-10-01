@@ -12,7 +12,7 @@ sources:
   url: github:pop-os/cosmic-icons.git
   track: master
 
-  ref: epoch-1.9.0-0-g343c007f37cd71716e68f01c43ecf2764b7f7c47
+  ref: epoch-1.9.0-1-gf1a282a0822aed1f0083dd2ab2e6c65bd5b401eb
 config:
   configure-commands: []
   build-commands: []

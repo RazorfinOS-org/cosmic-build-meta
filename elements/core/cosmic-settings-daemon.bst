@@ -28,7 +28,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings-daemon.git
   track: master
-  ref: epoch-1.9.0-0-gf97bee648c579b5fe2f2000bf3d129f1a7b08f17
+  ref: epoch-1.9.0-3-g7ec3e3016b68c5e57f27cb18a4b0e6c413443a37
 - kind: cargo2
   url: "crates:"
   ref:
@@ -1868,8 +1868,8 @@ sources:
     sha: fdb5bc1ae2baa591800df16c9ca78619bf65c0488b41b96ccec5d11220d8c154
   - kind: registry
     name: rustix
-    version: 1.1.4
-    sha: b6fe4565b9518b83ef4f91bb47ce29620ca828bd32cb7e408f0062e9930ba190
+    version: 1.1.5
+    sha: 891efababe418670775f199f0d233d84843c227a0949a883ce15b37c78d6629d
   - kind: registry
     name: rustls
     version: 0.23.45

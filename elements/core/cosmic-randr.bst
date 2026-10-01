@@ -19,7 +19,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-randr.git
   track: master
-  ref: epoch-1.9.0-0-g6e8e795970fa06d434af22775e415b517f7552d3
+  ref: epoch-1.9.0-1-gcfe8a1be466223840bba68d88c60ec66ed989814
 - kind: cargo2
   url: "crates:"
   ref:
