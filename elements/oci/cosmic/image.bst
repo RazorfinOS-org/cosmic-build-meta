@@ -15,6 +15,7 @@ kind: script
 
 build-depends:
 - freedesktop-sdk.bst:components/fakecap.bst
+- freedesktop-sdk.bst:components/gzip.bst
 - freedesktop-sdk.bst:oci/oci-builder.bst
 - freedesktop-sdk.bst:vm/prepare-image.bst
 - oci/cosmic/init-scripts.bst
