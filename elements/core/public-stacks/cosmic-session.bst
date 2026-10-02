@@ -39,4 +39,5 @@ depends:
 
   # Data/themes
   - core/cosmic-icons.bst
+  - core/cosmic-sound-theme.bst
   - core/cosmic-wallpapers.bst

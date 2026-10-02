@@ -6,8 +6,10 @@ kind: stack
 depends:
   - core/cosmic-edit.bst
   - core/cosmic-files.bst
+  - core/cosmic-monitor.bst
   - core/cosmic-player.bst
   - core/cosmic-settings.bst
   - core/cosmic-store.bst
   - core/cosmic-term.bst
+  - core/cosmic-viewer.bst
   - core/cosmic-initial-setup.bst
