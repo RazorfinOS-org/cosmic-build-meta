@@ -28,6 +28,7 @@ depends:
   - core/cosmic-launcher.bst
   - core/cosmic-notifications.bst
   - core/cosmic-osd.bst
+  - core/cosmic-osk.bst
   - core/cosmic-randr.bst
   - core/cosmic-screenshot.bst
   - core/cosmic-workspaces-epoch.bst
