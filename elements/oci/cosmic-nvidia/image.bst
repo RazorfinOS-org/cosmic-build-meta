@@ -49,8 +49,11 @@ config:
   - |
     systemd-sysusers --root /layer
 
+  # Hard-mask getty@tty1 so cosmic-greeter (via greetd.service) owns
+  # tty1 unconditionally. Done after prepare-image.sh's preset-all:
+  # systemd 261 (fdsdk 26.08) fails preset-all on masked units.
   - |
-    systemctl --root=/layer preset-all
+    ln -sf /dev/null /layer/etc/systemd/system/getty@tty1.service
 
   # bootc images must not have both /etc and /usr/etc populated.
   - |

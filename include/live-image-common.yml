@@ -122,6 +122,9 @@ config:
 
   - systemctl --root=/sysroot preset-all
 
+  # Mask after preset-all: systemd 261 fails it on masked units.
+  - ln -sf /dev/null /sysroot/etc/systemd/system/getty@tty1.service
+
   # Generate modules.dep + modules.alias for the staged kernel.
   # FDSDK ships /usr/lib/modules/<kver>/{kernel/,modules.builtin,...}
   # but skips the depmod step that produces modules.dep, modules.alias,

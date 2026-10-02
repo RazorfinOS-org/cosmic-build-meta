@@ -80,9 +80,3 @@ public:
     - ln -sf /var/mnt /mnt
 
     - touch /etc/machine-id
-
-    # Hard-mask getty@tty1 so cosmic-greeter (via greetd.service) owns
-    # tty1 unconditionally. systemd-preset has no `mask` verb, so we
-    # do this with a /dev/null symlink in /etc -- the canonical way.
-    - mkdir -p /etc/systemd/system
-    - ln -sf /dev/null /etc/systemd/system/getty@tty1.service
