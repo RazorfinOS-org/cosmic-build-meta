@@ -41,6 +41,7 @@ sources:
   directory: pop-faces
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/meson.bst
 # gtk-update-icon-cache is bundled in gtk3
 - freedesktop-sdk.bst:components/gtk3.bst

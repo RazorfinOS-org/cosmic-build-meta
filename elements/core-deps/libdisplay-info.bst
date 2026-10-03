@@ -1,11 +1,12 @@
 kind: meson
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/hwdata.bst
 - freedesktop-sdk.bst:components/meson.bst
 - freedesktop-sdk.bst:components/ninja.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
-- freedesktop-sdk.bst:components/gcc-base.bst
+- freedesktop-sdk.bst:components/_private/gcc-base.bst
 - freedesktop-sdk.bst:bootstrap/binutils.bst
 
 depends:

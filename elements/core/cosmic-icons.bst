@@ -1,6 +1,7 @@
 kind: manual
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - core-deps/just.bst
 - freedesktop-sdk.bst:components/findutils.bst
 

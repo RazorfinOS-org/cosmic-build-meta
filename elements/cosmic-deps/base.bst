@@ -80,7 +80,8 @@ depends:
   - freedesktop-sdk.bst:components/jq.bst
   - freedesktop-sdk.bst:components/git.bst
   - freedesktop-sdk.bst:components/git-lfs.bst
-  - freedesktop-sdk.bst:components/unzip.bst
+  # 26.08 dropped Info-ZIP unzip; libarchive ships unzip -> bsdunzip.
+  - freedesktop-sdk.bst:components/libarchive.bst
   - freedesktop-sdk.bst:components/zip.bst
   - freedesktop-sdk.bst:components/bzip2.bst
 

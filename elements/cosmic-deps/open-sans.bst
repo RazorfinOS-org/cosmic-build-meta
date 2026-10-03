@@ -22,6 +22,7 @@ depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/fontconfig.bst
 
 variables:

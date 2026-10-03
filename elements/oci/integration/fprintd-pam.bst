@@ -11,6 +11,9 @@ sources:
 
 # linux-pam dep: stage after the stock system-auth so this override
 # wins the compose overlap.
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
 - freedesktop-sdk.bst:components/linux-pam.bst
 - cosmic-deps/fprintd.bst

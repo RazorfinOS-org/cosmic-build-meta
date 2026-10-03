@@ -31,9 +31,7 @@ FILES=(
     /usr/lib/systemd/systemd-integritysetup
     /usr/lib/systemd/systemd-cryptsetup
     /usr/lib/systemd/systemd-shutdown
-    # nvpcr policies are systemd 258+; FDSDK 25.08 ships systemd 257 so
-    # /usr/lib/nvpcr/{cryptsetup,hardware,verity}.nvpcr aren't present.
-    # Re-add when FDSDK bumps systemd.
+    # /usr/lib/nvpcr/*.nvpcr (systemd 258+) left out until confirmed on 26.08.
 )
 
 UNITS=(

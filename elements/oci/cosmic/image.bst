@@ -15,6 +15,7 @@ kind: script
 
 build-depends:
 - freedesktop-sdk.bst:components/fakecap.bst
+- freedesktop-sdk.bst:components/gzip.bst
 - freedesktop-sdk.bst:oci/oci-builder.bst
 - freedesktop-sdk.bst:vm/prepare-image.bst
 - oci/cosmic/init-scripts.bst
@@ -45,6 +46,12 @@ config:
   commands:
   - mkdir /fakecap
 
+  # Create system users/groups before prepare-image.sh runs the initial
+  # scripts: dbus.bst's needs the messagebus group to set its launch
+  # helper to 4750 root:messagebus, and skips silently without it.
+  - |
+    systemd-sysusers --root /layer
+
   - |
     prepare-image.sh \
        --sysroot /layer \
@@ -52,17 +59,11 @@ config:
        --seed "%{sysroot-seed}" \
        --noroot --noboot >/dev/null
 
+  # Hard-mask getty@tty1 so cosmic-greeter (via greetd.service) owns
+  # tty1 unconditionally. Done after prepare-image.sh's preset-all:
+  # systemd 261 (fdsdk 26.08) fails preset-all on masked units.
   - |
-    systemd-sysusers --root /layer
-
-  # Apply systemd presets against the staged rootfs. Without this,
-  # /usr/lib/systemd/system-preset/*.preset files are dead weight --
-  # `systemctl preset-all` is what turns them into the actual
-  # /etc/systemd/system/*.wants/ symlinks systemd consults at boot.
-  # In particular, this is what enables greetd.service and masks
-  # getty@tty1 + getty@tty2 (per files/oci/systemd-presets/90-cosmic.preset).
-  - |
-    systemctl --root=/layer preset-all
+    ln -sf /dev/null /layer/etc/systemd/system/getty@tty1.service
 
   # bootc images must not have both /etc and /usr/etc populated.
   # /usr/etc is an ostree implementation detail generated client-side.

@@ -8,6 +8,7 @@
 kind: script
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
 config:

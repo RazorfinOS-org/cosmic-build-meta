@@ -1,6 +1,7 @@
 kind: make
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/make.bst
 - freedesktop-sdk.bst:components/sed.bst
 - freedesktop-sdk.bst:components/wayland-protocols.bst

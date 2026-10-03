@@ -23,6 +23,9 @@ sources:
   path: files/oci/mime-defaults
   directory: mime-defaults
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 

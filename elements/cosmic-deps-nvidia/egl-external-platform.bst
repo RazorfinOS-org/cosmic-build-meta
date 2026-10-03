@@ -14,6 +14,7 @@
 kind: meson
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/meson.bst
 - freedesktop-sdk.bst:components/pkg-config.bst
 

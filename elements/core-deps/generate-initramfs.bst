@@ -11,6 +11,9 @@ sources:
 - kind: local
   path: files/initramfs
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 

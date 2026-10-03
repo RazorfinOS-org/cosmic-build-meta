@@ -1,5 +1,6 @@
 # Build a unified initramfs and stage it next to the kernel at
 # /usr/lib/modules/$kver/initramfs.img -- exactly where bootc expects it.
+# The kernel element itself ships vmlinuz there (fdsdk 26.08 layout).
 #
 # Mirrors elements/oci/initramfs.bst from gnome-build-meta. Uses the
 # `generate-initramfs` script we ship in core-deps/generate-initramfs.bst.
@@ -95,13 +96,3 @@ config:
     initrds+=(/initramfs.img)
     cat "${initrds[@]}" >"%{install-root}/usr/lib/modules/${version}/initramfs.img"
 
-    # FDSDK 25.08's components/linux.bst installs vmlinuz to /boot/vmlinuz
-    # (not under /usr/lib/modules/<kver>/), and that path matches no
-    # split-rule domain, so it's filtered out of every runtime artifact
-    # downstream. bootc install needs it side-by-side with initramfs.img
-    # at /usr/lib/modules/<kver>/vmlinuz. Build-deps stage the full
-    # sandbox without split filtering, so /boot/vmlinuz is accessible
-    # here -- copy it into our install-root and let it ride downstream
-    # as part of *our* runtime artifact. Mirrors gnome-build-meta's
-    # gnomeos/initramfs/signed-modules.bst, minus the signing.
-    cp /boot/vmlinuz "%{install-root}/usr/lib/modules/${version}/vmlinuz"

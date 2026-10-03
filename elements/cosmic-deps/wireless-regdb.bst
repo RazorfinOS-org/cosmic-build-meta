@@ -8,6 +8,7 @@
 kind: manual
 
 build-depends:
+- core-deps/sandbox-tools.bst
 - freedesktop-sdk.bst:components/make.bst
 - freedesktop-sdk.bst:bootstrap/coreutils.bst
 

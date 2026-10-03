@@ -8,6 +8,9 @@ sources:
   path: files/oci/swap
   directory: swap
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 

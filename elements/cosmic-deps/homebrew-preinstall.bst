@@ -17,6 +17,9 @@ sources:
   path: files/oci/systemd-presets
   directory: systemd-presets
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 

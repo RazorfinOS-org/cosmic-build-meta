@@ -5,15 +5,14 @@
 # (gaming swaps it for core-deps/linux-ogc.bst).
 #
 # This reproduces the recipe of components/linux.bst at our pinned
-# freedesktop-sdk 25.08 ref. Deltas from the upstream recipe (all shared
-# with linux-ogc.bst, see there):
+# freedesktop-sdk 26.08 ref (kernel files all under /usr/lib/modules/<kver>/,
+# nothing in /boot). Deltas from the upstream recipe (all shared with
+# linux-ogc.bst, see there):
 #   1. CRYPTO_ZSTD forced =y (zswap.compressor=zstd needs it built in).
 #   2. Hardware enablement from the Fedora config audit (cosmic-config.sh).
-#   3. Modules stripped (INSTALL_MOD_STRIP=1) and vmlinux to the devel
-#      split: the shared config pass enables DEBUG_INFO_BTF (forcing
-#      DEBUG_INFO=y), and our runtime OCI layers only exclude the
-#      devel/debug domains, so upstream's contract would ship ~0.5 GB
-#      of debug payload in composed images.
+#   3. vmlinux to the devel split (upstream uses debug): the shared config
+#      pass enables DEBUG_INFO_BTF (forcing DEBUG_INFO=y), and keeping both
+#      kernels on one rule keeps the ~0.5 GB payload out of composed images.
 #
 # Bumps: `just bst source track core-deps/linux-fdsdk.bst` follows the
 # pinned stable tag; keep files/linux-ogc/fdsdk-config.sh in sync when
@@ -42,7 +41,6 @@ build-depends:
   strict: true
 
 variables:
-  bootdir: /boot
   indep-libdir: '%{prefix}/lib'
   # Modules are stripped by kbuild (INSTALL_MOD_STRIP=1) *before* the
   # module signature is appended; a post-build strip pass would tear
@@ -82,10 +80,6 @@ config:
     # in expected-configs and the post-olddefconfig gate verifies they
     # survived; raw scripts/config calls would be silently droppable.
     . ./config-utils.sh
-
-    # Linux 7.1 dropped the RNG_DEFAULT select that enabled this menu;
-    # keep FDSDK's expected SP800-90A DRBGs available.
-    enable CRYPTO_DRBG_MENU
 
     # The zswap.compressor=zstd karg needs the compressor built in, not =m.
     enable CRYPTO_ZSTD
@@ -133,11 +127,12 @@ config:
 
   install-commands:
   - |
-    install -Dm644 "%{image-name}" '%{install-root}%{bootdir}/vmlinuz'
-    install -Dm644 vmlinux '%{install-root}%{bootdir}/vmlinux'
-    install -Dm644 System.map '%{install-root}%{bootdir}/System.map'
-    install -Dm644 .config '%{install-root}%{bootdir}/config'
-    make -j1 INSTALL_MOD_PATH='%{install-root}%{prefix}' INSTALL_MOD_STRIP=1 modules_install
+    release=$(make -s kernelrelease)
+    install -Dm644 "%{image-name}" "%{install-root}%{indep-libdir}/modules/${release}/vmlinuz"
+    install -Dm644 vmlinux "%{install-root}%{indep-libdir}/modules/${release}/vmlinux"
+    install -Dm644 System.map "%{install-root}%{indep-libdir}/modules/${release}/System.map"
+    install -Dm644 .config "%{install-root}%{indep-libdir}/modules/${release}/config"
+    ZSTD_CLEVEL=19 make -j1 INSTALL_MOD_PATH="%{install-root}%{prefix}" INSTALL_MOD_STRIP=1 modules_install
 
   - |
     release=$(make -s kernelrelease)
@@ -171,18 +166,19 @@ config:
       install-commands:
         (>):
         - |
-          make -j1 INSTALL_DTBS_PATH='%{install-root}%{bootdir}/dtbs' dtbs_install
+          release=$(make -s kernelrelease)
+          make -j1 INSTALL_DTBS_PATH="%{install-root}%{indep-libdir}/modules/${release}/dtbs" dtbs_install
 
 public:
   bst:
     split-rules:
       devel:
         (>):
-        - '%{bootdir}/System.map'
+        - '%{indep-libdir}/modules/*/System.map'
         # DEBUG_INFO=y (via the shared config's DEBUG_INFO_BTF) makes
         # vmlinux ~0.5 GB; runtime consumers read /sys/kernel/btf/vmlinux,
         # not this file, so keep it out of the composed images.
-        - '%{bootdir}/vmlinux'
+        - '%{indep-libdir}/modules/*/vmlinux'
 
 sources:
 - kind: git_repo

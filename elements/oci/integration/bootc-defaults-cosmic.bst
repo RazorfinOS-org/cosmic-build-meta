@@ -9,6 +9,9 @@ sources:
 - kind: local
   path: files/oci/bootc-defaults
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 

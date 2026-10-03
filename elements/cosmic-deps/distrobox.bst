@@ -6,6 +6,9 @@ sources:
   track: '*.*'
   ref: 1.8.2.4-0-g08e4963711ee1c556f8eb44582a3aa0fbb4c9a77
 
+build-depends:
+- core-deps/sandbox-tools.bst
+
 depends:
 - freedesktop-sdk.bst:public-stacks/runtime-minimal.bst
 
