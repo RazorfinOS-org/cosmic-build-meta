@@ -178,12 +178,20 @@ config:
       /sysroot/usr/bin/newuidmap \
       /sysroot/usr/bin/newgidmap \
       /sysroot/usr/bin/nvidia-modprobe \
-      /sysroot/usr/libexec/dbus-daemon-launch-helper \
-      /sysroot/usr/lib/polkit-1/polkit-agent-helper-1 \
-      /sysroot/usr/lib/x86_64-linux-gnu/polkit-1/polkit-agent-helper-1 \
     ; do
       [ -f "$f" ] && chmod 4755 "$f" 2>/dev/null || true
     done
+    # polkit 127 (fdsdk 26.08) socket-activates its agent helper; no setuid.
+    # dbus's launch helper is 4750 root:messagebus, as dbus.bst's initial
+    # script sets.
+    f=/sysroot/usr/libexec/dbus-daemon-launch-helper
+    gid=
+    while IFS=: read -r name _ id _; do
+      [ "$name" = messagebus ] && { gid=$id; break; }
+    done < /sysroot/etc/group
+    if [ -f "$f" ] && [ -n "$gid" ]; then
+      chown "0:${gid}" "$f" && chmod 4750 "$f"
+    fi
 
   # FDSDK's greetd.service [Install] section only declares
   # `Alias=display-manager.service`, no `WantedBy=graphical.target`.

@@ -46,15 +46,18 @@ config:
   commands:
   - mkdir /fakecap
 
+  # Create system users/groups before prepare-image.sh runs the initial
+  # scripts: dbus.bst's needs the messagebus group to set its launch
+  # helper to 4750 root:messagebus, and skips silently without it.
+  - |
+    systemd-sysusers --root /layer
+
   - |
     prepare-image.sh \
        --sysroot /layer \
        --initscripts /initial_scripts \
        --seed "%{sysroot-seed}" \
        --noroot --noboot >/dev/null
-
-  - |
-    systemd-sysusers --root /layer
 
   # Hard-mask getty@tty1 so cosmic-greeter (via greetd.service) owns
   # tty1 unconditionally. Done after prepare-image.sh's preset-all:
