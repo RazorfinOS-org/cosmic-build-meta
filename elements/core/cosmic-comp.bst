@@ -34,7 +34,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-comp.git
   track: master
-  ref: epoch-1.9.0-10-gd8e4683be829d28743b323f891cf3059f87d15b6
+  ref: epoch-1.9.0-20-g3d55cba06c9cf6f27609cdefb520f7857dba20af
 - kind: cargo2
   url: "crates:"
   ref:
