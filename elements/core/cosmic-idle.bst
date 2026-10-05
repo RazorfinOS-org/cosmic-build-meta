@@ -18,7 +18,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-idle.git
   track: master
-  ref: epoch-1.9.0-1-gb3693ea1cfbef12e5369073c2d43e7e82936fd4d
+  ref: epoch-1.9.0-3-g09e64e7ee2d2414edecba016d462ef31af195ce0
 - kind: cargo2
   url: "crates:"
   ref:
