@@ -12,7 +12,7 @@ sources:
   url: github:pop-os/cosmic-wallpapers.git
   track: master
 
-  ref: epoch-1.9.0-1-gda595bba495cb8fc57f26505621fc25000218349
+  ref: epoch-1.10.0-0-gda595bba495cb8fc57f26505621fc25000218349
 
 # original/*.jpg are Git LFS objects in upstream; the git_repo plugin only
 # fetches the LFS *pointer* (~130 bytes) because we disable LFS smudge
