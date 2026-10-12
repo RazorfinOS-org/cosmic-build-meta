@@ -34,7 +34,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-comp.git
   track: master
-  ref: epoch-1.10.0-11-g4a21b16d3607aa36e2d0faa12ca23fc98a95b3db
+  ref: epoch-1.10.0-14-g4d14528f9108cbc0df5404b3b4b8fa6db75ddb41
 - kind: cargo2
   url: "crates:"
   ref:
@@ -285,8 +285,8 @@ sources:
     sha: 9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801
   - kind: registry
     name: cfg_aliases
-    version: 0.2.1
-    sha: 613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724
+    version: 0.2.2
+    sha: f079e83a288787bcd14a6aea84cee5c87a67c5a3e660c30f557a3d24761b3527
   - kind: registry
     name: chacha20
     version: 0.10.0
@@ -1218,8 +1218,8 @@ sources:
     sha: b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981
   - kind: registry
     name: libredox
-    version: 0.1.12
-    sha: 3d0b95e02c851351f877147b7deea7b1afb1df71b63aa5f8270716e0c5720616
+    version: 0.1.25
+    sha: 61ff90caf6077a803a240f62fdbe88645a890bbca49ef8174c3cb0404362171d
   - kind: registry
     name: libseat
     version: 0.2.4
@@ -1509,8 +1509,8 @@ sources:
     sha: 04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d
   - kind: registry
     name: orbclient
-    version: 0.3.50
-    sha: 52ad2c6bae700b7aa5d1cc30c59bdd3a1c180b09dbaea51e2ae2b8e1cf211fdd
+    version: 0.4.6
+    sha: 01f140a738f180203d7912dfd369936fff2fb0ad6f426c0aa007ed3e2b443e6b
   - kind: registry
     name: ordered-float
     version: 5.1.0
@@ -1627,6 +1627,10 @@ sources:
     name: pkg-config
     version: 0.3.32
     sha: 7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c
+  - kind: registry
+    name: plain
+    version: 0.2.3
+    sha: b4596b6d070b27117e987119b4dac604f3c58cfb0b191112e24771b2faeac1a6
   - kind: registry
     name: png
     version: 0.17.16
@@ -1752,13 +1756,17 @@ sources:
     version: 0.37.0
     sha: 7b634fabf032fab15307ffd272149b622260f55974d9fad689292a5d33df02e5
   - kind: registry
+    name: redox_event
+    version: 0.4.8
+    sha: c5018d583d6d2f5499352aea8d177e9067d1eb03ab17c78169d5ba7a30001b15
+  - kind: registry
     name: redox_syscall
     version: 0.5.18
     sha: ed2bf2547551a7053d6fdfafda3f938979645c44812fbfcda098faae3f1a362d
   - kind: registry
     name: redox_syscall
-    version: 0.7.2
-    sha: 6d94dd2f7cd932d4dc02cc8b2b50dfd38bd079a4e5d79198b99743d7fcf9a4b4
+    version: 0.9.4
+    sha: 737970939a87c6fa31e7acad13307bccbb017a073b695b6089a2c484f929e20e
   - kind: registry
     name: redox_users
     version: 0.5.2
@@ -1953,8 +1961,8 @@ sources:
     sha: 38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d
   - kind: registry
     name: siphasher
-    version: 1.0.2
-    sha: b2aa850e253778c88a04c3d7323b043aeda9d3e30d5971937c1855769763678e
+    version: 1.0.4
+    sha: 33f4fe9184a62d842c9ef383018f3306d8ba224fd9d836f56d7288308847c256
   - kind: registry
     name: skrifa
     version: 0.37.0
@@ -1976,16 +1984,20 @@ sources:
     version: 1.15.2
     sha: 8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90
   - kind: git
-    commit: e3d461a057ba244d213a8498ec372b0799cca103
+    commit: cf43a02acd6b5863909665c67f289f6f3478823a
     repo: github:smithay/smithay.git
     query:
-      rev: e3d461a
+      rev: cf43a02
     name: smithay
     version: 0.7.0
   - kind: registry
     name: smithay-client-toolkit
     version: 0.20.0
     sha: 0512da38f5e2b31201a93524adb8d3136276fa4fe4aafab4e1f727a82b534cc0
+  - kind: registry
+    name: smithay-client-toolkit
+    version: 0.21.1
+    sha: 74dc9ee14b0fdcb535f9556141bacac070c994a977d2240ee455d7438a617f00
   - kind: git
     commit: 859b02c88f45c554049a67c6ddeec1692ce0e20b
     repo: github:pop-os/smithay-clipboard
@@ -2396,6 +2408,10 @@ sources:
     version: 20250721.0.1
     sha: 40a1f863128dcaaec790d7b4b396cc9b9a7a079e878e18c47e6c2d2c5a8dcbb1
   - kind: registry
+    name: wayland-protocols-experimental
+    version: 20251230.0.3
+    sha: 91c6c3e7178e553d093d46999032bc79aafea9dedd71dd702c8ace7bbc25cf13
+  - kind: registry
     name: wayland-protocols-misc
     version: 0.3.12
     sha: 6e9567599ef23e09b8dad6e429e5738d4509dfc46b3b21f32841a304d16b29c8
@@ -2660,48 +2676,48 @@ sources:
     sha: d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650
   - kind: registry
     name: winit
-    version: 0.31.0-beta.2
-    sha: 2879d2854d1a43e48f67322d4bd097afcb6eb8f8f775c8de0260a71aea1df1aa
+    version: 0.31.0-beta.3
+    sha: f431156a3e4f0f1b35eaaf37674e55838e3652908c8088f570466274d1902e2b
   - kind: registry
     name: winit-android
-    version: 0.31.0-beta.2
-    sha: 51d9c0d2cd93efec3a9f9ad819cfaf0834782403af7c0d248c784ec0c61761df
+    version: 0.31.0-beta.3
+    sha: d5d60d944a564986b9311e325334cc22e7e4cf726dd0ff7475fd925404215af4
   - kind: registry
     name: winit-appkit
-    version: 0.31.0-beta.2
-    sha: 21310ca07851a49c348e0c2cc768e36b52ca65afda2c2354d78ed4b90074d8aa
+    version: 0.31.0-beta.3
+    sha: 23343ec0ea7ac6aa72f38009a6ff66fb63bcf6395e0622fba72794d2a762ab42
   - kind: registry
     name: winit-common
-    version: 0.31.0-beta.2
-    sha: 45375fbac4cbb77260d83a30b1f9d8105880dbac99a9ae97f56656694680ff69
+    version: 0.31.0-beta.3
+    sha: e90422ff1c04502aaaac1dad1d099791c2bbb3fbb3f823019e0ce5cdeee04025
   - kind: registry
     name: winit-core
-    version: 0.31.0-beta.2
-    sha: e4f0ccd7abb43740e2c6124ac7cae7d865ecec74eec63783e8922577ac232583
+    version: 0.31.0-beta.3
+    sha: b8af6307236c51847199950c15cf80e0481a250bb96ce9132f5026df4ad3d0f9
   - kind: registry
     name: winit-orbital
-    version: 0.31.0-beta.2
-    sha: 51ea1fb262e7209f265f12bd0cc792c399b14355675e65531e9c8a87db287d46
+    version: 0.31.0-beta.3
+    sha: 278a8ae837902a3bc95dd2fd696d680da33f32130eecc29905358c9089cf6c50
   - kind: registry
     name: winit-uikit
-    version: 0.31.0-beta.2
-    sha: 680a356e798837d8eb274d4556e83bceaf81698194e31aafc5cfb8a9f2fab643
+    version: 0.31.0-beta.3
+    sha: 83315a3ea1739c8466cf23d35e3b0a2cb20c9515d8857666b633afef484740b5
   - kind: registry
     name: winit-wayland
-    version: 0.31.0-beta.2
-    sha: 8ce5afb2ba07da603f84b722c95f9f9396d2cedae3944fb6c0cda4a6f88de545
+    version: 0.31.0-beta.3
+    sha: 8b64ceed06de0c45886eef05102106abe1413e703384e337bc57c7e95b71f803
   - kind: registry
     name: winit-web
-    version: 0.31.0-beta.2
-    sha: 8c2490a953fb776fbbd5e295d54f1c3847f4f15b6c3929ec53c09acda6487a92
+    version: 0.31.0-beta.3
+    sha: f539be45f95cc297bdfb80569aef38d925d64aec4133852a4d3fc5cb3660f1c9
   - kind: registry
     name: winit-win32
-    version: 0.31.0-beta.2
-    sha: 644ea78af0e858aa3b092e5d1c67c41995a98220c81813f1353b28bc8bb91eaa
+    version: 0.31.0-beta.3
+    sha: 25fb480c41df01d351f656cbf3ad74013f8a9d22bb5b2dcab59f9167e7a0b6ec
   - kind: registry
     name: winit-x11
-    version: 0.31.0-beta.2
-    sha: aa5b600756534c7041aa93cd0d244d44b09fca1b89e202bd1cd80dd9f3636c46
+    version: 0.31.0-beta.3
+    sha: bb5746cd907e514b7895491a1c6f7d0cb70077f9e16928cd74ae6f987ffd96aa
   - kind: registry
     name: winnow
     version: 0.6.24
