@@ -264,7 +264,7 @@ sources:
 - kind: git_repo
   url: github:OpenGamingCollective/linux.git
   track: v7.2.*-ogc*
-  ref: v7.2.9-ogc1-0-g9f1e1d5d73d4cd9d09f7d9c1ca6aa185f4129d63
+  ref: v7.2.9-ogc2-0-ge4ded9909ce12e84a46a3519e9c7747ff13aa9b0
 # Fixups for the OGC patchset itself; review at every tag bump and
 # drop each patch once the fix lands upstream.
 - kind: patch_queue
