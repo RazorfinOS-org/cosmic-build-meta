@@ -34,7 +34,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-comp.git
   track: master
-  ref: epoch-1.10.0-16-g742b800b518f0dafd89d0c1ace4de4935334ed18
+  ref: epoch-1.11.0-0-g8cb1802caada438bb5cc7670dfabdaca5fad0502
 - kind: cargo2
   url: "crates:"
   ref:
@@ -261,8 +261,8 @@ sources:
     sha: 1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33
   - kind: registry
     name: calloop
-    version: 0.14.4
-    sha: 4dbf9978365bac10f54d1d4b04f7ce4427e51f71d61f2fe15e3fed5166474df7
+    version: 0.14.5
+    sha: 43b32313e937c8721c9d17ee9bf60699a6402b4b7c2cb6ac1bee0ffcaa4b4e5e
   - kind: registry
     name: calloop-wayland-source
     version: 0.4.1
@@ -1984,10 +1984,10 @@ sources:
     version: 1.15.2
     sha: 8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90
   - kind: git
-    commit: cf43a02acd6b5863909665c67f289f6f3478823a
+    commit: 8a270232f1bfc416c781273c98a3f52a812a0bba
     repo: github:smithay/smithay.git
     query:
-      rev: cf43a02
+      rev: 8a27023
     name: smithay
     version: 0.7.0
   - kind: registry
