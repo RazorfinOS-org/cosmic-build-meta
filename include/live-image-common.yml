@@ -189,8 +189,11 @@ config:
     while IFS=: read -r name _ id _; do
       [ "$name" = messagebus ] && { gid=$id; break; }
     done < /sysroot/etc/group
+    # chown clears setuid, so chmod after; a sandbox that refuses the
+    # chown leaves root:root, as dbus.bst's own script would.
     if [ -f "$f" ] && [ -n "$gid" ]; then
-      chown "0:${gid}" "$f" && chmod 4750 "$f"
+      chown "0:${gid}" "$f" 2>/dev/null || true
+      chmod 4750 "$f"
     fi
 
   # FDSDK's greetd.service [Install] section only declares
