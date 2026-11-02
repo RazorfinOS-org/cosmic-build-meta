@@ -16,7 +16,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-term.git
   track: master
-  ref: epoch-1.11.0-1-ga5e1bb5eba2083ff6f4b3110706be7060e306270
+  ref: epoch-1.11.0-2-g8a05e91948814afc4162d9fcdc95875c8cc69400
 - kind: cargo2
   url: "crates:"
   ref:
