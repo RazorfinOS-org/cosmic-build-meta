@@ -597,6 +597,9 @@ chunk-variant variant="cosmic":
         echo "error: setfattr not found; install the 'attr' package" >&2; exit 1; }
     sudo files/chunkah/assign-components.sh "${rootfs}"
 
+    echo "==> Restoring ownership BuildStream can't carry"
+    sudo files/chunkah/fix-ownership.sh "${rootfs}"
+
     echo "==> Running chunkah (max-layers {{chunk_max_layers}})"
     sudo podman run --rm \
         --security-opt label=disable \
@@ -623,7 +626,7 @@ chunk-variant variant="cosmic":
     echo "==> Loading chunked image into podman storage as ${ref}"
     sudo skopeo copy "oci:${outdir}/img" "containers-storage:${ref}"
 
-    echo "==> Verifying setuid survived the round-trip"
+    echo "==> Verifying setuid modes and owners survived the round-trip"
     vcid="$(sudo podman create "${ref}" true)"
     vroot="$(sudo podman mount "${vcid}")"
     sudo files/chunkah/check-setuid.sh "${vroot}" || \
@@ -828,6 +831,13 @@ track *elements:
 [group('track')]
 track-all:
     just bst source track --deps all core/deps.bst
+
+# New upstream apps never show up in `track-all`, which only follows
+# existing elements; deliberate skips live in files/epoch/ignore.txt.
+# Fail if pop-os/cosmic-epoch has a submodule that no element sources
+[group('track')]
+epoch-drift:
+    files/epoch/check-drift.sh
 
 # Track the OGC kernel (follows v7.2.*-ogc* tags). Kernel only, not the
 # gaming stack: gamescope's vendored git_module pins break under blind
