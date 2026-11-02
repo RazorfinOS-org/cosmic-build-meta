@@ -22,7 +22,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-bg.git
   track: master
-  ref: epoch-1.11.0-0-g9520e16758693bc2f6845d52680f236d548edda2
+  ref: epoch-1.11.0-2-gafce6904b201754fcad3f3d3bd9acd6ba21536ab
 - kind: cargo2
   url: "crates:"
   ref:
@@ -47,14 +47,6 @@ sources:
     version: 0.6.4
     sha: dc890384c8602f339876ded803c97ad529f3842aba97f6392b3dba0dd171769b
   - kind: registry
-    name: alloc-no-stdlib
-    version: 2.0.4
-    sha: cc7bb162ec39d46ab1ca8c77bf72e890535becd1751bb45f64c597edb4c8c6b3
-  - kind: registry
-    name: alloc-stdlib
-    version: 0.2.4
-    sha: 0e76a019e91224d279006ff972f1e984179a6e9feb050adba6ce8274aef23195
-  - kind: registry
     name: anyhow
     version: 1.0.104
     sha: 330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470
@@ -70,6 +62,10 @@ sources:
     name: arg_enum_proc_macro
     version: 0.3.4
     sha: 0ae92a5119aa49cdbcf6b9f893fe4e1d98b04ccbf82ee0584ad948a44a734dea
+  - kind: registry
+    name: array-init
+    version: 2.1.0
+    sha: 3d62b7694a562cdf5a74227903507c56ab2cc8bdd1f781ed5cb4cf9c9f810bfc
   - kind: registry
     name: arrayvec
     version: 0.7.8
@@ -131,10 +127,6 @@ sources:
     name: borsh
     version: 1.8.1
     sha: 553c5d846a6ba5150c65e3b1b8ec073bcf1abc20f9b7220de384a4443ea4e20a
-  - kind: registry
-    name: brotli-decompressor
-    version: 5.0.3
-    sha: 3a32acac15fe1967bc3986b2a6347dffc965602354ea6f450ad07e8bfd253583
   - kind: git
     commit: 430f3d48a97d8779f9c1985473912e594ccca1ae
     repo: github:pop-os/libcosmic
@@ -542,57 +534,25 @@ sources:
     version: 0.3.106
     sha: 7883d941dae510fb2d978fc3fe018c71c9e2892fd38854de3e8b92c2e5ad9cc5
   - kind: registry
-    name: jxl-bitstream
-    version: 1.1.0
-    sha: b480e752277e29eb4054f69546887a9b84656fe78c08f54ba5850ced98a378fe
+    name: jxl
+    version: 0.8.0
+    sha: b8379fc83d79477900c9aed78cb8370a556d834081bebcb771c6010381c4e230
   - kind: registry
-    name: jxl-coding
-    version: 1.0.1
-    sha: cd972bcd125e776f1eb241ac50e39f956095a1c2770c64736c968f8946bd9a3c
+    name: jxl-image-rs-integration
+    version: 0.8.0
+    sha: 040122e58dac2a6ac1ef70ba8630f35461870c5e7f94d62d7db27f09f96bbe97
   - kind: registry
-    name: jxl-color
-    version: 0.11.0
-    sha: f316b1358c1711755b3ee8e8cb5c4a1dad12e796233088a7a513440782de80b2
+    name: jxl_macros
+    version: 0.8.0
+    sha: eeb27c06a9957bd9c8e65d0aeea0db6a555a9e1c85597e284f8304015c410c87
   - kind: registry
-    name: jxl-frame
-    version: 0.13.3
-    sha: 2d967c6fd669c7c01060b5022d8835fa82fd46b06ffc98b549f17600a097c2b3
+    name: jxl_simd
+    version: 0.8.0
+    sha: a645451b4d34b4017caf24110a14eb737e275b5d3d121bc754e67727ee65af0e
   - kind: registry
-    name: jxl-grid
-    version: 0.6.2
-    sha: 01671307879a033bfa52e6e8784b941aca770b3f3a7d33830b455b6844f793fb
-  - kind: registry
-    name: jxl-image
-    version: 0.13.0
-    sha: c5f752d62577c702a94dbbce4045caf08cb58639e8a4d56464b40ecf33ffe565
-  - kind: registry
-    name: jxl-jbr
-    version: 0.2.1
-    sha: e35d032bcec660647828527ff42c6f5776d2fd44b8357f9f6d9ac6dc07218e46
-  - kind: registry
-    name: jxl-modular
-    version: 0.11.3
-    sha: 2a2f045b24c738dd91d482be385512b512721ae08a671bd4b27bf1c47f215235
-  - kind: registry
-    name: jxl-oxide
-    version: 0.12.6
-    sha: d36c662923f47586880211f3bc7c0d83fb3a9b410d278c7bde93450748abeef3
-  - kind: registry
-    name: jxl-oxide-common
-    version: 1.0.0
-    sha: b62394c5021b3a9e7e0dbb2d639d555d019090c9946c39f6d3b09d390db4157b
-  - kind: registry
-    name: jxl-render
-    version: 0.12.4
-    sha: d34386bfdb6a19b5a30cc9beb4d475d537422c31ae8c39bb69640fcce3fcaf19
-  - kind: registry
-    name: jxl-threadpool
-    version: 1.0.0
-    sha: 25f15eb830aa77a7f21148d72e153562a26bfe570139bd4922eab1908dd499d3
-  - kind: registry
-    name: jxl-vardct
-    version: 0.11.1
-    sha: ce72a18c6d3a47172ab6c479be2bdb56f22066b5d7092663f03b4490820b4511
+    name: jxl_transforms
+    version: 0.8.0
+    sha: 21c4b7f8957f5ba578b2e28cd5ebbc97dad58a3ad5ff26765da61e8dab8f1cad
   - kind: registry
     name: known-folders
     version: 1.4.2

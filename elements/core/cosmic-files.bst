@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-files.git
   track: master
-  ref: epoch-1.11.0-1-g4efe802ede04b4e56d55727c54ab40d4e8777f4b
+  ref: epoch-1.11.0-6-g09bdd8251d5fd909e79fab5b8e6fb5b063a6e6c0
 - kind: cargo2
   url: "crates:"
   ref:
@@ -2954,10 +2954,6 @@ sources:
     name: tracing-subscriber
     version: 0.3.23
     sha: cb7f578e5945fb242538965c2d0b04418d38ec25c79d160cd279bf0731c8d319
-  - kind: registry
-    name: trash
-    version: 5.2.9
-    sha: be89b3fe156965d29ac4f8522f3a640c655affdd9f21cb4f36857f0c92c00317
   - kind: registry
     name: ttf-parser
     version: 0.25.1

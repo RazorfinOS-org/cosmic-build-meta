@@ -18,7 +18,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-store.git
   track: master
-  ref: epoch-1.11.0-2-g5b9bbeddb02d5a783299fb8c809fca0edb302c89
+  ref: epoch-1.11.0-3-gbb24819c25de982f66bc736c029af8303b5c29c4
 - kind: cargo2
   url: "crates:"
   ref:
