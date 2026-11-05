@@ -20,7 +20,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-initial-setup.git
   track: master
-  ref: epoch-1.11.0-0-g653a4db1841e70ef8e36d3c6f0a14b7fce335697
+  ref: epoch-1.11.0-1-g512bd3357d85891fae8e6f8d4f7841cff6122f74
 
 # Several files in res/ are Git LFS objects upstream; the git_repo
 # plugin only fetches the LFS *pointers* (~130 bytes each) because we
@@ -562,7 +562,7 @@ sources:
     sha: 77745e017f5edba1a9c1d854f6f3a52dac8a12dd5af5d2f54aecf61e43d80d30
   - kind: git
     commit: c0cff4db14c37ed954983158e4055aa94c7741d9
-    repo: github:pop-os/cosmic-protocols//
+    repo: github:pop-os/cosmic-protocols
     query:
       rev: c0cff4d
     name: cosmic-client-toolkit
@@ -594,9 +594,14 @@ sources:
     version: 0.4.0
   - kind: git
     commit: c0cff4db14c37ed954983158e4055aa94c7741d9
-    repo: github:pop-os/cosmic-protocols//
+    repo: github:pop-os/cosmic-protocols
     query:
       rev: c0cff4d
+    name: cosmic-protocols
+    version: 0.2.0
+  - kind: git
+    commit: c0cff4db14c37ed954983158e4055aa94c7741d9
+    repo: github:pop-os/cosmic-protocols
     name: cosmic-protocols
     version: 0.2.0
   - kind: git
