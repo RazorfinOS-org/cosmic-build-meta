@@ -29,7 +29,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-settings.git
   track: master
-  ref: epoch-1.11.0-27-gfede96f61107a86438d3eedd694425188ee959e4
+  ref: epoch-1.11.0-37-g6aaf30d69ec3ed64eeb1d441ef5fe0a2017b3fe6
 - kind: cargo2
   url: "crates:"
   ref:
@@ -137,14 +137,6 @@ sources:
     version: 0.6.4
     sha: dc890384c8602f339876ded803c97ad529f3842aba97f6392b3dba0dd171769b
   - kind: registry
-    name: alloc-no-stdlib
-    version: 2.0.4
-    sha: cc7bb162ec39d46ab1ca8c77bf72e890535becd1751bb45f64c597edb4c8c6b3
-  - kind: registry
-    name: alloc-stdlib
-    version: 0.2.4
-    sha: 0e76a019e91224d279006ff972f1e984179a6e9feb050adba6ce8274aef23195
-  - kind: registry
     name: allocator-api2
     version: 0.2.21
     sha: 683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923
@@ -213,6 +205,10 @@ sources:
     name: arg_enum_proc_macro
     version: 0.3.4
     sha: 0ae92a5119aa49cdbcf6b9f893fe4e1d98b04ccbf82ee0584ad948a44a734dea
+  - kind: registry
+    name: array-init
+    version: 2.1.0
+    sha: 3d62b7694a562cdf5a74227903507c56ab2cc8bdd1f781ed5cb4cf9c9f810bfc
   - kind: registry
     name: arrayref
     version: 0.3.9
@@ -417,10 +413,6 @@ sources:
     name: borsh
     version: 1.8.1
     sha: 553c5d846a6ba5150c65e3b1b8ec073bcf1abc20f9b7220de384a4443ea4e20a
-  - kind: registry
-    name: brotli-decompressor
-    version: 5.0.3
-    sha: 3a32acac15fe1967bc3986b2a6347dffc965602354ea6f450ad07e8bfd253583
   - kind: registry
     name: bs58
     version: 0.5.1
@@ -681,7 +673,7 @@ sources:
     name: cosmic-client-toolkit
     version: 0.2.0
   - kind: git
-    commit: 63dacd148f634023f904d27e94ce0da93eef6710
+    commit: 46b26e63ca22a7acb27adf0c4708ba62a48d356d
     repo: github:pop-os/cosmic-comp
     name: cosmic-comp-config
     version: 1.0.0
@@ -1768,65 +1760,33 @@ sources:
     version: 0.3.107
     sha: 8dc09d2154098bbf4ef54eab6b117a3c24cbbffe94046b16ee6d6d4510584d3a
   - kind: registry
-    name: jxl-bitstream
-    version: 1.1.0
-    sha: b480e752277e29eb4054f69546887a9b84656fe78c08f54ba5850ced98a378fe
+    name: jxl
+    version: 0.8.0
+    sha: b8379fc83d79477900c9aed78cb8370a556d834081bebcb771c6010381c4e230
   - kind: registry
-    name: jxl-coding
-    version: 1.0.1
-    sha: cd972bcd125e776f1eb241ac50e39f956095a1c2770c64736c968f8946bd9a3c
+    name: jxl-image-rs-integration
+    version: 0.8.0
+    sha: 040122e58dac2a6ac1ef70ba8630f35461870c5e7f94d62d7db27f09f96bbe97
   - kind: registry
-    name: jxl-color
-    version: 0.11.0
-    sha: f316b1358c1711755b3ee8e8cb5c4a1dad12e796233088a7a513440782de80b2
+    name: jxl_macros
+    version: 0.8.0
+    sha: eeb27c06a9957bd9c8e65d0aeea0db6a555a9e1c85597e284f8304015c410c87
   - kind: registry
-    name: jxl-frame
-    version: 0.13.3
-    sha: 2d967c6fd669c7c01060b5022d8835fa82fd46b06ffc98b549f17600a097c2b3
+    name: jxl_simd
+    version: 0.8.0
+    sha: a645451b4d34b4017caf24110a14eb737e275b5d3d121bc754e67727ee65af0e
   - kind: registry
-    name: jxl-grid
-    version: 0.6.2
-    sha: 01671307879a033bfa52e6e8784b941aca770b3f3a7d33830b455b6844f793fb
-  - kind: registry
-    name: jxl-image
-    version: 0.13.0
-    sha: c5f752d62577c702a94dbbce4045caf08cb58639e8a4d56464b40ecf33ffe565
-  - kind: registry
-    name: jxl-jbr
-    version: 0.2.1
-    sha: e35d032bcec660647828527ff42c6f5776d2fd44b8357f9f6d9ac6dc07218e46
-  - kind: registry
-    name: jxl-modular
-    version: 0.11.3
-    sha: 2a2f045b24c738dd91d482be385512b512721ae08a671bd4b27bf1c47f215235
-  - kind: registry
-    name: jxl-oxide
-    version: 0.12.6
-    sha: d36c662923f47586880211f3bc7c0d83fb3a9b410d278c7bde93450748abeef3
-  - kind: registry
-    name: jxl-oxide-common
-    version: 1.0.0
-    sha: b62394c5021b3a9e7e0dbb2d639d555d019090c9946c39f6d3b09d390db4157b
-  - kind: registry
-    name: jxl-render
-    version: 0.12.4
-    sha: d34386bfdb6a19b5a30cc9beb4d475d537422c31ae8c39bb69640fcce3fcaf19
-  - kind: registry
-    name: jxl-threadpool
-    version: 1.0.0
-    sha: 25f15eb830aa77a7f21148d72e153562a26bfe570139bd4922eab1908dd499d3
-  - kind: registry
-    name: jxl-vardct
-    version: 0.11.1
-    sha: ce72a18c6d3a47172ab6c479be2bdb56f22066b5d7092663f03b4490820b4511
+    name: jxl_transforms
+    version: 0.8.0
+    sha: 21c4b7f8957f5ba578b2e28cd5ebbc97dad58a3ad5ff26765da61e8dab8f1cad
   - kind: registry
     name: kamadak-exif
     version: 0.6.2
     sha: 8772c92c0f41c4a672cbdee6728253e5ae8fcc1c5eb5c6c676579565684bbf68
   - kind: registry
     name: kdl
-    version: 6.5.0
-    sha: 81a29e7b50079ff44549f68c0becb1c73d7f6de2a4ea952da77966daf3d4761e
+    version: 6.7.1
+    sha: 082ddf81b2acd76fe04412655d17befedfff1837db772f8e74c38050d25ed670
   - kind: registry
     name: keyboard-types
     version: 0.8.3
@@ -3621,10 +3581,6 @@ sources:
     version: 0.31.0-beta.2
   - kind: registry
     name: winnow
-    version: 0.6.24
-    sha: c8d71a593cc5c42ad7876e2c1fda56f314f3754c084128833e64f1345ff8a03a
-  - kind: registry
-    name: winnow
     version: 0.7.15
     sha: df79d97927682d2fd8adb29682d1140b343be4ac0f08fd68b7765d9c059d3945
   - kind: registry
@@ -3834,16 +3790,8 @@ sources:
     sha: b268e58e7c693d7c271f93ffc4ba3b380412554231c85bf61ca7af91042a4112
   - kind: registry
     name: zlink
-    version: 0.5.0
-    sha: 9b895b99588dceb73f4d349b8323eabad9a97d48ce83698d475c7223727c6148
-  - kind: registry
-    name: zlink
     version: 0.8.0
     sha: 198be428106fe2987e3c014daadf976120909f4a765587341c9d4c2624912d61
-  - kind: registry
-    name: zlink-core
-    version: 0.5.0
-    sha: bd12701bd1d42a982b931f0159cf5054bf13d90e7828a8377dfc02ed4b00342d
   - kind: registry
     name: zlink-core
     version: 0.8.0
@@ -3854,10 +3802,6 @@ sources:
     sha: 9beafa91ab0672e1a2adc828cac4163152156d54046a0cad298807e290153ccf
   - kind: registry
     name: zlink-macros
-    version: 0.5.0
-    sha: e6f2416a5f504dfd7e04fee49f31abafe3314a3f62b4ddaa8e9a5fd496d4dd50
-  - kind: registry
-    name: zlink-macros
     version: 0.8.0
     sha: ad68b7baceb8afe7b0b21e408961f6a9d28fe5f10e02b19ef15b7ac3be39fc90
   - kind: registry
@@ -3866,16 +3810,8 @@ sources:
     sha: 3e2019f3c1186761aee19689ba2f99e659ec7f0d637ad1ee96f22a54434e743a
   - kind: registry
     name: zlink-smol
-    version: 0.5.0
-    sha: 4bc53cd0d636ad753f759aab0abb1f456e985c3938a279d11ebda92340ae37b1
-  - kind: registry
-    name: zlink-smol
     version: 0.8.0
     sha: 43f8b15370cace714c53983a91688004407f897eb1cf9b877b3e9df9330a26aa
-  - kind: registry
-    name: zlink-tokio
-    version: 0.5.0
-    sha: 28cbf366ac77ab41bf9a8d43535d3d620a072f7957813e03355d3d010c16cc4f
   - kind: registry
     name: zlink-tokio
     version: 0.8.0
