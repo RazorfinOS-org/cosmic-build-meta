@@ -14,7 +14,7 @@ sources:
   url: github:pop-os/cosmic-protocols.git
   track: main
 
-  ref: c0cff4db14c37ed954983158e4055aa94c7741d9
+  ref: 815b2c5df84a4a82eb8fb505343f8ebde6aefc38
 variables:
   make-args: >-
     PREFIX="%{prefix}"

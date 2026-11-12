@@ -16,7 +16,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-applibrary.git
   track: master
-  ref: epoch-1.11.0-4-gc19e73ef7d4160d42a5943790cdc7da95ee1c9f9
+  ref: epoch-1.11.0-5-g90c399d882e7ea7f03e344e88caac5034e4ea94c
 - kind: cargo2
   url: "crates:"
   ref:
@@ -465,7 +465,7 @@ sources:
     version: 0.1.1
     sha: 77745e017f5edba1a9c1d854f6f3a52dac8a12dd5af5d2f54aecf61e43d80d30
   - kind: git
-    commit: 2ad004a9b88c68fcaf55080623956178a01e5d7e
+    commit: 66865a70dfb95f5ed98a6d1943600c63f9cde808
     repo: github:pop-os/cosmic-applets
     name: cosmic-app-list-config
     version: 1.11.0
@@ -1994,8 +1994,8 @@ sources:
     sha: bdd58c3c93c3d278ca835519292445cb4b0d4dc59ccfdf7ceadaab3f8aeb4038
   - kind: registry
     name: smallvec
-    version: 1.16.4
-    sha: d0d5d4b1981b8bbbb7aed204cae5726d683d5d6ac7e74ec54122ea28f315e7c8
+    version: 1.16.5
+    sha: 149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46
   - kind: registry
     name: smithay-client-toolkit
     version: 0.20.0
@@ -2281,8 +2281,8 @@ sources:
     sha: 3a3b425286980a367278453f3b6d28cdcb134b574e5a35824a6ff5eebad50bb6
   - kind: registry
     name: uuid
-    version: 1.29.0
-    sha: 4a0e2d11620c50695fe12bbbfde96b3477fe606e7284c22d505c12ce51214514
+    version: 1.29.1
+    sha: 4a06f08a856b009bc7bbaf7d3e79808595d032dd19074c0c2ef26e49e03e6bdc
   - kind: registry
     name: version_check
     version: 0.9.5
