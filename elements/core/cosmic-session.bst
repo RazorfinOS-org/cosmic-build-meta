@@ -20,7 +20,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-session.git
   track: master
-  ref: epoch-1.11.0-1-g3fe5d42eda0c3121e67a62b1f67d06f67ecbb09d
+  ref: epoch-1.11.0-3-g1de865b2b707b7dd670920a9529961d136bd63c8
 - kind: cargo2
   url: "crates:"
   ref:
@@ -89,6 +89,11 @@ sources:
     name: color-spantrace
     version: 0.3.0
     sha: b8b88ea9df13354b55bc7234ebcce36e6ef896aca2e42a15de9e10edce01b427
+  - kind: git
+    commit: f2beba6eccb7ae4d66c962dfb933fcaa2450166b
+    repo: github:pop-os/cosmic-comp
+    name: cosmic-comp-ipc
+    version: 0.1.0
   - kind: git
     commit: 6ccc9fbf034220f0142bc907a7d7513b49aba0e1
     repo: github:pop-os/dbus-settings-bindings
