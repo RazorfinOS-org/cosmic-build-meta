@@ -60,7 +60,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/xdg-desktop-portal-cosmic.git
   track: master
-  ref: epoch-1.11.0-11-g2d701019e9c629c6198117c5998456c24ea21d11
+  ref: epoch-1.11.0-14-g7b0864c355ae383bc15527c69101fd09b64e5910
 - kind: cargo2
   url: "crates:"
   ref:
@@ -1794,16 +1794,14 @@ sources:
     name: libredox
     version: 0.1.25
     sha: 61ff90caf6077a803a240f62fdbe88645a890bbca49ef8174c3cb0404362171d
-  - kind: git
-    commit: 71022422eebd1bb2cb5a3259362819639fd29b58
-    repo: freedesktop:pipewire/pipewire-rs
+  - kind: registry
     name: libspa
     version: 0.10.1
-  - kind: git
-    commit: 71022422eebd1bb2cb5a3259362819639fd29b58
-    repo: freedesktop:pipewire/pipewire-rs
+    sha: 882f7427e7989dcc9d388b7f05c4630390a1d7696f9ffa469cd4a7a48f0b4c40
+  - kind: registry
     name: libspa-sys
     version: 0.10.1
+    sha: 3b6e17bdaf63ed0d5e4144022624032b41fd9733112e8c74ac26fc9bf1291924
   - kind: registry
     name: lilt
     version: 0.8.2
@@ -2295,16 +2293,14 @@ sources:
     name: piper
     version: 0.2.5
     sha: c835479a4443ded371d6c535cbfd8d31ad92c5d23ae9770a61bc155e4992a3c1
-  - kind: git
-    commit: 71022422eebd1bb2cb5a3259362819639fd29b58
-    repo: freedesktop:pipewire/pipewire-rs
+  - kind: registry
     name: pipewire
     version: 0.10.1
-  - kind: git
-    commit: 71022422eebd1bb2cb5a3259362819639fd29b58
-    repo: freedesktop:pipewire/pipewire-rs
+    sha: bde71084c4e25959d68f1ea54daa75e5ecdb338e5caf0b5510143b79baa32d5c
+  - kind: registry
     name: pipewire-sys
     version: 0.10.1
+    sha: 9ce653f53e63e5b93853218092ee9a8906a5d082c92f3f1db26316955dd63ce0
   - kind: registry
     name: pkg-config
     version: 0.3.34
