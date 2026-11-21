@@ -1,0 +1,2 @@
+# cosmic-epoch submodules we deliberately don't build, one repo per line.
+simple-wrapper  # dormant since 2022; cosmic-epoch's own justfile doesn't build it
