@@ -17,7 +17,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-files.git
   track: master
-  ref: epoch-1.11.0-24-gdf4ae0fd5c5028fcd49b6e97bf662b2d08c562a7
+  ref: epoch-1.11.0-26-g84a32e1eed33b1e017c8a653bfe1c2d5a13a711a
 - kind: cargo2
   url: "crates:"
   ref:
