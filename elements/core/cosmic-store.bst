@@ -18,7 +18,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/cosmic-store.git
   track: master
-  ref: epoch-1.11.0-7-g377ed6b88a91fd86761cd15dccfa70073a1a01be
+  ref: epoch-1.12.0-0-g9a89876261fda1db95f9cf03b6d8f852efa8d0be
 - kind: cargo2
   url: "crates:"
   ref:
@@ -85,8 +85,8 @@ sources:
     sha: 320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa
   - kind: registry
     name: ahash
-    version: 0.8.12
-    sha: 5a15f179cd60c4584b8a8c596927aadc462e27f2ca70c04e0071964a73ba7a75
+    version: 0.8.13
+    sha: 0fca89247609239eeb6915e6991111866b92d7b31025e69302bbf430cc4d2c38
   - kind: registry
     name: aho-corasick
     version: 1.1.5
@@ -145,8 +145,8 @@ sources:
     sha: 291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d
   - kind: registry
     name: anyhow
-    version: 1.0.104
-    sha: 330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470
+    version: 1.0.105
+    sha: 2cb931c189b85683d69a5cfad41d4d418671e1ac413dd209f3f2fc31e3cfd902
   - kind: registry
     name: apply
     version: 0.3.0
@@ -156,7 +156,7 @@ sources:
     version: 0.5.1
     sha: cab112f0a86d568ea0e627cc1d6be74a1e9cd55214684db5561995f6dad897c6
   - kind: git
-    commit: c14084db5c0dce7b56830b705c9f3cf6f9603469
+    commit: 9ff6496feb75779c16bdfaf0cc04daba466f9dc7
     repo: github:jackpot51/appstream.git
     name: appstream
     version: 0.2.2
@@ -166,8 +166,8 @@ sources:
     sha: 3bc62ac97cc33321f50863d514c3bc38a453947a8f9e781137e47c7401020aed
   - kind: registry
     name: arc-swap
-    version: 1.9.3
-    sha: 380962b3d93b99642e50b9febf72c071e97e8b32d86eae9cf4ef582bb960ae6e
+    version: 1.9.5
+    sha: 84a22b5d51209f6de83d37a0b33d320acb8da88823e42a94c075140708f032a5
   - kind: registry
     name: arg_enum_proc_macro
     version: 0.3.4
@@ -194,8 +194,8 @@ sources:
     sha: 0bb44936d800fea8f016d7f2311c6a4f97aebd5dc86f09906139ec848cf3a46f
   - kind: registry
     name: ashpd
-    version: 0.13.13
-    sha: fb8421aaa9644a5faf26735f258b669b15f063313ef8f8e2bdb28912a1a6f111
+    version: 0.14.3
+    sha: b60a01f4fbcba6a522ec4d285893bd0ce36f5987a8b3bf636e6aeb2d2acdf8ac
   - kind: registry
     name: async-broadcast
     version: 0.7.2
@@ -259,8 +259,8 @@ sources:
     sha: 2230e48787ed3eb4088996eab66a32ca20c0b67bbd4fd6cdfe79f04f1f04c9fc
   - kind: registry
     name: auto_enums
-    version: 0.8.10
-    sha: 3091d68264354f211516b91dce6f71046e444fab1867716035f736667243affb
+    version: 0.8.11
+    sha: 2b9074f2376d0e79a52581f29bf4344601362925d3527fd7070af17b1d7a1f79
   - kind: registry
     name: autocfg
     version: 1.5.1
@@ -307,8 +307,8 @@ sources:
     sha: 5e764a1d40d510daf35e07be9eb06e75770908c27d411ee6c92109c9840eaaf7
   - kind: registry
     name: bit_field
-    version: 0.10.3
-    sha: 1e4b40c7323adcfc0a41c4b88143ed58346ff65a288fc144329c5c45e05d70c6
+    version: 0.10.4
+    sha: cb2907cc03d08cdb1c6724ad0670ce67c4a71e1c45a6d7635224011714cfc4b1
   - kind: registry
     name: bitcode
     version: 0.6.9
@@ -359,14 +359,14 @@ sources:
     sha: bf88ba1141d185c399bee5288d850d63b8369520c1eafc32a0430b5b6c287bf4
   - kind: registry
     name: bstr
-    version: 1.13.1
-    sha: 6bb31b46c14244e20ee9984b11bf5c992b91fb6939fea616e3512c8baecdbe5f
+    version: 1.14.0
+    sha: a680398c10c7bc0488067c4612226ea905a85f607134b69f3068d505d58c4214
   - kind: registry
     name: btoi
     version: 0.5.0
     sha: 3b5ab9db53bcda568284df0fd39f6eac24ad6f7ba7ff1168b9e76eba6576b976
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: build_helpers
     version: 0.14.0
@@ -376,8 +376,8 @@ sources:
     sha: 5c0e531d93d39c34eef561e929e8a7f86d77a5af08aac4f6d6e39976c51858e9
   - kind: registry
     name: bumpalo
-    version: 3.20.3
-    sha: 72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649
+    version: 3.20.4
+    sha: 87a0cf66fd1eb2fb7b822cb78370d82303750809bc6ba855f3f58e517d3238db
   - kind: registry
     name: by_address
     version: 1.2.1
@@ -396,8 +396,8 @@ sources:
     sha: 8f1fe948ff07f4bd06c30984e69f5b4899c516a3ef74f34df92a2df2ab535495
   - kind: registry
     name: bytes
-    version: 1.12.1
-    sha: fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04
+    version: 1.12.2
+    sha: 776dfebd015e2d8732c684a2c71003674ccb49457b539b9e82151ba38e96dd7c
   - kind: registry
     name: calloop
     version: 0.14.5
@@ -408,12 +408,12 @@ sources:
     sha: 138efcf0940a02ebf0cc8d1eff41a1682a46b431630f4c52450d6265876021fa
   - kind: registry
     name: cc
-    version: 1.11.1
-    sha: 4ff2a8126fff0f8c839080d619675a585e61720bb12d2baceae45769fd66f155
+    version: 1.11.3
+    sha: 02f0e023adb368345ce0ca6cdfc0f24a06554468d0e8503e14a0841de79bfa69
   - kind: registry
     name: cfg-expr
-    version: 0.20.10
-    sha: 9ba9e9ec16c447027685b1f897b720e18e9a8afd00bd7332c483537e38086c9f
+    version: 0.20.11
+    sha: edd44d82755fb9210fb10d9daf8dd7e522da0efe1d5f263cffc5db07725663ff
   - kind: registry
     name: cfg-if
     version: 1.0.5
@@ -432,20 +432,20 @@ sources:
     sha: 1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327
   - kind: registry
     name: clap
-    version: 4.6.7
-    sha: aa8876b300ab35ba921adea3dfd70157a46249b33f95c9084ae5709785478946
+    version: 4.6.9
+    sha: 844c5c0b65be192cb68d570cca1b21a6444431d24e39c084dc0336177015337c
   - kind: registry
     name: clap_builder
     version: 4.6.7
     sha: ec0797fb7aeb1406c84efac526901f7ec3ead2124f946b494e72879d4b54704d
   - kind: registry
     name: clap_derive
-    version: 4.6.7
-    sha: f9c751b79415d4e559e3d1fcf128e09e720eb673a06d26cf6f392d37d75b66e0
+    version: 4.6.9
+    sha: b4c174f11f949b9ca8c60580925e282b9cbd5454750e506f08648b2038080cd7
   - kind: registry
     name: clap_lex
-    version: 1.1.1
-    sha: 1c133bc6a41be0d194c306b5506d15e6feeea7b1d6604bd3f8310dfb2ca96486
+    version: 1.1.2
+    sha: e0921b3876b3a1df8a1c9f912e7f94342458022c2e84288015893d83c4d62a79
   - kind: registry
     name: clipboard-win
     version: 5.4.3
@@ -509,8 +509,8 @@ sources:
     sha: 031ad3d167622974ed636505ae4556267ed4aa2aea0464122fa6bc9698a32825
   - kind: registry
     name: const-oid
-    version: 0.10.2
-    sha: a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c
+    version: 0.10.3
+    sha: be95d4a884358a21a199689323c29e9256b4a1b315e22f183d155422041d3a9a
   - kind: registry
     name: core-foundation
     version: 0.10.1
@@ -544,19 +544,17 @@ sources:
     version: 0.1.1
     sha: 77745e017f5edba1a9c1d854f6f3a52dac8a12dd5af5d2f54aecf61e43d80d30
   - kind: git
-    commit: c0cff4db14c37ed954983158e4055aa94c7741d9
+    commit: 815b2c5df84a4a82eb8fb505343f8ebde6aefc38
     repo: github:pop-os/cosmic-protocols
-    query:
-      rev: c0cff4d
     name: cosmic-client-toolkit
     version: 0.2.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: cosmic-config
     version: 1.0.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: cosmic-config-derive
     version: 1.0.0
@@ -566,7 +564,7 @@ sources:
     name: cosmic-freedesktop-icons
     version: 0.4.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: cosmic-launch
     version: 0.1.0
@@ -576,19 +574,17 @@ sources:
     name: cosmic-login1-zbus
     version: 1.0.0
   - kind: git
-    commit: ca20ce3185b3b4404f429d59d429c40b58a2ddef
+    commit: 45340f50c8d59135646340f77566390832e8197e
     repo: github:pop-os/cosmic-panel
     name: cosmic-panel-config
     version: 1.11.0
   - kind: git
-    commit: c0cff4db14c37ed954983158e4055aa94c7741d9
+    commit: 815b2c5df84a4a82eb8fb505343f8ebde6aefc38
     repo: github:pop-os/cosmic-protocols
-    query:
-      rev: c0cff4d
     name: cosmic-protocols
     version: 0.2.0
   - kind: git
-    commit: 108e095779549931e7ce109429255a1341c70b7c
+    commit: 212f39a25fde26b53edde98446ec8de5e52c8e31
     repo: github:pop-os/cosmic-settings-daemon
     name: cosmic-settings-config
     version: 1.11.0
@@ -602,7 +598,7 @@ sources:
     version: 0.19.0
     sha: be17b688510d934ce13f48a2beba700e11583e281e0fda99c22bb256a14eda73
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: cosmic-theme
     version: 1.0.0
@@ -612,8 +608,8 @@ sources:
     sha: 5ca28b0ae3115b884660db4118d803791fd6756b6e88f39c0f3f7859060d7566
   - kind: registry
     name: crc32fast
-    version: 1.5.4
-    sha: 5f97d3416d5337d15c4b0d78c8c91df922ca143f57ec20e2d1c188333047ef04
+    version: 1.5.6
+    sha: fd9ae8fcb3ea71b0b26338b4ffb13006bb175de8fd07921089a906ce7e5e6945
   - kind: registry
     name: crossbeam-deque
     version: 0.8.8
@@ -681,18 +677,6 @@ sources:
     name: data-url
     version: 0.3.2
     sha: be1e0bca6c3637f992fc1cc7cbc52a78c1ef6db076dbf1059c4323d6a2048376
-  - kind: registry
-    name: defmt
-    version: 1.2.0
-    sha: e4a0795ac740cb54d7b3775c9c17345f6aaecf884c01733b39d6017738e0e3e1
-  - kind: registry
-    name: defmt-macros
-    version: 1.2.0
-    sha: 840bb056bd99c495c9188198a258ab787c79f306d864db3e6e8451442d6d8366
-  - kind: registry
-    name: defmt-parser
-    version: 1.1.0
-    sha: 71958f69fb2de856c5dd51ac9377e986ca1aa5919f931bf5395a807277f889a0
   - kind: registry
     name: deranged
     version: 0.5.9
@@ -801,12 +785,12 @@ sources:
     sha: 67c78a4d8fdf9953a5c9d458f9efe940fd97a0cab0941c075a813ac594733827
   - kind: registry
     name: env_filter
-    version: 2.0.0
-    sha: 900d271a03799a1ee8d1ca9b19893b48ca674a9284fefcfb85f05e74ed314217
+    version: 2.1.0
+    sha: 288efae2d67fb0418d01f837feb55c7a9cdc4c5db38d3dee91324a1c7ec6fd31
   - kind: registry
     name: env_logger
-    version: 0.11.11
-    sha: de671bd27a75a797dc9ae289ba1e77276e75e2026408aab65185384e2d5cd3f6
+    version: 0.11.12
+    sha: 82bdfc6e01c305a3ea46ed815b06ac0b379d7c5eac588fa4464048d731c4dcdf
   - kind: registry
     name: equator
     version: 0.4.2
@@ -821,8 +805,8 @@ sources:
     sha: 00d174d5400e5e8fd687ad1049e2f578285fa914201b1af7e8b112a4546bd826
   - kind: registry
     name: errno
-    version: 0.3.14
-    sha: 39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb
+    version: 0.3.15
+    sha: e35d6e78f4cebb90e51d543db8fe41528851d6deeef6ef21ebd4bfdc1e784776
   - kind: registry
     name: error-code
     version: 3.4.0
@@ -853,8 +837,8 @@ sources:
     sha: 8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93
   - kind: registry
     name: exr
-    version: 1.74.2
-    sha: 711fe42c9964295e01ee3fba3f9fe0e1d24b98886950d68efe81b1c76e21adf3
+    version: 1.74.3
+    sha: cb29d0be702adf92c645d9b2f93472906ba83d400e59f98adb3770ce5c18c2f6
   - kind: registry
     name: fastrand
     version: 2.5.0
@@ -949,8 +933,8 @@ sources:
     sha: aa9a19cbb55df58761df49b23516a86d432839add4af60fc256da840f66ed35b
   - kind: registry
     name: form_urlencoded
-    version: 1.2.2
-    sha: cb4cb245038516f5f85277875cdaa4f7d2c9a0fa0468de06ed190163b1581fcf
+    version: 1.2.3
+    sha: afa489199eaffb1211795df1c6236ce1ad0d41a6fa45250add73e3b02420f06e
   - kind: registry
     name: freedesktop-desktop-entry
     version: 0.8.4
@@ -1053,8 +1037,8 @@ sources:
     sha: 151665d9be52f9bb40fc7966565d39666f2d1e69233571b71b87791c7e0528b3
   - kind: registry
     name: glam
-    version: 0.34.2
-    sha: 54af5066834d6c2d404eb26ea036a15b15d9ff80db510b9a73ff95ab07f30831
+    version: 0.34.3
+    sha: 627003914c6057c9c8f0832ee4f870b5a4f599d0cfa83f4072675114860cd0ff
   - kind: registry
     name: glib
     version: 0.21.5
@@ -1165,8 +1149,8 @@ sources:
     sha: 27f864f10dfb56725ce5ce5472bc52252c8f93a4ab86327122cebf62c5f59a17
   - kind: registry
     name: hyper
-    version: 1.12.0
-    sha: 2c3e324da4c95177d6291d4c8730197c0d1822f8a9766814a4a44fa5ab797c9c
+    version: 1.13.0
+    sha: 229c6ff5584df4c6becbfe00567128bac768c8cd32ebc8a8366bd81ed072e8f3
   - kind: registry
     name: hyper-rustls
     version: 0.27.10
@@ -1200,67 +1184,67 @@ sources:
     version: 0.1.2
     sha: f31827a206f56af32e590ba56d5d2d085f558508192593743f16b2306495269f
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_accessibility
     version: 0.1.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_core
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_debug
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_futures
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_graphics
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_program
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_renderer
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_runtime
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_tiny_skia
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_wgpu
     version: 0.14.0
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_widget
     version: 0.14.2
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: iced_winit
     version: 0.14.0
@@ -1394,28 +1378,48 @@ sources:
     sha: 2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285
   - kind: registry
     name: itoa
-    version: 1.0.18
-    sha: 8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682
+    version: 1.0.19
+    sha: 3bd1574e617a9a6c1f8f8181bd7e841e1f20e4277607ef28945765188d6284d4
   - kind: registry
     name: jiff
-    version: 0.2.39
-    sha: 3ac703058abac89e5c39b0b879dce2b6b14a4ba36600c7e7e3d0c60a6883ef3c
+    version: 0.2.46
+    sha: 175dc66334db3b9ab9985bf8b61cfed50dc16d20964bb47f9e479adcae984a7f
+  - kind: registry
+    name: jiff
+    version: 1.0.3
+    sha: 107f2e89536b6818514025f6787b0d94d819e54fe3b40365275fc753de485b3f
   - kind: registry
     name: jiff-core
-    version: 0.1.2
-    sha: aee43309eb53bafb8c36d35d6e444769c8f8e6206a9fbf7546f5db9d7d4a0e93
+    version: 0.1.8
+    sha: e599b80292e597019b8b3e392de3f4bea2959ddfb8c7dff60e035e9e311a2c1b
+  - kind: registry
+    name: jiff-core
+    version: 1.0.2
+    sha: d44c923edf2bf456a982253f1a9ee1f6e89e421dffd0065d9b9a581da0def58f
   - kind: registry
     name: jiff-static
-    version: 0.2.39
-    sha: 6dc32470c67eb7d0e9ccb74303fa925313dc04cecb1aa048beaa6f391e36a93d
+    version: 0.2.46
+    sha: c7b1af7547d47354bc438d797e3854601bde8f8d185780c5ba4ab27afa54f1ba
+  - kind: registry
+    name: jiff-static
+    version: 1.0.3
+    sha: 4996f71e569e3a3e32b925c28ef8f0027dc30bb1d594b33eeda409eea185f5c8
   - kind: registry
     name: jiff-tzdb
-    version: 0.1.9
-    sha: fa8377070c6bae868759445e5a77f66d84f0b72f3a054bfb00e6d038b8282da7
+    version: 0.1.10
+    sha: 0980fca2cc272465bd60e82397607ba9f33add9e48defd77923301bbd03808f2
+  - kind: registry
+    name: jiff-tzdb
+    version: 1.0.0
+    sha: 12e71a1b68a875a44a33bb7a1dd84392cb77145a3367a552a3cfe6a4f5cf3afc
   - kind: registry
     name: jiff-tzdb-platform
     version: 0.1.3
     sha: 875a5a69ac2bab1a891711cf5eccbec1ce0341ea805560dcd90b7a2e925132e8
+  - kind: registry
+    name: jiff-tzdb-platform
+    version: 1.0.0
+    sha: dc65b284afcfa8f6cf189c7274c805505314a7ab975c60e1f548bff56525420e
   - kind: registry
     name: jni
     version: 0.22.4
@@ -1493,7 +1497,7 @@ sources:
     version: 0.2.191
     sha: 65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a
   - kind: git
-    commit: 896b252dfc3c6cb0c678b844432016415dc104b1
+    commit: be7937d5c2495d002311709d0e68c3f8f845265a
     repo: github:pop-os/libcosmic.git
     name: libcosmic
     version: 1.0.0
@@ -1650,12 +1654,20 @@ sources:
     sha: b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c
   - kind: registry
     name: mio
-    version: 1.2.4
-    sha: 1788edb87fdc09c7e26304471e2f5be8cdefb1b6930d6e3985fc02ff53bf86ee
+    version: 1.2.5
+    sha: 20521a903f02b0a573cd6840e9d0a5a0cc043d361fe924092cd70f8556cc9c4a
   - kind: registry
     name: moxcms
     version: 0.8.1
     sha: bb85c154ba489f01b25c0d36ae69a87e4a1c73a72631fc6c0eb6dde34a73e44b
+  - kind: registry
+    name: multiversion
+    version: 0.8.1
+    sha: eb8a68be21d0755f83bfe47e79b896cc732687cf1903f0e50585e8d6ecc53076
+  - kind: registry
+    name: multiversion-macros
+    version: 0.8.1
+    sha: a05e0c3c3e4edaa21d87c645852ed0b0c3663752bcc6ec43353bd6189dce35e1
   - kind: registry
     name: multiversion_no_op
     version: 1.0.0
@@ -1698,12 +1710,12 @@ sources:
     sha: 0676bb32a98c1a483ce53e500a81ad9c3d5b3f7c920c28c24e9cb0980d0b5bc8
   - kind: registry
     name: notify
-    version: 8.2.1
-    sha: 82f812702fbc75d35416d3f884e04925be7e9498f4eceea2e24ba34559284674
+    version: 8.2.2
+    sha: c41a04a5f59df9322cc657286dd2d79f90816119b22c5f847607c850110205ab
   - kind: registry
     name: notify-rust
-    version: 4.18.2
-    sha: 4587364a9a0074333429b3df75a30a205340c56a536ca3eb6ca0e59b87bbf8af
+    version: 4.19.0
+    sha: 57da5b5d3b7809bf71858da5a2818c3404ca4688c02c8abecdda0fcdec235df3
   - kind: registry
     name: notify-types
     version: 2.2.0
@@ -1712,10 +1724,6 @@ sources:
     name: num-bigint
     version: 0.4.8
     sha: c89e69e7e0f03bea5ef08013795c25018e101932225a656383bd384495ecc367
-  - kind: registry
-    name: num-complex
-    version: 0.4.6
-    sha: 73f88a1307638156682bada9d7604135552957b7818057dcef22705b4d509495
   - kind: registry
     name: num-conv
     version: 0.2.2
@@ -1938,16 +1946,16 @@ sources:
     sha: 5be167a7af36ee22fe3115051bc51f6e6c7054c9348e28deb4f49bd6f705a315
   - kind: registry
     name: pin-project
-    version: 1.1.13
-    sha: 2466b2336ed02bcdca6b294417127b90ec92038d1d5c4fbeac971a922e0e0924
+    version: 1.2.0
+    sha: a6c2123f4708bbd422630a6dae7c03f678b1ce1f1c99e4c4b3beac69c8174cc9
   - kind: registry
     name: pin-project-internal
-    version: 1.1.13
-    sha: c96395f0a926bc13b1c17622aaddda1ecb55d49c8f1bf9777e4d877800a43f8b
+    version: 1.2.0
+    sha: 358938fd6df944c1e44bb328b60fb275f13c804aac47ba26a1165d45a3f87756
   - kind: registry
     name: pin-project-lite
-    version: 0.2.17
-    sha: a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd
+    version: 0.2.18
+    sha: c938015719552d665fd0553b90d96cd7ff58e83e4c061ca99e6bb78865a72752
   - kind: registry
     name: piper
     version: 0.2.5
@@ -2025,14 +2033,6 @@ sources:
     version: 1.0.18
     sha: 4488a4a36b9a4ba6b9334a32a39971f77c1436ec82c38707bce707699cc3bbcb
   - kind: registry
-    name: pulp
-    version: 0.22.3
-    sha: 046aa45b989642ec2e4717c8e72d677b13edd831a4d3b6cf37d9a3e54912496a
-  - kind: registry
-    name: pulp-wasm-simd-flag
-    version: 0.1.1
-    sha: 1d8f70e07b9c3962945a74e59ca1c511bba65b6419468acc217c457d93f3c740
-  - kind: registry
     name: pxfm
     version: 0.1.30
     sha: d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea
@@ -2074,8 +2074,8 @@ sources:
     sha: f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf
   - kind: registry
     name: rand
-    version: 0.10.3
-    sha: 65c9fb96cbc91e3478eaae79a69fcd3f1ae4ad052e471fe6732fff548984b4af
+    version: 0.10.4
+    sha: 8f6fa277c67e6ea590466f04c3fe82cb509f0864fe470643e5570de9514a9b11
   - kind: registry
     name: rand
     version: 0.8.8
@@ -2106,16 +2106,16 @@ sources:
     sha: 76afc826de14238e6e8c374ddcc1fa19e374fd8dd986b0d2af0d02377261d83c
   - kind: registry
     name: rand_pcg
-    version: 0.10.2
-    sha: caa0f4137e1c0a72f4c651489402276c8e8e1cf081f3b0ba156d2cbeef09e86a
+    version: 0.10.3
+    sha: eb95882a1e14462c69aea9984bb261293ccfe6022ef8de0eda18bd5afb0052df
   - kind: registry
     name: range-alloc
     version: 0.1.5
     sha: ca45419789ae5a7899559e9512e58ca889e41f04f1f2445e9f4b290ceccd1d08
   - kind: registry
     name: rangemap
-    version: 1.8.0
-    sha: a611d15b50743feb4c76b7d03edcb0e64f399c26961e4efe6975bc398be6aa3d
+    version: 1.9.0
+    sha: f2d43a8c8c74056248124068fde0df374d1ddf9039e747d190f01c36faeaab08
   - kind: registry
     name: rav1e
     version: 0.8.1
@@ -2124,10 +2124,6 @@ sources:
     name: ravif
     version: 0.13.0
     sha: e52310197d971b0f5be7fe6b57530dcd27beb35c1b013f29d66c1ad73fbbcc45
-  - kind: registry
-    name: raw-cpuid
-    version: 11.6.0
-    sha: 498cd0dc59d73224351ee52a95fee0f1a617a2eae0e7d9d720cc622c73a54186
   - kind: registry
     name: raw-window-handle
     version: 0.6.2
@@ -2148,10 +2144,6 @@ sources:
     name: read-fonts
     version: 0.41.0
     sha: 046a7d674daf459825b32f5062056d6882db0d2f5a479fbd76ccfc870ac18709
-  - kind: registry
-    name: reborrow
-    version: 0.5.5
-    sha: 03251193000f4bd3b042892be858ee50e8b3719f2b08e5833ac4353724632430
   - kind: registry
     name: redox_event
     version: 0.4.8
@@ -2178,16 +2170,16 @@ sources:
     sha: 92ecd8964f8453721699a1ed72037b0db49ce2f5a5138486ee89bed6f67cdf3a
   - kind: registry
     name: regex
-    version: 1.13.1
-    sha: f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d
+    version: 1.13.2
+    sha: 9807af0e638c12e753aa1b4e601791bf2a8f71274023c8bbeec12fc149950857
   - kind: registry
     name: regex-automata
-    version: 0.4.18
-    sha: ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2
+    version: 0.4.19
+    sha: 41d60ef07df457506a0a1a2073112eb4aae5733dbd2813c3da77d1b0fd441158
   - kind: registry
     name: regex-syntax
-    version: 0.8.11
-    sha: d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4
+    version: 0.8.12
+    sha: d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6
   - kind: registry
     name: renderdoc-sys
     version: 1.1.0
@@ -2210,10 +2202,6 @@ sources:
     sha: a4689e6c2294d81e88dc6261c768b63bc4fcdb852be6d1352498b114f61383b7
   - kind: registry
     name: ron
-    version: 0.11.0
-    sha: db09040cc89e461f1a265139777a2bde7f8d8c67c4936f700c63ce3e2904d468
-  - kind: registry
-    name: ron
     version: 0.12.3
     sha: 97b3fe97c18ff24299ea56f802c5693eb34266fb0bc8317f4e101debc8a3ceaf
   - kind: registry
@@ -2226,16 +2214,16 @@ sources:
     sha: 9da7f59328b09405b181fee1018925fad50f157afb43c0c0f5c522c256dd5907
   - kind: registry
     name: rust-embed
-    version: 8.13.0
-    sha: 19afa5b4b6a611de00bd1bdae6ae6f39084c9399f0679c3f52d8469cf335cc23
+    version: 8.14.0
+    sha: e98f580cf7a2863aeb6827800283f52cbe6fb3f3bb7c1843783f903c16dcb8ad
   - kind: registry
     name: rust-embed-impl
-    version: 8.13.0
-    sha: e0d8afda6374eac59e066abee06d265247ebbaf3006cf878e2879e8356e34053
+    version: 8.14.0
+    sha: a93e2f69cf224a6c7df7509aa5ba4a23f56828ee41b040e92ac8762371eb9ba7
   - kind: registry
     name: rust-embed-utils
-    version: 8.13.0
-    sha: 0d84e8ba78bd384263e5922f084cbe1b081c3b7e69add59c8fb097b879ba968a
+    version: 8.14.0
+    sha: 915e33dccbe7deb2b8a342dc4c517503fe85e0230ddbae40a4fb0220493dad9b
   - kind: registry
     name: rustc-hash
     version: 1.1.0
@@ -2266,8 +2254,8 @@ sources:
     sha: 4a073f5dc7469f984c52ad2752b63b0807745133b6de880b7b64c1ac4c48aec4
   - kind: registry
     name: rustls-pki-types
-    version: 1.15.1
-    sha: 2f4925028c7eb5d1fcdaf196971378ed9d2c1c4efc7dc5d011256f76c99c0a96
+    version: 1.16.0
+    sha: 102f35f7de7b06d8c61f1cff6592f5253e0dea431c74867aad5dfd70f44663fb
   - kind: registry
     name: rustls-platform-verifier
     version: 0.7.1
@@ -2278,8 +2266,8 @@ sources:
     sha: eec689c0bc40ff2458a5977b6619cb718087084a18e02a131c599b62d05e1a5f
   - kind: registry
     name: rustls-webpki
-    version: 0.103.16
-    sha: 4443b1b6d39d7c663139942cc4558262562d2c84123bb6282ef177009ca8b281
+    version: 0.103.17
+    sha: e3a0760a887c14823fca5a1c970b01d47c328c696c0c64829d1df50e8f853fd5
   - kind: registry
     name: rustversion
     version: 1.0.23
@@ -2362,12 +2350,12 @@ sources:
     sha: 9c187e0a369471c550af028cba56d4f4fa2a489ad28151ae95a4d340a2a8b782
   - kind: registry
     name: serde_with
-    version: 3.24.0
-    sha: df9adc193c780ef8f159aee8b61e2d5801aaa555e6eb0947fe45530ec506296f
+    version: 3.25.0
+    sha: 56cb1ca7c93ae63d6439b5250f6b6b040f7e121f32e5dd2f5d523dd4149b3204
   - kind: registry
     name: serde_with_macros
-    version: 3.24.0
-    sha: 3e17bbc68e28663bbbb90df47e058aa7eda4fb445b89fe70457bb94fbccf6e49
+    version: 3.25.0
+    sha: cff15a7c864bbec77d9586ca6822bc7c369bdf19e9243134a62b0b51ce26b31f
   - kind: registry
     name: serde_yaml
     version: 0.9.34+deprecated
@@ -2394,8 +2382,8 @@ sources:
     sha: 11031e251abf8611c80f460e19dbdeb54a66db918e49c65a7065b46ac7aec520
   - kind: registry
     name: simd_helpers
-    version: 0.1.0
-    sha: 95890f873bec569a0362c235787f3aca6e1e887302ba4840839bcc6459c42da6
+    version: 0.1.1
+    sha: f48ea32978b7ad365bd1ecce83827746d5d50dc006a8c85112b7acc3c716e3e7
   - kind: registry
     name: simdutf8
     version: 0.1.5
@@ -2426,8 +2414,8 @@ sources:
     sha: bdd58c3c93c3d278ca835519292445cb4b0d4dc59ccfdf7ceadaab3f8aeb4038
   - kind: registry
     name: smallvec
-    version: 1.16.4
-    sha: d0d5d4b1981b8bbbb7aed204cae5726d683d5d6ac7e74ec54122ea28f315e7c8
+    version: 1.16.6
+    sha: 3244542535d5de959d90ec55d1b5ff0fd2bb7b1310223907d5f11932847f7b59
   - kind: registry
     name: smithay-client-toolkit
     version: 0.20.0
@@ -2518,8 +2506,8 @@ sources:
     sha: 872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297
   - kind: registry
     name: syn
-    version: 3.0.9
-    sha: d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b
+    version: 3.0.10
+    sha: 4ae9ccbea3a7b0b09443036490c8f34a8b1b760fd345e5c0dae0aac718faea79
   - kind: registry
     name: sync_wrapper
     version: 1.0.2
@@ -2548,6 +2536,10 @@ sources:
     name: taffy
     version: 0.15.1
     sha: 31f7bd2d97198df05186f93a3a3c306845f40e8b3c22bf9279cdd7e5cf5fea7d
+  - kind: registry
+    name: target-features
+    version: 0.1.6
+    sha: c1bbb9f3c5c463a01705937a24fdabc5047929ac764b2d5b9cf681c1f5041ed5
   - kind: registry
     name: target-lexicon
     version: 0.13.5
@@ -2666,8 +2658,8 @@ sources:
     sha: 0db3bae107c9522f86d361697dee1d7386a2ddcf659d5aea5159819a21a3c4a7
   - kind: registry
     name: toml_parser
-    version: 1.1.5+spec-1.1.0
-    sha: baa693a8032d7e1cada7d0041e96126df243179ff061456783ac7f12bda4744c
+    version: 1.1.6+spec-1.1.0
+    sha: e6769c452d71ba30696c6b37770c439a9cc9110f47f7d5cdbeda79840ef5ea31
   - kind: registry
     name: toml_writer
     version: 1.2.0+spec-1.1.0
@@ -2786,8 +2778,8 @@ sources:
     sha: 8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1
   - kind: registry
     name: url
-    version: 2.5.8
-    sha: ff67a8a4397373c3ef660812acab3268222035010ab8680ec4215f38ba3d0eed
+    version: 2.5.9
+    sha: f00cd2407bb42c0ef17be88d4cf020f5cceffd121665bac9b8b9493a369b3b1a
   - kind: registry
     name: usvg
     version: 0.45.1
@@ -2810,8 +2802,8 @@ sources:
     sha: 3a3b425286980a367278453f3b6d28cdcb134b574e5a35824a6ff5eebad50bb6
   - kind: registry
     name: uuid
-    version: 1.29.0
-    sha: 4a0e2d11620c50695fe12bbbfde96b3477fe606e7284c22d505c12ce51214514
+    version: 1.29.3
+    sha: 3c14b15dffa2f4bd712103e857140aa04a4f2ff6e955c77d7eb8e53ee02a3b64
   - kind: registry
     name: v_frame
     version: 0.3.9
@@ -2826,8 +2818,8 @@ sources:
     sha: 0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a
   - kind: registry
     name: walkdir
-    version: 2.5.0
-    sha: 29790946404f91d9c5d06f9874efddea1dc06c5efe94541a7d6863108e3a5e4b
+    version: 2.5.1
+    sha: b42e295b7452c4604982280d8586001fcad9b8b201cac67bca9771e7a7475403
   - kind: registry
     name: want
     version: 0.3.2
@@ -2922,8 +2914,8 @@ sources:
     sha: 5a6580f308b1fad9207618087a65c04e7a10bc77e02c8e84e9b00dd4b12fa0bb
   - kind: registry
     name: webpki-root-certs
-    version: 1.0.11
-    sha: e49d0e65abc00c142e8f9428da991da9f1a250c39be97459901eb12b9b49f62a
+    version: 1.0.12
+    sha: 293198dcebfb821155b5092ab94b5a82ff180eddd7241df3bd6e66a4ffd1a585
   - kind: registry
     name: weezl
     version: 0.1.12
@@ -3269,7 +3261,7 @@ sources:
     version: 3.0.0
     sha: 2fb433233f2df9344722454bc7e96465c9d03bff9d77c248f9e7523fe79585b5
   - kind: git
-    commit: ca20ce3185b3b4404f429d59d429c40b58a2ddef
+    commit: 45340f50c8d59135646340f77566390832e8197e
     repo: github:pop-os/cosmic-panel
     name: xdg-shell-wrapper-config
     version: 1.11.0
@@ -3343,8 +3335,8 @@ sources:
     sha: 5db4be7c075cb421e4b7ee645541604239bd243ba7c357511f4ff3a74b555907
   - kind: registry
     name: zbus
-    version: 6.2.1
-    sha: 0ddb2961d9587ef9f24ad14cde1c3bc4c5edc9f1525932a8cffdd5bd98886eb9
+    version: 6.5.0
+    sha: 9a7f9f5dd97fa527c1202ba1cb35d48e07f77d4de8542317c854f7aef22b0668
   - kind: registry
     name: zbus-lockstep
     version: 0.5.2
@@ -3359,8 +3351,8 @@ sources:
     sha: 2990635d09ade6df1868f72f8cac69a876a90981e8bd3c40b1be413f8dc88f40
   - kind: registry
     name: zbus_macros
-    version: 6.2.1
-    sha: 083b38add47c340fc12ec560124fb1d9c23acb584f7021099f85ec6587a03c54
+    version: 6.5.0
+    sha: 2f5aa7f2c4ea81b7ccfb26bafefdb4d1a44dd9d4f82c8426173a3727311743e4
   - kind: registry
     name: zbus_names
     version: 4.3.5
@@ -3375,20 +3367,20 @@ sources:
     sha: d1586c021a01ca0a9216dcd874e546382e156a5cbab5fab6cb5f10087e22682a
   - kind: registry
     name: zcheapstr
-    version: 1.2.0
-    sha: 939f186d9ecebe044315a5cb6d6f78568bbc21152adc954d5a0c2f58bdbc9920
+    version: 1.4.0
+    sha: 2da34e7164b75d803c3197b86e6cf61b874106fbd472c5082575a8bc5fbd0907
   - kind: registry
     name: zeno
     version: 0.3.3
     sha: 6df3dc4292935e51816d896edcd52aa30bc297907c26167fec31e2b0c6a32524
   - kind: registry
     name: zerocopy
-    version: 0.8.63
-    sha: e5fe1f8f1b06191a00962174c61aa5005e0bb391a6d80d07e24d115c01a92ed8
+    version: 0.8.64
+    sha: ed43f3060383c64b000f3c630550aebdfa9d3b76d48de32390483dd2cc7e0865
   - kind: registry
     name: zerocopy-derive
-    version: 0.8.63
-    sha: 863ad3ac83293fb4d740aedbfdc9240dd8d1a50c1099acd76ce80ce7c7230c7f
+    version: 0.8.64
+    sha: a5cbd820fe3e35fb38c83b6dc7e6b1618bc46e0cd10073ae94e8d52dc468d8b9
   - kind: registry
     name: zerofrom
     version: 0.1.8
@@ -3399,8 +3391,8 @@ sources:
     sha: f75b4683f6c7f45248d4d64056a24298c6281e0993356d7d1b4a1a962ef10d4a
   - kind: registry
     name: zeroize
-    version: 1.9.1
-    sha: e13084392c5e4bc371903e2935a5eaeed24905a7511356b883835e18a78f6879
+    version: 1.9.2
+    sha: 85ccff8a4805aba1eaa4cd4afcd49f7557dd2cf5fd79ffc37f8959466effc5aa
   - kind: registry
     name: zerotrie
     version: 0.2.5
@@ -3415,28 +3407,28 @@ sources:
     sha: c3743ddbf47738d929cd1ae2e199d40d0162979dfe31aef8ae646d2bf00bf97a
   - kind: registry
     name: zlib-rs
-    version: 0.6.8
-    sha: b268e58e7c693d7c271f93ffc4ba3b380412554231c85bf61ca7af91042a4112
+    version: 0.6.9
+    sha: aa76918995d776d9dd34d371030be228d021137449771493d56e29f77e4148ac
   - kind: registry
     name: zmij
     version: 1.0.23
     sha: 29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b
   - kind: registry
     name: zruntime
-    version: 0.2.2
-    sha: 23ef5ed7d628cdf0af82f93dfe03330a8e37383bf7422a1d3d6eb72326680be5
+    version: 0.2.4
+    sha: ac67096b97c00742108c4674db6bb6178adb78c4b66a506b0e4a7a9593aa5d9e
   - kind: registry
     name: zstd
-    version: 0.14.3
-    sha: db3ae9bf90af6e40197bef767eeefc46ad6397420fe873830bd85e5fbbfb3c70
+    version: 0.14.5
+    sha: 465cb081cac3a28a84ef547702dba1fe0f4a9f22e4e57a0b675ceee028c2af80
   - kind: registry
     name: zstd-safe
-    version: 8.2.0
-    sha: ded520f16b29e1a9b771c722221b2b0a0398c2316d9bb3c42b458a5414d7434b
+    version: 8.4.0
+    sha: 9b09bddd92c53b91833f4df03e0ea07e02d8367cfcd15a3b9acda94fc273f793
   - kind: registry
     name: zstd-sys
-    version: 2.1.2+zstd.1.5.7
-    sha: 481ada9c543b2323cbb7bbdbb5249177fbf0188ed959ed2c15e4b22421c84ed3
+    version: 2.2.0+zstd.1.6.0
+    sha: c3f4089cda6dda4dc43c43dd9f8964140064fd2f752f3da46c3a483c3c175160
   - kind: registry
     name: zune-core
     version: 0.4.12

@@ -22,7 +22,7 @@ sources:
 - kind: git_repo
   url: srht:~kennylevinsen/greetd
   track: master
-  ref: 0.10.3-26-gd5f27c3a8b1758da9e45608d2cff20303f21c2ff
+  ref: 0.10.3-29-g9cba565136c05c553374ca1466a17e0886107386
 - kind: cargo2
   url: "crates:"
   ref:
@@ -80,8 +80,8 @@ sources:
     sha: 49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b
   - kind: registry
     name: libc
-    version: 0.2.180
-    sha: bcc35a38544a891a5f7c865aca548a982ccb3b8650a5b06d0fd33a10283c56fc
+    version: 0.2.189
+    sha: 3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2
   - kind: registry
     name: memchr
     version: 2.7.2
@@ -270,7 +270,6 @@ sources:
     name: windows_x86_64_msvc
     version: 0.52.5
     sha: bec47e5bfd1bff0eeaf6d8b485cc1074891a197ab4225d504cb7a1ab88b02bf0
-
 config:
   configure-commands:
   - |
