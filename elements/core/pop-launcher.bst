@@ -18,7 +18,7 @@ sources:
 - kind: git_repo
   url: github:pop-os/launcher.git
   track: master
-  ref: epoch-1.11.0-2-g4111617b7345134abe67332a7baa5ef12538f412
+  ref: epoch-1.12.0-0-g4111617b7345134abe67332a7baa5ef12538f412
 - kind: cargo2
   url: "crates:"
   ref:
